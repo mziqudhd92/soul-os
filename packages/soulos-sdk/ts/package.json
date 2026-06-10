@@ -1,7 +1,14 @@
 {
   "name": "@soulos/sdk",
   "version": "0.1.0",
-  "description": "Thin TypeScript client for the SoulOS kernel API",
+  "description": "TypeScript client for SoulOS — avatars, episodic memory, SSE chat (@soulos/sdk)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mziqudhd92/soul-os.git",
+    "directory": "packages/soulos-sdk/ts"
+  },
+  "homepage": "https://github.com/mziqudhd92/soul-os#readme",
+  "keywords": ["soulos", "ai-agents", "mcp", "sse", "chatbot", "hexaco"],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {

@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+title: SoulOS
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - name: SoulOS Contributors
+repository-code: "https://github.com/mziqudhd92/soul-os"
+url: "https://github.com/mziqudhd92/soul-os"
+license: MIT
+version: 0.1.0
+keywords:
+  - artificial-intelligence
+  - ai-agents
+  - model-context-protocol
+  - hexaco
+  - psychometrics
+  - episodic-memory
+  - fastapi
+  - pgvector
+  - chatbot
+  - open-source
+abstract: >-
+  Open-source runtime for persistent AI avatars with HEXACO psychometric
+  personality (MSV), pgvector episodic memory, dual-process SSE inference,
+  native MCP integration, and pip-installable Soul Studio for .soul.json authoring.

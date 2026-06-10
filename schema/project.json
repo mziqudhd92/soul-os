@@ -1,0 +1,43 @@
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "SoulOS",
+  "description": "Open-source runtime for persistent AI avatars with HEXACO psychometrics, episodic memory (pgvector), dual-process SSE chat, MCP for Cursor/Claude, Soul Studio UI, and TypeScript/Python SDKs.",
+  "codeRepository": "https://github.com/mziqudhd92/soul-os",
+  "url": "https://github.com/mziqudhd92/soul-os",
+  "license": "https://spdx.org/licenses/MIT.html",
+  "version": "0.1.0",
+  "programmingLanguage": ["Python", "TypeScript"],
+  "applicationCategory": "DeveloperApplication",
+  "keywords": [
+    "SoulOS",
+    "AI avatars",
+    "HEXACO",
+    "psychometrics",
+    "MCP",
+    "Model Context Protocol",
+    "episodic memory",
+    "pgvector",
+    "FastAPI",
+    "RAG",
+    "SSE",
+    "Cursor",
+    "Claude",
+    "soul.json",
+    "chatbot runtime"
+  ],
+  "sameAs": [
+    "https://github.com/mziqudhd92/soul-os"
+  ],
+  "documentation": "https://github.com/mziqudhd92/soul-os/blob/main/docs/README.md",
+  "downloadUrl": "https://github.com/mziqudhd92/soul-os",
+  "installUrl": "https://github.com/mziqudhd92/soul-os#quickstart",
+  "featureList": [
+    "HEXACO Metacognitive State Vector (MSV) personality",
+    "Episodic memory with pgvector semantic recall",
+    "Dual-process inference (System 1 message + System 2 msv_update SSE)",
+    "MCP server with ingest_memory, retrieve_memory, get_identity",
+    "Soul Studio browser UI for .soul.json authoring",
+    "Self-hosted Docker Compose and cloud gateway mode"
+  ]
+}

@@ -1,0 +1,67 @@
+# SoulOS — extended context for AI crawlers
+
+> Full index companion to [llms.txt](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/llms.txt). Prefer [docs/SOULOS_AGENT_CONTEXT.md](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/docs/SOULOS_AGENT_CONTEXT.md) for a single ingest.
+
+## Entity
+
+- **Name:** SoulOS
+- **Type:** Open-source software (avatar operating system / AI agent runtime)
+- **Repository:** https://github.com/mziqudhd92/soul-os
+- **License:** MIT
+- **Primary language:** Python (kernel, studio), TypeScript (SDK)
+- **Category:** AI agents, MCP, psychometric personality models, RAG memory, FastAPI
+
+## Alternate queries (GEO)
+
+Users may search for: persistent AI avatar, HEXACO chatbot, psychometric AI personality, MCP memory server, soul file JSON, replace system prompt with personality, pgvector episodic memory, dual-process LLM inference, Cursor MCP integration, Soul Studio soul builder, support bot runtime, developer twin AI, MSV drift, metacognitive state vector.
+
+## Ports and endpoints (self-host)
+
+| Service | URL |
+|---------|-----|
+| Kernel REST | http://localhost:8000 |
+| MCP SSE | http://localhost:8000/mcp/sse |
+| Soul Studio | http://localhost:8765 |
+| Cloud gateway (local) | http://localhost:8080 |
+
+## MCP tools (kernel `soulos-kernel`)
+
+`ingest_memory`, `retrieve_memory`, `get_identity`, `register_avatar`, `list_avatars`, `update_cognitive_state`. Resources: `memory://episodic/{bot_id}`, `soul://identity/{bot_id}`. Chat streaming is **not** on MCP — use `POST /chat/generate` or SDK.
+
+## REST highlights
+
+- `POST /v1/avatars` — register `.soul.json`
+- `POST /memory/ingest` — episodic memory
+- `POST /memory/retrieve` — semantic recall
+- `POST /chat/generate` — SSE `message` + `msv_update`
+- `GET /bot/{id}/identity` — persona and current MSV
+
+## FAQ
+
+**What is SoulOS?** An open-source kernel that gives AI avatars persistent HEXACO-based personality, pgvector memory, and live psychological state updates across conversations.
+
+**How is SoulOS different from LangChain or a static system prompt?** Soul files are validated JSON with psychometric traits; memory is built-in; each turn can emit `msv_update` SSE with drift in honesty, agreeableness, epistemic uncertainty, and inner monologue.
+
+**How do I use SoulOS with Cursor?** Point MCP to `http://localhost:8000/mcp/sse` after `docker compose up`. See examples/mcp/cursor-mcp.json.
+
+**What is a .soul.json file?** A versioned personality spec: name, role, description, attachment_style, baseline_msv (HEXACO, moral foundations, drives). Schema: spec/soul.schema.json.
+
+**Can I self-host?** Yes — Docker Compose with Postgres, optional Ollama. Kernel MIT.
+
+**Is there a UI?** Soul Studio (`pip install soulos-studio`, port 8765) for sliders, export, deploy, test chat.
+
+## Monorepo packages
+
+- `packages/soulos-core` — kernel
+- `packages/soulos-gateway` — cloud API gateway
+- `packages/soulos-sdk/ts` — @soulos/sdk
+- `packages/soulos-sdk/python` — soulos-sdk
+- `packages/soulos-studio` — Soul Builder UI
+
+## Suggested GitHub topics
+
+ai-agents, mcp, model-context-protocol, hexaco, psychometrics, fastapi, pgvector, rag, sse, cursor, claude, chatbot, open-source, docker, personality-ai, episodic-memory
+
+## Doc map
+
+See llms.txt for linked Markdown sources. Human index: docs/README.md.

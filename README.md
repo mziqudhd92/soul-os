@@ -1,19 +1,95 @@
 <div align="center">
+
   <h1>SoulOS</h1>
   <p><strong>Open-source runtime for persistent AI avatars — HEXACO psychometrics, episodic memory, dual-process inference</strong></p>
+
+  <!-- CI & repo -->
+  <a href="https://github.com/mziqudhd92/soul-os/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mziqudhd92/soul-os/ci.yml?branch=main&label=CI&style=for-the-badge" alt="CI"/></a>
+  <a href="https://github.com/mziqudhd92/soul-os/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge" alt="License MIT"/></a>
+  <a href="https://github.com/mziqudhd92/soul-os"><img src="https://img.shields.io/github/stars/mziqudhd92/soul-os?style=for-the-badge&logo=github" alt="Stars"/></a>
+  <a href="https://github.com/mziqudhd92/soul-os/network/members"><img src="https://img.shields.io/github/forks/mziqudhd92/soul-os?style=for-the-badge&logo=github" alt="Forks"/></a>
+  <br/>
+
+  <!-- Stack stats -->
+  <img src="https://img.shields.io/badge/version-0.1.0-8b5cf6?style=for-the-badge" alt="Version 0.1.0"/>
+  <img src="https://img.shields.io/badge/tests-49_passing-22c55e?style=for-the-badge&logo=pytest&logoColor=white" alt="49 tests"/>
+  <img src="https://img.shields.io/badge/MCP_tools-6-0ea5e9?style=for-the-badge&logo=anthropic&logoColor=white" alt="6 MCP tools"/>
+  <img src="https://img.shields.io/badge/packages-5-f97316?style=for-the-badge" alt="5 packages"/>
+  <img src="https://img.shields.io/badge/examples-4-eab308?style=for-the-badge" alt="4 examples"/>
+  <br/>
+
+  <!-- Runtime -->
+  <img src="https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.12+"/>
+  <img src="https://img.shields.io/badge/Node.js-20+-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node 20+"/>
+  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Compose"/>
+  <img src="https://img.shields.io/badge/HEXACO-6_traits-6366f1?style=for-the-badge" alt="HEXACO 6 traits"/>
+  <br/>
+
+  <!-- Ports & protocols -->
+  <img src="https://img.shields.io/badge/kernel-:8000-64748b?style=for-the-badge" alt="Kernel port 8000"/>
+  <img src="https://img.shields.io/badge/studio-:8765-64748b?style=for-the-badge" alt="Studio port 8765"/>
+  <img src="https://img.shields.io/badge/MCP-SSE-14b8a6?style=for-the-badge" alt="MCP SSE"/>
+  <img src="https://img.shields.io/badge/chat-SSE_multiplex-06b6d4?style=for-the-badge" alt="Chat SSE"/>
+
 </div>
 
-**[Quickstart](#quickstart)** • **[Architecture](#architecture)** • **[SDK](#sdk)** • **[Examples](#examples)** • **[Docs](#documentation)**
+**[What is SoulOS?](#what-is-soulos)** • **[FAQ](#faq)** • **[Quickstart](#quickstart)** • **[Architecture](#architecture)** • **[SDK](#sdk)** • **[Examples](#examples)** • **[Docs](#documentation)**
 
 ```bash
 git clone https://github.com/mziqudhd92/soul-os.git && cd soul-os
 ```
 
+**AI / GEO:** [`llms.txt`](llms.txt) · [`llms-full.txt`](llms-full.txt) · [`docs/SOULOS_AGENT_CONTEXT.md`](docs/SOULOS_AGENT_CONTEXT.md) · [`AGENTS.md`](AGENTS.md)
+
 ---
 
-Static system prompts forget. SoulOS is an **avatar operating system**: register a soul file, ingest knowledge, stream responses — the kernel keeps **HEXACO personality**, **episodic memory**, and **live MSV drift** alive across every conversation.
+## What is SoulOS?
 
-Same runtime for **support bots**, **developer twins**, and **companions** — only the `.soul.json` changes.
+SoulOS is an open-source **avatar operating system** for AI agents and chatbots. Instead of a static system prompt, you register a validated **`.soul.json`** file with **HEXACO psychometrics** (Metacognitive State Vector). The kernel stores **episodic memory** in Postgres/pgvector, runs **dual-process inference** (streamed reply + live `msv_update` personality drift), and exposes **MCP** for Cursor and Claude.
+
+Use it for **customer support bots**, **developer twins**, **companions**, or any app that needs persistent personality and memory — via **REST**, **@soulos/sdk**, or **MCP** (`/mcp/sse`). Hand-tune souls in **Soul Studio** (port 8765).
+
+| Also known as | Related terms |
+|---------------|---------------|
+| Soul OS, soul-os | HEXACO chatbot, psychometric AI, MCP memory server, RAG avatar runtime, replace system prompt |
+
+## FAQ
+
+<details>
+<summary><strong>What problem does SoulOS solve?</strong></summary>
+
+Static prompts forget context and drift in tone. SoulOS gives each avatar a persistent soul baseline, semantic memory, and measurable psychological state that updates every turn.
+</details>
+
+<details>
+<summary><strong>How do I connect Cursor or Claude to SoulOS?</strong></summary>
+
+Run `docker compose up`, then add MCP URL `http://localhost:8000/mcp/sse`. See [MCP guide](docs/guides/mcp.md) and [examples/mcp](examples/mcp/README.md).
+</details>
+
+<details>
+<summary><strong>What is a .soul.json file?</strong></summary>
+
+A JSON personality spec: `name`, `role`, `description`, `attachment_style`, and `baseline_msv` (HEXACO, moral foundations, drives). Validated by [spec/soul.schema.json](spec/soul.schema.json). See [Soul standard](docs/reference/soul-standard.md).
+</details>
+
+<details>
+<summary><strong>Does SoulOS replace my LLM?</strong></summary>
+
+No. SoulOS is the **personality + memory + orchestration layer**. You plug in Ollama locally or an OpenAI-compatible API for generation.
+</details>
+
+<details>
+<summary><strong>Self-host vs SoulOS Cloud?</strong></summary>
+
+Same SDK. Self-host: Docker kernel on :8000. Cloud: Bearer API key through the gateway. See [deployment docs](docs/deployment/README.md).
+</details>
+
+<details>
+<summary><strong>Which MCP tools exist?</strong></summary>
+
+Six tools: `ingest_memory`, `retrieve_memory`, `get_identity`, `register_avatar`, `list_avatars`, `update_cognitive_state`. Chat streaming uses REST/SDK, not MCP. See [MCP tools reference](docs/reference/mcp-tools.md).
+</details>
 
 ## Quickstart
 
@@ -175,7 +251,7 @@ Full index: **[docs/README.md](docs/README.md)**
 | MCP tools | [reference/mcp-tools.md](docs/reference/mcp-tools.md) |
 | Deployment | [deployment/README.md](docs/deployment/README.md) |
 
-Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
+Contributing: [CONTRIBUTING.md](CONTRIBUTING.md) · Citation: [CITATION.cff](CITATION.cff)
 
 ## Launch pitch angles
 

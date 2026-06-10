@@ -1,7 +1,33 @@
 {
   "name": "soulos-monorepo",
   "version": "0.1.0",
+  "description": "SoulOS — open-source runtime for persistent AI avatars (HEXACO MSV, episodic memory, MCP, Soul Studio)",
   "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mziqudhd92/soul-os.git"
+  },
+  "homepage": "https://github.com/mziqudhd92/soul-os#readme",
+  "bugs": {
+    "url": "https://github.com/mziqudhd92/soul-os/issues"
+  },
+  "keywords": [
+    "soulos",
+    "ai-agents",
+    "mcp",
+    "hexaco",
+    "psychometrics",
+    "fastapi",
+    "pgvector",
+    "chatbot",
+    "episodic-memory",
+    "cursor",
+    "claude",
+    "sse",
+    "rag",
+    "open-source"
+  ],
   "workspaces": [
     "packages/soulos-sdk/ts"
   ],

@@ -61,6 +61,7 @@ Python packages need **3.12+**. Kernel tests use `packages/soulos-core/.venv` if
 
 - Index: [docs/README.md](docs/README.md)
 - Soul contract: [spec/soul.schema.json](spec/soul.schema.json)
+- AI / GEO: [llms.txt](llms.txt), [llms-full.txt](llms-full.txt), [docs/SOULOS_AGENT_CONTEXT.md](docs/SOULOS_AGENT_CONTEXT.md)
 - Update docs when changing APIs, ports (`8000` kernel, `8765` Studio, `/mcp/sse`), or MCP tools
 
 ## Security

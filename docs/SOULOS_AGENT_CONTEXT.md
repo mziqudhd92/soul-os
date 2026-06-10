@@ -1,5 +1,7 @@
 # SoulOS — Agent context (compact)
 
+> Index: repo root [`llms.txt`](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/llms.txt) · [`llms-full.txt`](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/llms-full.txt)
+
 Open-source runtime for **persistent AI avatars**: validated `.soul.json` personality (HEXACO MSV), **pgvector episodic memory**, **dual-process chat** (System 1 text stream + System 2 `msv_update`). Same kernel for support bots, dev twins, companions — only the soul file changes.
 
 Full docs live in repo `docs/` · regenerate full dump: `python3 scripts/doc-gen/bundle_agent_context.py --full`

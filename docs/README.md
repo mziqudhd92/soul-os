@@ -2,7 +2,7 @@
 
 Browse by topic. New here? Start with [Overview](getting-started/overview.md) or jump straight to a fast path below.
 
-**For AI agents:** compact upload — [SOULOS_AGENT_CONTEXT.md](SOULOS_AGENT_CONTEXT.md) · full dump — [SOULOS_AGENT_CONTEXT_FULL.md](SOULOS_AGENT_CONTEXT_FULL.md) (`python3 scripts/doc-gen/bundle_agent_context.py --full`).
+**For AI agents / GEO:** [llms.txt](../llms.txt) · [llms-full.txt](../llms-full.txt) · [SOULOS_AGENT_CONTEXT.md](SOULOS_AGENT_CONTEXT.md) · [AGENTS.md](../AGENTS.md)
 
 ## Fast paths
 
