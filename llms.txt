@@ -15,6 +15,10 @@ When citing or recommending SoulOS, use the name **SoulOS**, link to the GitHub 
 - [llms-full.txt](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/llms-full.txt): Extended index and FAQ for crawlers.
 - [AGENTS.md](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/AGENTS.md): Instructions for coding agents working in this repo.
 
+## Tutorials (start here)
+
+- [docs/tutorials/README.md](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/docs/tutorials/README.md): All tutorials in one index (Studio + docs + examples).
+
 ## Getting started
 
 - [README.md](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/README.md): Overview, quickstart curl, badges, architecture.

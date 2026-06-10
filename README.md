@@ -64,9 +64,24 @@
 
 </div>
 
-**[What is SoulOS?](#what-is-soulos)** · **[FAQ](#faq)** · **[Quickstart](#quickstart)** · **[Architecture](#architecture)** · **[SDK](#sdk)** · **[Examples](#examples)** · **[Docs](#documentation)**
+**[Tutorials](docs/tutorials/README.md)** · **[Quickstart](#quickstart)** · **[FAQ](#faq)** · **[Architecture](#architecture)** · **[SDK](#sdk)** · **[Examples](#examples)** · **[Docs](#documentation)**
 
 **AI / GEO:** [`llms.txt`](llms.txt) · [`llms-full.txt`](llms-full.txt) · [`docs/SOULOS_AGENT_CONTEXT.md`](docs/SOULOS_AGENT_CONTEXT.md) · [`AGENTS.md`](AGENTS.md)
+
+---
+
+## Tutorials
+
+**Start here:** **[docs/tutorials/README.md](docs/tutorials/README.md)** — every walkthrough in one table (5 min → 20 min).
+
+| Quick link | Time |
+|------------|------|
+| [Build your first soul](packages/soulos-studio/soulos_studio/content/tutorials/first-soul-wizard.md) | 5 min |
+| [15-min quickstart](docs/getting-started/quickstart.md) | 15 min |
+| [MCP in Cursor](examples/mcp/README.md) | 5 min |
+| [Python bot guide](docs/guides/python-bot.md) | 20 min |
+
+In **Soul Studio** (http://localhost:8765): header **Tutorials** tab — same content, in the UI.
 
 ---
 

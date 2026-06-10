@@ -1,6 +1,8 @@
 # SoulOS documentation
 
-Browse by topic. New here? Start with [Overview](getting-started/overview.md) or jump straight to a fast path below.
+Browse by topic. **New here?** → **[Tutorials hub](tutorials/README.md)** (all walkthroughs in one place).
+
+Or start with [Overview](getting-started/overview.md) or a fast path below.
 
 **For AI agents / GEO:** [llms.txt](../llms.txt) · [llms-full.txt](../llms-full.txt) · [SOULOS_AGENT_CONTEXT.md](SOULOS_AGENT_CONTEXT.md) · [AGENTS.md](../AGENTS.md)
 
