@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
@@ -10,10 +8,23 @@
 !.yarn/releases
 !.yarn/versions
 
+# python
+.venv/
+**/.venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
 # testing
 /coverage
+.pytest_cache/
+**/.pytest_cache/
 
-# next.js
+# next.js (legacy paths)
 /.next/
 /out/
 
@@ -23,6 +34,7 @@
 # misc
 .DS_Store
 *.pem
+*.xlsx
 
 # debug
 npm-debug.log*
@@ -30,8 +42,16 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# secrets — never commit
+.env
+.env.*
+!.env.example
+**/keys.json
+*.pem
+credentials.json
+
+# generated docs (regenerate with scripts/doc-gen/bundle_agent_context.py --full)
+docs/SOULOS_AGENT_CONTEXT_FULL.md
 
 # vercel
 .vercel

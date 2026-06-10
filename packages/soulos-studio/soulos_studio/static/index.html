@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SoulOS Studio</title>
+  <link rel="stylesheet" href="/static/studio.css" />
+</head>
+<body>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="header">
+    <button type="button" class="logo" id="btn-home" aria-label="Back to soul builder">
+      <span class="logo-mark">S</span>
+      <span class="logo-text">SoulOS Studio</span>
+    </button>
+
+    <div class="header-nav">
+      <div class="toolbar-group" id="studio-toolbar">
+        <button type="button" id="btn-wizard" class="btn ghost sm">Wizard</button>
+        <button type="button" id="btn-import" class="btn ghost sm">Import</button>
+        <button type="button" id="btn-export" class="btn ghost sm">Export</button>
+        <button type="button" id="btn-deploy" class="btn ghost sm">Deploy to kernel</button>
+      </div>
+
+      <span class="header-divider" id="toolbar-divider" aria-hidden="true"></span>
+
+      <div class="nav-group">
+        <button type="button" id="nav-docs" class="btn nav" data-view="docs">Docs</button>
+        <button type="button" id="nav-tutorial" class="btn nav" data-view="tutorial">Tutorials</button>
+        <button type="button" id="nav-studio" class="btn primary nav" data-view="studio">Studio</button>
+      </div>
+
+      <button type="button" id="btn-theme" class="btn ghost icon" title="Toggle theme" aria-label="Toggle theme">☾</button>
+    </div>
+
+    <input type="file" id="file-input" accept=".json,application/json" hidden />
+  </header>
+
+  <div class="page-shell">
+    <div id="view-studio" class="view view-active">
+      <main class="layout">
+        <section class="panel form-panel">
+          <header class="panel-head">
+            <h2>Soul identity</h2>
+            <p>Who they are and how they present themselves.</p>
+          </header>
+          <label class="field">
+            <span>Name</span>
+            <input id="name" type="text" />
+          </label>
+          <label class="field">
+            <span>Role</span>
+            <input id="role" type="text" />
+          </label>
+          <label class="field">
+            <span>Description</span>
+            <textarea id="description" rows="3"></textarea>
+          </label>
+          <label class="field">
+            <span>Attachment style</span>
+            <select id="attachment_style"></select>
+          </label>
+          <label class="field">
+            <span>Inner monologue</span>
+            <input id="inner_monologue" type="text" />
+          </label>
+
+          <header class="panel-head compact">
+            <h2 class="accent">HEXACO personality</h2>
+          </header>
+          <div id="hexaco-sliders" class="sliders"></div>
+
+          <header class="panel-head compact">
+            <h2 class="violet">Moral foundations</h2>
+          </header>
+          <div id="moral-sliders" class="sliders"></div>
+
+          <header class="panel-head compact">
+            <h2 class="cyan">Drives</h2>
+          </header>
+          <div id="drive-sliders" class="sliders"></div>
+
+          <label class="field">
+            <span>Epistemic uncertainty</span>
+            <input id="epistemic_uncertainty" type="range" min="0" max="1" step="0.01" />
+            <span id="uncertainty-val" class="mono val-readout">0.10</span>
+          </label>
+
+          <button type="button" id="btn-reset" class="btn ghost full">Reset defaults</button>
+        </section>
+
+        <section class="panel stack-panel">
+          <div class="soul-preview" id="soul-preview">
+            <div class="soul-preview-head">
+              <div class="soul-preview-title">
+                <h2>Live soul</h2>
+                <span class="soul-filename mono">.soul.json</span>
+                <span id="validation-badge" class="badge ok">Valid</span>
+              </div>
+              <div class="soul-preview-actions">
+                <div class="view-toggle" role="tablist" aria-label="Preview mode">
+                  <button type="button" class="view-toggle-btn active" data-preview="split" role="tab">Split</button>
+                  <button type="button" class="view-toggle-btn" data-preview="chart" role="tab">Chart</button>
+                  <button type="button" class="view-toggle-btn" data-preview="json" role="tab">JSON</button>
+                </div>
+                <button type="button" id="btn-copy-json" class="btn ghost sm">Copy</button>
+              </div>
+            </div>
+            <div class="soul-preview-body split" id="soul-preview-body">
+              <div class="soul-chart-pane" id="soul-chart-pane">
+                <p class="chart-label">HEXACO baseline</p>
+                <div class="radar-wrap">
+                  <canvas id="radar" class="radar" aria-label="HEXACO personality radar"></canvas>
+                </div>
+                <div id="hexaco-chips" class="hexaco-chips" aria-label="HEXACO trait values"></div>
+              </div>
+              <div class="soul-json-pane" id="soul-json-pane">
+                <pre id="json-preview" class="json-code soul-json-code" tabindex="0"></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-block">
+            <header class="panel-head compact">
+              <h2>Test chat</h2>
+              <p>Deploy first, then watch <code>msv_update</code> drift in the radar.</p>
+            </header>
+            <div id="chat-log" class="chat-log"></div>
+            <form id="chat-form" class="chat-form">
+              <input id="chat-input" type="text" placeholder="Message your avatar…" disabled />
+              <button type="submit" class="btn primary sm" disabled id="chat-send">Send</button>
+            </form>
+            <p id="avatar-id" class="mono hint"></p>
+            <div id="mcp-connect" class="mcp-connect hidden">
+              <header class="panel-head compact">
+                <h2>Connect MCP</h2>
+                <p>Use this avatar from Cursor or Claude Desktop.</p>
+              </header>
+              <p class="hint mono" id="mcp-bot-id"></p>
+              <pre id="mcp-config" class="mcp-config mono"></pre>
+              <button type="button" id="btn-copy-mcp" class="btn ghost sm">Copy MCP config</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="view-docs" class="view hidden">
+      <div class="content-layout">
+        <aside class="panel sidebar" id="docs-sidebar">
+          <header class="panel-head compact">
+            <h2>Documentation</h2>
+          </header>
+          <div id="docs-nav"></div>
+        </aside>
+        <article class="panel prose-panel">
+          <div id="docs-content" class="prose">
+            <p class="hint">Select a document from the sidebar.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <div id="view-tutorial" class="view hidden">
+      <div class="tutorial-wrap">
+        <div id="tutorial-list-view">
+          <header class="page-intro">
+            <h1>Tutorials</h1>
+            <p>Step-by-step guides for Studio, integration, and deployment.</p>
+          </header>
+          <div id="tutorial-grid" class="tutorial-grid"></div>
+        </div>
+        <div id="tutorial-detail-view" class="hidden">
+          <button type="button" id="tutorial-back" class="btn ghost sm">← All tutorials</button>
+          <article class="panel prose-panel flat">
+            <div id="tutorial-meta" class="tutorial-meta"></div>
+            <div id="tutorial-content" class="prose"></div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="wizard-overlay" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="wizard-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="wizard-title">Soul wizard</h2>
+        <p id="wizard-subtitle">Step-by-step guide to your <code>.soul.json</code></p>
+      </div>
+      <div id="wizard-progress" class="wizard-progress"></div>
+      <div id="wizard-body" class="modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" id="wizard-back" class="btn ghost hidden">Back</button>
+        <div class="btn-group">
+          <button type="button" id="wizard-cancel" class="btn ghost">Cancel</button>
+          <button type="button" id="wizard-next" class="btn primary">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/studio.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "sk_test_demo_key_for_local_dev": {
+    "account_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "tier": "cloud",
+    "rate_limit_per_minute": 120
+  }
+}

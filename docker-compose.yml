@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  soulos-studio:
+    build:
+      context: .
+      dockerfile: packages/soulos-studio/Dockerfile
+    container_name: senticore-soulos-studio
+    ports:
+      - "8765:8765"
+    environment:
+      - SOULOS_KERNEL_URL=http://soulos-kernel:8000
+    depends_on:
+      soulos-kernel:
+        condition: service_started
+    networks:
+      - senticore_net
+
+  soulos-kernel:
+    build:
+      context: .
+      dockerfile: packages/soulos-core/Dockerfile
+    container_name: senticore-soulos-kernel
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql+asyncpg://postgres:changeme_local_dev@db:5432/senticore
+      - INFERENCE_API_URL=http://ollama:11434
+    depends_on:
+      db:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    networks:
+      - senticore_net
+
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: senticore-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_local_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-senticore}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - senticore_net
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: senticore-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - senticore_net
+    command: ["serve"]
+
+networks:
+  senticore_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  ollama_data:

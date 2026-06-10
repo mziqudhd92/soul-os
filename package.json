@@ -1,26 +1,20 @@
 {
-  "name": "botmaker",
+  "name": "soulos-monorepo",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "packages/soulos-sdk/ts"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "next": "16.2.6",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.6",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "test:all": "npm run test:kernel && npm run test:gateway && npm run test:studio",
+    "test:kernel": "cd packages/soulos-core && (test -x .venv/bin/pytest && .venv/bin/pytest -q || python3 -m pytest -q)",
+    "test:gateway": "cd packages/soulos-gateway && python3 -m pytest -q",
+    "test:studio": "cd packages/soulos-studio && (test -x .venv/bin/pytest && .venv/bin/pytest -q || python3 -m pytest -q)",
+    "cloud:up": "docker compose -f docker-compose.cloud.yml up --build",
+    "up": "docker compose up --build",
+    "studio": "soulos-studio",
+    "build:sdk": "npm run build -w @soulos/sdk",
+    "seed": "python3 scripts/seed.py",
+    "doc:gen": "python3 scripts/doc-gen/generate_docs.py"
   }
 }

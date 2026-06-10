@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "soulos": {
+      "url": "http://localhost:8000/mcp/sse"
+    }
+  }
+}

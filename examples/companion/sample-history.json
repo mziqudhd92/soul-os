@@ -1,0 +1,6 @@
+[
+  { "role": "user", "content": "I had a rough day at work." },
+  { "role": "assistant", "content": "That sounds draining. What made it especially hard?" },
+  { "role": "user", "content": "My manager criticized my presentation." },
+  { "role": "assistant", "content": "Criticism after a big effort can sting. Did anything about the feedback feel fair?" }
+]

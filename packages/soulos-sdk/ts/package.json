@@ -1,0 +1,23 @@
+{
+  "name": "@soulos/sdk",
+  "version": "0.1.0",
+  "description": "Thin TypeScript client for the SoulOS kernel API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./node": {
+      "types": "./dist/node.d.ts",
+      "default": "./dist/node.js"
+    }
+  },
+  "files": ["dist", "src"],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,13 @@
+[project]
+name = "soulos-sdk"
+version = "0.1.0"
+description = "Thin Python client for the SoulOS kernel API"
+requires-python = ">=3.12"
+dependencies = ["httpx>=0.27.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["soulos"]

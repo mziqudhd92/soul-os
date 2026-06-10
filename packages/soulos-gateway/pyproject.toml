@@ -1,0 +1,19 @@
+[project]
+name = "soulos-gateway"
+version = "0.1.0"
+description = "SoulOS Cloud API gateway — API keys, rate limits, proxy to kernel"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.111.0",
+    "uvicorn>=0.30.1",
+    "httpx>=0.27.0",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+only-include = ["main.py", "config.py", "keys.py", "rate_limit.py"]

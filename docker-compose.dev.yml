@@ -1,0 +1,8 @@
+# Dev overlay: bind-mount soulos-core and spec for live kernel edits.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  soulos-kernel:
+    volumes:
+      - ./packages/soulos-core:/app
+      - ./spec:/spec

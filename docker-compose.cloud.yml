@@ -1,0 +1,86 @@
+# SoulOS Cloud stack: gateway (public) + kernel (internal) + data + inference
+# Usage: docker compose -f docker-compose.cloud.yml up --build
+#
+# SDK: SoulOSClient({ apiKey: 'sk_test_demo_key_for_local_dev', baseUrl: 'http://localhost:8080' })
+
+services:
+  soulos-gateway:
+    build:
+      context: .
+      dockerfile: packages/soulos-gateway/Dockerfile
+    container_name: soulos-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - KERNEL_URL=http://soulos-kernel:8000
+      - GATEWAY_SECRET=${GATEWAY_SECRET:-changeme_gateway_secret}
+      - SOULOS_KEYS_FILE=/app/keys.json
+      - SOULOS_API_KEYS={"sk_test_demo_key_for_local_dev":{"account_id":"aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee","tier":"cloud","rate_limit_per_minute":120}}
+      - DEFAULT_RATE_LIMIT_PER_MINUTE=120
+    depends_on:
+      soulos-kernel:
+        condition: service_started
+    networks:
+      - senticore_net
+
+  soulos-kernel:
+    build:
+      context: .
+      dockerfile: packages/soulos-core/Dockerfile
+    container_name: soulos-kernel-cloud
+    expose:
+      - "8000"
+    volumes:
+      - ./packages/soulos-core:/app
+      - ./spec:/spec
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql+asyncpg://postgres:changeme_local_dev@db:5432/senticore
+      - INFERENCE_API_URL=http://ollama:11434
+      - REQUIRE_AUTH=1
+      - GATEWAY_SECRET=${GATEWAY_SECRET:-changeme_gateway_secret}
+    depends_on:
+      db:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    networks:
+      - senticore_net
+
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: senticore-db-cloud
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_local_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-senticore}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_cloud:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - senticore_net
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: senticore-ollama-cloud
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data_cloud:/root/.ollama
+    networks:
+      - senticore_net
+    command: ["serve"]
+
+networks:
+  senticore_net:
+    driver: bridge
+
+volumes:
+  postgres_data_cloud:
+  ollama_data_cloud:
