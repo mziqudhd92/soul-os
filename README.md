@@ -60,22 +60,7 @@
 
   <a href="https://github.com/mziqudhd92/soul-os/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mziqudhd92/soul-os/ci.yml?branch=main&label=CI&style=for-the-badge" alt="CI"/></a>
   <a href="https://github.com/mziqudhd92/soul-os/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge" alt="License MIT"/></a>
-  <a href="https://github.com/mziqudhd92/soul-os"><img src="https://img.shields.io/github/stars/mziqudhd92/soul-os?style=for-the-badge&logo=github" alt="Stars"/></a>
-  <a href="https://github.com/mziqudhd92/soul-os/network/members"><img src="https://img.shields.io/github/forks/mziqudhd92/soul-os?style=for-the-badge&logo=github" alt="Forks"/></a>
   <a href="https://github.com/mziqudhd92/soul-os"><img src="https://komarev.com/ghpvc/?username=mziqudhd92&amp;repo=soul-os&amp;label=README+views&amp;color=22c55e&amp;style=for-the-badge" alt="README views"/></a>
-  <br/>
-  <img src="https://img.shields.io/badge/version-0.1.0-8b5cf6?style=for-the-badge" alt="Version 0.1.0"/>
-  <img src="https://img.shields.io/badge/tests-49_passing-22c55e?style=for-the-badge&logo=pytest&logoColor=white" alt="49 tests"/>
-  <img src="https://img.shields.io/badge/MCP_tools-6-0ea5e9?style=for-the-badge&logo=anthropic&logoColor=white" alt="6 MCP tools"/>
-  <img src="https://img.shields.io/badge/packages-5-f97316?style=for-the-badge" alt="5 packages"/>
-  <img src="https://img.shields.io/badge/examples-4-eab308?style=for-the-badge" alt="4 examples"/>
-  <br/>
-  <img src="https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.12+"/>
-  <img src="https://img.shields.io/badge/Node.js-20+-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node 20+"/>
-  <img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Compose"/>
-  <img src="https://img.shields.io/badge/kernel-:8000-64748b?style=for-the-badge" alt="Kernel port 8000"/>
-  <img src="https://img.shields.io/badge/studio-:8765-64748b?style=for-the-badge" alt="Studio port 8765"/>
-  <img src="https://img.shields.io/badge/MCP-SSE-14b8a6?style=for-the-badge" alt="MCP SSE"/>
 
 </div>
 
