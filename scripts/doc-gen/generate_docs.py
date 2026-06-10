@@ -33,23 +33,23 @@ SoulOS gives AI avatars a persistent **Soul**: HEXACO-based Moral State Vectors 
 
 ```mermaid
 graph TB
-    subgraph "packages/soulos-studio"
-        Studio[FastAPI + static UI]
-        StudioAPI[Studio API proxy]
+    subgraph studio ["packages/soulos-studio"]
+        Studio["FastAPI + static UI"]
+        StudioAPI["Studio API proxy"]
         Studio --> StudioAPI
     end
 
-    subgraph "packages/soulos-core (Docker: soulos-kernel)"
-        API[main.py routes]
-        RT[runtime/ pipeline]
-        MCP[mcp_server.py]
+    subgraph core ["packages/soulos-core (Docker: soulos-kernel)"]
+        API["main.py routes"]
+        RT["runtime pipeline"]
+        MCP["mcp_server.py"]
         API --> RT
         API --> MCP
     end
 
-    subgraph "Infrastructure"
-        DB[(PostgreSQL + pgvector)]
-        LLM[[Ollama / inference API]]
+    subgraph infra ["Infrastructure"]
+        DB[("PostgreSQL + pgvector")]
+        LLM["Ollama / inference API"]
         RT --> DB
         RT --> LLM
     end
