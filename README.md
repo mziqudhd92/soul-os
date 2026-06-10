@@ -253,11 +253,6 @@ Full index: **[docs/README.md](docs/README.md)**
 
 Contributing: [CONTRIBUTING.md](CONTRIBUTING.md) · Citation: [CITATION.cff](CITATION.cff)
 
-## Launch pitch angles
-
-- **Hacker News:** *Show HN: SoulOS – open-source runtime replacing static system prompts with psychometric state machines*
-- **Product Hunt / X:** Dual-process demo — text streams while HEXACO radar morphs live in Soul Studio
-
 ## License
 
 MIT
