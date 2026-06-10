@@ -8,6 +8,7 @@
   <a href="https://github.com/mziqudhd92/soul-os/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge" alt="License MIT"/></a>
   <a href="https://github.com/mziqudhd92/soul-os"><img src="https://img.shields.io/github/stars/mziqudhd92/soul-os?style=for-the-badge&logo=github" alt="Stars"/></a>
   <a href="https://github.com/mziqudhd92/soul-os/network/members"><img src="https://img.shields.io/github/forks/mziqudhd92/soul-os?style=for-the-badge&logo=github" alt="Forks"/></a>
+  <a href="https://github.com/mziqudhd92/soul-os"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fmziqudhd92%2Fsoul-os&amp;count_bg=%2322c55e&amp;title_bg=%2364748b&amp;icon=octicon%2Feye&amp;title=README+views&amp;edge_flat=false" alt="README views"/></a>
   <br/>
 
   <!-- Stack stats -->
