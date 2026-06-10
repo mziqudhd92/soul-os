@@ -1,8 +1,8 @@
 # SoulOS documentation
 
-Browse by topic. **New here?** → **[Tutorials hub](tutorials/README.md)** (all walkthroughs in one place).
+Browse by topic. **New here?** → **[Python bot tutorial](guides/python-bot.md)** (recommended first) · **[Tutorials hub](tutorials/README.md)**
 
-Or start with [Overview](getting-started/overview.md) or a fast path below.
+Or [Overview](getting-started/overview.md) or a fast path below.
 
 **For AI agents / GEO:** [llms.txt](../llms.txt) · [llms-full.txt](../llms-full.txt) · [SOULOS_AGENT_CONTEXT.md](SOULOS_AGENT_CONTEXT.md) · [AGENTS.md](../AGENTS.md)
 
@@ -10,10 +10,11 @@ Or start with [Overview](getting-started/overview.md) or a fast path below.
 
 | Goal | Time | Doc |
 |------|------|-----|
-| Kernel smoke test | 5 min | [Quickstart — Path A](getting-started/quickstart.md#path-a) |
-| MCP in Cursor | 5 min | [examples/mcp](../examples/mcp/README.md) |
-| Full tutorial (support + dev twin) | 15 min | [Quickstart](getting-started/quickstart.md) |
-| Tune `.soul.json` in browser | 10 min | [Soul Builder](getting-started/soul-builder.md) |
+| **Python bot integration** | 25 min | **[python-bot.md](guides/python-bot.md)** |
+| Kernel smoke test (curl) | 10 min | [Quickstart — Path A](getting-started/quickstart.md#path-a) |
+| Build soul in browser | 15 min | [Wizard tutorial](../packages/soulos-studio/soulos_studio/content/tutorials/first-soul-wizard.md) |
+| MCP in Cursor | 10 min | [examples/mcp](../examples/mcp/README.md) |
+| Support + dev twin | 15 min | [Quickstart](getting-started/quickstart.md) |
 
 ## Choose your integration
 

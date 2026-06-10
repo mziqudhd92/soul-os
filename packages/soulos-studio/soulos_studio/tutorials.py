@@ -6,28 +6,36 @@ from typing import Any
 
 TUTORIALS: list[dict[str, Any]] = [
     {
+        "id": "python-bot",
+        "title": "Python bot integration",
+        "description": "Recommended first tutorial — migrate from static system prompts.",
+        "duration": "25 min",
+        "category": "Guides",
+        "source": {"type": "docs", "path": "guides/python-bot.md"},
+    },
+    {
+        "id": "quickstart",
+        "title": "15-minute quickstart",
+        "description": "Support agent vs dev twin — curl register, ingest, SSE chat.",
+        "duration": "15 min",
+        "category": "Getting started",
+        "source": {"type": "docs", "path": "getting-started/quickstart.md"},
+    },
+    {
         "id": "first-soul",
         "title": "Build your first soul",
-        "description": "Use the Wizard to create a validated .soul.json from scratch.",
-        "duration": "5 min",
+        "description": "Wizard walkthrough — validated .soul.json without hand-editing JSON.",
+        "duration": "15 min",
         "category": "Studio",
         "source": {"type": "tutorial", "path": "first-soul-wizard.md"},
     },
     {
         "id": "deploy-chat",
         "title": "Deploy and test chat",
-        "description": "Register with the kernel, stream responses, and watch HEXACO drift.",
-        "duration": "8 min",
+        "description": "Register with the kernel, stream responses, watch HEXACO drift.",
+        "duration": "12 min",
         "category": "Studio",
         "source": {"type": "tutorial", "path": "deploy-and-chat.md"},
-    },
-    {
-        "id": "quickstart",
-        "title": "15-minute quickstart",
-        "description": "Support agent vs dev twin — same kernel, different souls.",
-        "duration": "15 min",
-        "category": "Getting started",
-        "source": {"type": "docs", "path": "getting-started/quickstart.md"},
     },
     {
         "id": "soul-builder",
@@ -36,14 +44,6 @@ TUTORIALS: list[dict[str, Any]] = [
         "duration": "10 min",
         "category": "Getting started",
         "source": {"type": "docs", "path": "getting-started/soul-builder.md"},
-    },
-    {
-        "id": "python-bot",
-        "title": "Python bot integration",
-        "description": "Migrate from static system prompts to SoulOS in Python.",
-        "duration": "20 min",
-        "category": "Guides",
-        "source": {"type": "docs", "path": "guides/python-bot.md"},
     },
     {
         "id": "psychometrics",

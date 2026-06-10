@@ -1,21 +1,30 @@
 # Tutorials — start here
 
-All hands-on walkthroughs in one place. Same list appears in **Soul Studio** → **Tutorials** tab at http://localhost:8765.
+**Recommended first tutorial:** **[Python bot integration](../guides/python-bot.md)** — wire SoulOS into an existing bot (Discord, CLI, FastAPI) without rewriting your stack.
 
-## Pick a path
+Same list appears in **Soul Studio** → **Tutorials** at http://localhost:8765.
 
-| Time | Tutorial | Where |
-|------|----------|--------|
-| 5 min | **Build your first soul** (Wizard) | [first-soul-wizard.md](../../packages/soulos-studio/soulos_studio/content/tutorials/first-soul-wizard.md) · Studio UI |
-| 5 min | **Kernel smoke test** (curl) | [Quickstart — Path A](../getting-started/quickstart.md#path-a) |
-| 5 min | **MCP in Cursor** | [examples/mcp](../../examples/mcp/README.md) |
-| 8 min | **Deploy and test chat** | [deploy-and-chat.md](../../packages/soulos-studio/soulos_studio/content/tutorials/deploy-and-chat.md) · Studio UI |
-| 10 min | **Soul Builder deep dive** | [soul-builder.md](../getting-started/soul-builder.md) |
-| 15 min | **Support bot + dev twin** | [quickstart.md](../getting-started/quickstart.md) |
-| 15 min | **MCP guide** | [mcp.md](../guides/mcp.md) |
-| 20 min | **Python bot integration** | [python-bot.md](../guides/python-bot.md) |
+## Learning path (recommended order)
 
-## By topic
+| # | Time | Tutorial | You will learn |
+|---|------|----------|----------------|
+| **1** | 25 min | **[Python bot integration](../guides/python-bot.md)** | Replace static system prompts with soul + memory + `send_message` |
+| 2 | 10 min | [Kernel smoke test (curl)](../getting-started/quickstart.md#path-a) | Register soul, ingest memory, SSE chat without code |
+| 3 | 15 min | [Build your first soul (Wizard)](../../packages/soulos-studio/soulos_studio/content/tutorials/first-soul-wizard.md) | Create `.soul.json` in Studio without hand-editing JSON |
+| 4 | 12 min | [Deploy and test chat](../../packages/soulos-studio/soulos_studio/content/tutorials/deploy-and-chat.md) | Deploy from Studio, watch HEXACO drift live |
+| 5 | 15 min | [Support bot + dev twin](../getting-started/quickstart.md) | Two avatars, same kernel — only soul + memory differ |
+| 6 | 10 min | [MCP in Cursor](../../examples/mcp/README.md) | IDE tools for memory and identity |
+| 7 | 15 min | [MCP deep dive](../guides/mcp.md) | Full MCP tool surface and gateway auth |
+
+## All tutorials by topic
+
+### Integrations (start here)
+
+| Tutorial | File |
+|----------|------|
+| **Python bot** (recommended first) | [python-bot.md](../guides/python-bot.md) |
+| MCP (Cursor / Claude) | [mcp.md](../guides/mcp.md) |
+| HEXACO sliders | [psychometrics.md](../guides/psychometrics.md) |
 
 ### Studio (browser UI)
 
@@ -25,7 +34,7 @@ All hands-on walkthroughs in one place. Same list appears in **Soul Studio** →
 | Deploy and test chat | [deploy-and-chat.md](../../packages/soulos-studio/soulos_studio/content/tutorials/deploy-and-chat.md) |
 | Soul Builder guide | [soul-builder.md](../getting-started/soul-builder.md) |
 
-Open Studio: `docker compose up` then http://localhost:8765 — or `pip install -e packages/soulos-studio && soulos-studio`
+`docker compose up` → http://localhost:8765 — or `pip install -e packages/soulos-studio && soulos-studio`
 
 ### Kernel & API
 
@@ -34,14 +43,6 @@ Open Studio: `docker compose up` then http://localhost:8765 — or `pip install 
 | 15-minute quickstart | [quickstart.md](../getting-started/quickstart.md) |
 | API & SSE | [api.md](../reference/api.md) |
 | Soul file anatomy | [soul-standard.md](../reference/soul-standard.md) |
-
-### Integrations
-
-| Tutorial | File |
-|----------|------|
-| Python bot | [python-bot.md](../guides/python-bot.md) |
-| MCP (Cursor / Claude) | [mcp.md](../guides/mcp.md) |
-| HEXACO sliders | [psychometrics.md](../guides/psychometrics.md) |
 
 ### Deployment
 
@@ -52,4 +53,4 @@ Open Studio: `docker compose up` then http://localhost:8765 — or `pip install 
 
 ## Docs index
 
-Full documentation map: [docs/README.md](../README.md)
+[docs/README.md](../README.md)

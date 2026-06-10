@@ -64,7 +64,7 @@
 
 </div>
 
-**[Tutorials](docs/tutorials/README.md)** · **[Quickstart](#quickstart)** · **[FAQ](#faq)** · **[Architecture](#architecture)** · **[SDK](#sdk)** · **[Examples](#examples)** · **[Docs](#documentation)**
+**[Python bot tutorial](docs/guides/python-bot.md)** · **[Tutorials](docs/tutorials/README.md)** · **[Quickstart](#quickstart)** · **[FAQ](#faq)** · **[Architecture](#architecture)** · **[Docs](#documentation)**
 
 **AI / GEO:** [`llms.txt`](llms.txt) · [`llms-full.txt`](llms-full.txt) · [`docs/SOULOS_AGENT_CONTEXT.md`](docs/SOULOS_AGENT_CONTEXT.md) · [`AGENTS.md`](AGENTS.md)
 
@@ -72,16 +72,17 @@
 
 ## Tutorials
 
-**Start here:** **[docs/tutorials/README.md](docs/tutorials/README.md)** — every walkthrough in one table (5 min → 20 min).
+**Start here:** **[Python bot integration](docs/guides/python-bot.md)** — wire SoulOS into Discord, CLI, or FastAPI without rewriting your bot.
 
-| Quick link | Time |
-|------------|------|
-| [Build your first soul](packages/soulos-studio/soulos_studio/content/tutorials/first-soul-wizard.md) | 5 min |
-| [15-min quickstart](docs/getting-started/quickstart.md) | 15 min |
-| [MCP in Cursor](examples/mcp/README.md) | 5 min |
-| [Python bot guide](docs/guides/python-bot.md) | 20 min |
+Full index: **[docs/tutorials/README.md](docs/tutorials/README.md)** · Studio UI: http://localhost:8765 → **Tutorials** tab
 
-In **Soul Studio** (http://localhost:8765): header **Tutorials** tab — same content, in the UI.
+| # | Tutorial | Time |
+|---|----------|------|
+| 1 | **[Python bot](docs/guides/python-bot.md)** | 25 min |
+| 2 | [Quickstart curl (Path A)](docs/getting-started/quickstart.md#path-a) | 10 min |
+| 3 | [First soul (Wizard)](packages/soulos-studio/soulos_studio/content/tutorials/first-soul-wizard.md) | 15 min |
+| 4 | [Deploy & chat in Studio](packages/soulos-studio/soulos_studio/content/tutorials/deploy-and-chat.md) | 12 min |
+| 5 | [MCP in Cursor](examples/mcp/README.md) | 10 min |
 
 ---
 

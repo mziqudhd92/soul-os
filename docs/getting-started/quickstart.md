@@ -1,46 +1,145 @@
-# 15-Minute Quickstart: Support Agent vs Dev Twin (Same Runtime)
+# 15-Minute Quickstart: Support Agent vs Dev Twin
 
-SoulOS uses one kernel for every avatar type. You only change the **soul file** and **what you ingest**.
+**Level:** beginner · **Outcome:** two working avatars on one kernel — you will see how **only the soul file and memory** change behavior.
+
+SoulOS uses **one kernel** for every avatar type. Same Postgres, same inference, same API — different `.soul.json` + different ingested facts.
+
+**Recommended if you write Python bots:** start with [Python bot integration](../guides/python-bot.md) instead — this quickstart is ideal for **curl / API exploration**.
 
 ## Prerequisites
 
 ```bash
+git clone https://github.com/mziqudhd92/soul-os.git && cd soul-os
 docker compose up --build
-# Kernel: http://localhost:8000
 ```
+
+| Service | URL |
+|---------|-----|
+| Kernel | http://localhost:8000 |
+| Studio (optional) | http://localhost:8765 |
+
+Verify kernel:
+
+```bash
+curl -s http://localhost:8000/health || curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/
+```
+
+---
 
 <a id="path-a"></a>
 
-## Path A — Support agent (5 minutes)
+## Path A — Support agent (~10 minutes)
+
+**Goal:** customer-support avatar that knows refund policy from **memory**, not from a giant system prompt.
+
+### A1 — Register the soul
 
 ```bash
-# 1. Register soul
-curl -X POST http://localhost:8000/v1/avatars \
+curl -s -X POST http://localhost:8000/v1/avatars \
   -H "Content-Type: application/json" \
-  -d @examples/support-bot/support-bot.soul.json
-
-# 2. Ingest FAQ
-curl -X POST http://localhost:8000/memory/ingest \
-  -H "Content-Type: application/json" \
-  -d '{"bot_id":"<id>","content":"Full refunds within 30 days of purchase."}'
-
-# 3. Chat
-curl -N -X POST http://localhost:8000/chat/generate \
-  -H "Content-Type: application/json" \
-  -d '{"bot_id":"<id>","message":"Can I get a refund after 20 days?"}'
+  -d @examples/support-bot/support-bot.soul.json | tee /tmp/support-register.json
 ```
 
-## Path B — Dev twin (5 minutes)
+**Expected:** JSON with `id`, `name`, `baseline_msv`, `current_msv`.
 
 ```bash
-curl -X POST http://localhost:8000/v1/avatars -d @examples/dev-twin/dev-twin.soul.json
-
-curl -X POST http://localhost:8000/memory/ingest \
-  -d '{"bot_id":"<id>","content":"POST /v1/avatars registers avatars with validated HEXACO MSV."}'
-
-curl -N -X POST http://localhost:8000/chat/generate \
-  -d '{"bot_id":"<id>","message":"How do I register a new avatar?"}'
+export SUPPORT_ID=$(python3 -c "import json; print(json.load(open('/tmp/support-register.json'))['id'])")
+echo "bot_id=$SUPPORT_ID"
 ```
+
+**If 422:** soul JSON failed validation — compare with [spec/soul.schema.json](../../spec/soul.schema.json).
+
+### A2 — Ingest policy (episodic memory)
+
+```bash
+curl -X POST http://localhost:8000/memory/ingest \
+  -H "Content-Type: application/json" \
+  -d "{\"bot_id\":\"$SUPPORT_ID\",\"content\":\"Full refunds within 30 days of purchase.\"}"
+```
+
+**Expected:** `{"status":"success"}` (or similar).
+
+Ingest more lines from [examples/support-bot/faq.md](../../examples/support-bot/faq.md) for richer answers.
+
+### A3 — Chat with SSE
+
+```bash
+curl -N -X POST http://localhost:8000/chat/generate \
+  -H "Content-Type: application/json" \
+  -d "{\"bot_id\":\"$SUPPORT_ID\",\"message\":\"Can I get a refund after 20 days?\"}"
+```
+
+**Expected output pattern:**
+
+```text
+event: message
+data: {"text":"..."}
+
+event: message
+data: {"text":"..."}
+
+event: msv_update
+data: {"hexaco":{...},"epistemic_uncertainty":0.2,...}
+```
+
+The reply should mention **30 days** because memory was recalled — not because you pasted FAQ into the soul file.
+
+### A4 — Sanity check (optional)
+
+```bash
+curl -s -X POST http://localhost:8000/memory/retrieve \
+  -H "Content-Type: application/json" \
+  -d "{\"bot_id\":\"$SUPPORT_ID\",\"query\":\"refund policy\",\"top_k\":3}"
+```
+
+You should see your ingested line in `memories`.
+
+---
+
+## Path B — Dev twin (~10 minutes)
+
+**Goal:** developer assistant with **repo facts** in memory — same kernel, different soul.
+
+### B1 — Register dev twin soul
+
+```bash
+curl -s -X POST http://localhost:8000/v1/avatars \
+  -H "Content-Type: application/json" \
+  -d @examples/dev-twin/dev-twin.soul.json | tee /tmp/dev-register.json
+
+export DEV_ID=$(python3 -c "import json; print(json.load(open('/tmp/dev-register.json'))['id'])")
+```
+
+### B2 — Ingest technical context
+
+```bash
+curl -X POST http://localhost:8000/memory/ingest \
+  -H "Content-Type: application/json" \
+  -d "{\"bot_id\":\"$DEV_ID\",\"content\":\"POST /v1/avatars registers avatars with validated HEXACO MSV and returns an id.\"}"
+```
+
+### B3 — Ask a dev question
+
+```bash
+curl -N -X POST http://localhost:8000/chat/generate \
+  -H "Content-Type: application/json" \
+  -d "{\"bot_id\":\"$DEV_ID\",\"message\":\"How do I register a new avatar?\"}"
+```
+
+Compare tone and structure to Path A — **same API**, different personality baseline and memory.
+
+---
+
+## What you proved
+
+| Concept | Path A | Path B |
+|---------|--------|--------|
+| Soul file | `support-bot.soul.json` | `dev-twin.soul.json` |
+| Memory | FAQ / policy | API / repo facts |
+| `bot_id` | `$SUPPORT_ID` | `$DEV_ID` |
+| Kernel | Same `:8000` | Same `:8000` |
+
+---
 
 ## TypeScript SDK (same runtime)
 
@@ -57,26 +156,40 @@ for await (const event of soul.sendMessage(id, 'I need a refund')) {
 }
 ```
 
-## Hosted API (same client)
+## Hosted API
 
 ```typescript
 const soul = new SoulOSClient({ apiKey: process.env.SOULOS_API_KEY });
 ```
 
-Only the config changes — not your application code.
+Only client config changes — not your app logic.
 
-## Soul Studio (optional)
+---
 
-Open [http://localhost:8765](http://localhost:8765) to tune traits, export `.soul.json`, or deploy to the kernel. See [Soul Builder](soul-builder.md).
+## Soul Studio (visual path)
+
+http://localhost:8765 — Wizard, sliders, **Deploy to kernel**, live chat. See [Soul Builder](soul-builder.md) and Studio tutorials.
 
 ## MCP (5 minutes)
 
-Connect Cursor to `http://localhost:8000/mcp/sse` — [examples/mcp](../../examples/mcp/README.md) · [MCP guide](../guides/mcp.md).
+`http://localhost:8000/mcp/sse` — [examples/mcp](../../examples/mcp/README.md) · [MCP guide](../guides/mcp.md)
+
+---
+
+## Troubleshooting
+
+| Issue | Fix |
+|-------|-----|
+| Connection refused | `docker compose up` — wait for kernel |
+| Empty / generic answers | Ingest memory; check Ollama (`llama3`) |
+| No SSE output | Use `curl -N`; check `bot_id` |
+| Slow first reply | Ollama model pull on first run |
+
+---
 
 ## Next steps
 
-- [Overview](overview.md) — stack orientation and security notes
-- [Python bot integration](../guides/python-bot.md) — wire SoulOS into an existing bot
-- [Soul standard](../reference/soul-standard.md) — full `.soul.json` specification
-- [API reference](../reference/api.md) — REST + SSE events
+- **[Python bot integration](../guides/python-bot.md)** — recommended for real bots
+- [Soul standard](../reference/soul-standard.md) — `.soul.json` fields
+- [API reference](../reference/api.md) — REST + SSE
 - [Deployment](../deployment/README.md) — self-host vs Cloud

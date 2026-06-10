@@ -1,8 +1,21 @@
 # Tutorial: Add SoulOS to Your Python Bot
 
-You already have a Python bot — maybe a script, a Discord/Telegram handler, or a small FastAPI app that calls an LLM with a fixed `system` prompt. This guide shows how to plug in **SoulOS** for **persistent personality** and **stable behavior** without rewriting your bot from scratch.
+> **Start here** — recommended first tutorial for human developers building real bots.
 
-SoulOS does **not** replace your transport layer (webhooks, CLI, Slack SDK). It replaces the fragile part: *“one big system prompt + hope the model remembers.”*
+You already have a Python bot — a script, Discord/Telegram handler, or FastAPI app that calls an LLM with a fixed `system` prompt. This guide plugs in **SoulOS** for **persistent personality** and **stable behavior** without rewriting your transport layer.
+
+SoulOS does **not** replace webhooks, CLI, or Slack SDK. It replaces the fragile part: *one big system prompt + hope the model remembers.*
+
+**Time:** ~25 minutes · **Outcome:** working REPL (or pattern you can paste into Discord/FastAPI)
+
+## Learning objectives
+
+By the end you will:
+
+1. Map your system prompt → `.soul.json` + episodic memory
+2. Register once, persist `avatar_id`, chat via `send_message`
+3. Handle `msv_update` for uncertainty / escalation signals
+4. Know when to re-register vs when memory alone is enough
 
 ---
 
@@ -216,6 +229,8 @@ The kernel:
 
 ## Step 5 — Wire into your existing loop
 
+### Simple REPL
+
 Example: simple REPL (same pattern for Discord `on_message`, etc.):
 
 ```python
@@ -249,6 +264,30 @@ if __name__ == "__main__":
 ```
 
 **Integration rule:** wherever you called your LLM before, call `handle_user_message` instead. Keep your auth, rate limits, and UI as they are.
+
+### Discord-shaped handler (sketch)
+
+```python
+# discord.py-style — call SoulOS inside on_message
+async def on_message(message):
+    if message.author.bot:
+        return
+    text = await handle_user_message(message.content)
+    await message.channel.send(text)
+```
+
+Register `avatar_id` once at bot startup (or read from env). Do **not** register on every message.
+
+### FastAPI-shaped handler (sketch)
+
+```python
+@app.post("/chat")
+async def chat_endpoint(body: dict):
+    user_text = body["message"]
+    return {"reply": await handle_user_message(user_text)}
+```
+
+Run SoulOS client once at app startup; reuse the same `SoulOSClient` and `avatar_id` per worker.
 
 ---
 

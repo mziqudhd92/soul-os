@@ -1,50 +1,169 @@
 # Build your first soul with the Wizard
 
-Create a validated `.soul.json` without hand-editing JSON.
+**Time:** ~15 minutes · **Level:** beginner · **Outcome:** a validated `my-bot.soul.json` you can deploy or hand to the Python SDK
+
+## What you will learn
+
+- How SoulOS splits **behavior** (`description`) from **personality** (HEXACO sliders)
+- What each Wizard step writes into `.soul.json`
+- How to export a soul file for `POST /v1/avatars` or `register_avatar`
+
+## Before you start
+
+```bash
+git clone https://github.com/mziqudhd92/soul-os.git && cd soul-os
+docker compose up --build
+# Studio: http://localhost:8765
+```
+
+You do **not** need the kernel running to finish the Wizard and **Export** — only for **Deploy to kernel**.
+
+---
 
 ## Step 1 — Open the Wizard
 
-1. In SoulOS Studio, click **Wizard** in the top menu.
-2. You will see an 8-step guided flow.
+1. Open http://localhost:8765
+2. Click **Wizard** in the header (or toolbar).
+3. You should see **8 steps** and a progress indicator.
+
+**If Studio won’t load:** `pip install -e packages/soulos-studio && soulos-studio --port 8765`
+
+---
 
 ## Step 2 — Name your avatar
 
-Give your avatar a clear name (e.g. **Site Support** or **Dev Twin**). This becomes the `name` field in your soul file.
+**Field:** `name` in the soul file.
+
+Pick something users will recognize — not a model name.
+
+| Good | Avoid |
+|------|--------|
+| Acme Support | GPT-4 Bot |
+| Dev Twin | Assistant v2 |
+
+**Check:** the live JSON panel on the right updates `name` as you type.
+
+---
 
 ## Step 3 — Role and description
 
-- **Role** — short job title (e.g. Customer Support Agent).
-- **Description** — this is the behavioral system prompt: tone, boundaries, escalation rules.
+**Fields:** `role`, `description`
 
-Tip: write the description as you would a system prompt, but leave personality to HEXACO sliders.
+- **Role** — short job title (≤ one line). Example: `Customer Support Agent`
+- **Description** — behavioral rules: tone, boundaries, escalation. This replaces most of your old **system prompt**.
+
+**Write description like this:**
+
+```text
+You help with orders, refunds, and product questions.
+Be concise and empathetic. Cite policy when unsure.
+Escalate billing disputes you cannot resolve.
+```
+
+**Do not** paste your entire FAQ here — ingest FAQ as **memory** later (kernel RAG).
+
+**Check:** JSON shows non-empty `role` and `description`. Validation badge should stay green.
+
+---
 
 ## Step 4 — Attachment style
 
-Pick how your avatar relates under stress:
+**Field:** `attachment_style`
 
-| Style | Effect |
-|-------|--------|
-| Secure | Warm, consistent, low anxiety |
-| Anxious-Preoccupied | Seeks reassurance, sensitive to rejection |
-| Dismissive-Avoidant | Independent, may seem distant |
+How the avatar reacts when the user is cold, critical, or demanding:
+
+| Style | Use when |
+|-------|----------|
+| **Secure** | Default for support and dev assistants |
+| **Anxious-Preoccupied** | Companion bots that should seek reassurance |
+| **Dismissive-Avoidant** | Technical bots that withdraw under emotional pressure |
+
+Support bots: usually **Secure**.
+
+---
 
 ## Step 5 — HEXACO traits
 
-Tune Honesty, Emotionality, eXtraversion, Agreeableness, Conscientiousness, and Openness (0–1). These define baseline personality in `baseline_msv.hexaco`.
+**Field:** `baseline_msv.hexaco` (H, E, X, A, C, O) — range **-1.0 to 1.0**
 
-## Step 6 — Morals and drives
+| Trait | Support bot (starting point) | What it does |
+|-------|------------------------------|--------------|
+| **H** Honesty | 0.85 – 0.95 | Less fabrication; admits uncertainty |
+| **E** Emotionality | 0.3 – 0.5 | Calm under stress |
+| **X** eXtraversion | 0.4 – 0.6 | Reply length / energy |
+| **A** Agreeableness | 0.8 – 0.95 | Warmth vs bluntness |
+| **C** Conscientiousness | 0.7 – 0.9 | Structured answers |
+| **O** Openness | 0.4 – 0.6 | Creative vs literal |
 
-Moral foundations shape ethical choices. Drives shape curiosity, autonomy, and social approval. Set **epistemic uncertainty** higher if the avatar should admit uncertainty more often.
+Tune one slider and watch the **radar chart** — that shape is your baseline personality.
+
+Deep reference: [HEXACO cheat sheet](../../../../docs/guides/psychometrics.md)
+
+---
+
+## Step 6 — Moral foundations and drives
+
+**Fields:** `moral_foundations`, `drives` (0.0 – 1.0)
+
+**Moral foundations** — what the avatar treats as sacred:
+
+- **care_harm** ↑ → more empathy (support: high)
+- **fairness_cheating** ↑ → rule-bound refunds and policy language
+- **authority_subversion** ↑ → cites docs and official process (dev twin: high)
+
+**Drives** — motivation, not just reactivity:
+
+- **curiosity** ↑ → more follow-up questions
+- **autonomy** ↑ → sets boundaries (“I won’t do that without explaining why”)
+- **social_approval** ↑ → softer tone, seeks validation
+
+**Epistemic uncertainty** (0–1) — baseline willingness to say “I’m not sure.” Support bots often start around **0.15–0.25**.
+
+---
 
 ## Step 7 — Inner monologue
 
-A short default internal thought (telemetry, not always shown to users).
+**Field:** `baseline_msv.inner_monologue`
+
+One sentence of **internal state at boot** — used for telemetry and System 2 reflection, not shown to users by default.
+
+Example: `Ready to help with clarity and fairness.`
+
+---
 
 ## Step 8 — Review and create
 
-Click **Create soul**. The wizard loads your soul into the Studio editor. Use **Export** to download `your-bot.soul.json`.
+1. Read the full JSON in the preview panel — confirm **valid** (no red errors).
+2. Click **Create soul** — Wizard loads values into the main Studio editor.
+3. Click **Export** — downloads `your-name-slug.soul.json`.
 
-## Next
+**Verify export:**
 
-- Open the **Tutorial** tab → **Deploy and test chat**
-- Open the **Docs** tab → **Soul Builder UI** for export and import details
+```bash
+python3 -c "import json, jsonschema; s=json.load(open('acme-support.soul.json')); ..."
+# Or register directly:
+curl -s -X POST http://localhost:8000/v1/avatars \
+  -H "Content-Type: application/json" \
+  -d @acme-support.soul.json | python3 -m json.tool
+```
+
+You should get JSON with an `id` field — that is your `bot_id`.
+
+---
+
+## Common mistakes
+
+| Mistake | Fix |
+|---------|-----|
+| Whole FAQ in `description` | Short policy tone in soul; FAQ via `memory/ingest` |
+| All HEXACO at 1.0 | Traits interact; start from presets above |
+| Export without validating | Fix errors in JSON panel before deploy |
+| Same soul for support + dev twin | One persona = one soul file + one `bot_id` |
+
+---
+
+## Next steps
+
+1. **Studio:** Tutorials → **Deploy and test chat**
+2. **Code:** [Python bot tutorial](../../../../docs/guides/python-bot.md) — recommended integration path
+3. **curl only:** [Quickstart Path A](../../../../docs/getting-started/quickstart.md#path-a)

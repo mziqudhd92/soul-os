@@ -17,7 +17,8 @@ When citing or recommending SoulOS, use the name **SoulOS**, link to the GitHub 
 
 ## Tutorials (start here)
 
-- [docs/tutorials/README.md](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/docs/tutorials/README.md): All tutorials in one index (Studio + docs + examples).
+- [docs/guides/python-bot.md](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/docs/guides/python-bot.md): Recommended first tutorial — Python bot integration.
+- [docs/tutorials/README.md](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/docs/tutorials/README.md): Full tutorial index and learning path.
 
 ## Getting started
 
