@@ -132,19 +132,19 @@ Full walkthrough: [docs/getting-started/quickstart.md](docs/getting-started/quic
 
 ```mermaid
 flowchart TB
-    subgraph devApp [Your app or site]
-        Widget[Custom chat UI]
-        SDK[@soulos/sdk]
+    subgraph devApp ["Your app or site"]
+        Widget["Custom chat UI"]
+        SDK["@soulos/sdk"]
     end
 
-    subgraph kernel [SoulOS Kernel]
-        API[FastAPI soulos-core]
-        MSV[HEXACO MSV + System 2 reflector]
-        RAG[pgvector episodic memory]
+    subgraph kernel ["SoulOS Kernel"]
+        API["FastAPI soulos-core"]
+        MSV["HEXACO MSV + System 2 reflector"]
+        RAG["pgvector episodic memory"]
     end
 
-    subgraph inference [Pluggable CPU]
-        LLM[Ollama / OpenAI / vLLM]
+    subgraph inference ["Pluggable CPU"]
+        LLM["Ollama / OpenAI / vLLM"]
     end
 
     Widget --> SDK
@@ -152,7 +152,7 @@ flowchart TB
     API --> MSV
     API --> RAG
     API --> LLM
-    MCP[Claude / Cursor MCP] --> API
+    MCP["Claude / Cursor MCP"] --> API
 ```
 
 ### Dual-process loop
