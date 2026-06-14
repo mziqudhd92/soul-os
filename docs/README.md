@@ -21,6 +21,7 @@ Or [Overview](getting-started/overview.md) or a fast path below.
 | Use case | Best choice | Doc |
 |----------|-------------|-----|
 | IDE agent (Cursor) managing memory / FAQ | **MCP** (`/mcp/sse`) | [MCP guide](guides/mcp.md) · [tool reference](reference/mcp-tools.md) |
+| Your app with existing LLM + SSE (Bedrock, OpenAI) | **Sidecar** (`SoulHybridClient`, `/hybrid/*`) | [Sidecar guide](guides/sidecar-integration.md) · [hybrid-api.md](reference/hybrid-api.md) |
 | Your app or site chat widget | **@soulos/sdk** or REST | [Quickstart](getting-started/quickstart.md) · [Python bot](guides/python-bot.md) |
 | Hand-tuning personality JSON | **Soul Studio** (:8765) | [Soul Builder](getting-started/soul-builder.md) |
 
@@ -36,6 +37,9 @@ Or [Overview](getting-started/overview.md) or a fast path below.
 
 | Doc | Description |
 |-----|-------------|
+| [Plug in SoulOS](guides/plug-in-soulos.md) | Integration modes, inference plug-ins, checklist |
+| [Sidecar integration](guides/sidecar-integration.md) | Bedrock/OpenAI apps: hybrid API + compose |
+| [Gateway headers](guides/gateway-headers.md) | `REQUIRE_AUTH=1` BFF pattern |
 | [Python bot integration](guides/python-bot.md) | Add SoulOS to an existing Python bot |
 | [Psychometrics cheat sheet](guides/psychometrics.md) | What HEXACO sliders do |
 | [MCP integration](guides/mcp.md) | Claude / Cursor via Model Context Protocol |
@@ -46,6 +50,7 @@ Or [Overview](getting-started/overview.md) or a fast path below.
 | Doc | Description |
 |-----|-------------|
 | [API reference](reference/api.md) | REST endpoints + SSE events |
+| [Hybrid API (sidecar)](reference/hybrid-api.md) | `prepare` / `complete` JSON schemas |
 | [MCP tools](reference/mcp-tools.md) | Tool argument schemas |
 | [Soul standard](reference/soul-standard.md) | `.soul.json` anatomy |
 | [Architecture](reference/architecture.md) | Kernel, runtime pipeline, monorepo |

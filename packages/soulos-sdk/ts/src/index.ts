@@ -1,5 +1,13 @@
 export const DEFAULT_CLOUD_URL = "https://api.soulos.dev";
 
+export {
+  SoulHybridClient,
+  type SoulHybridClientConfig,
+  type EnsureAvatarResponse,
+  type HybridPrepareResponse,
+  type HybridCompleteResponse,
+} from "./hybrid";
+
 export type SoulOSClientConfig = {
   baseUrl?: string;
   apiKey?: string;
@@ -93,7 +101,7 @@ export class SoulOSClient {
     const res = await fetch(`${this.baseUrl}/v1/avatars`, {
       method: "POST",
       headers,
-      body,
+      body: body as unknown as BodyInit,
     });
     const parsed = await res.json();
     if (!res.ok) {

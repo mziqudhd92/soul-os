@@ -22,11 +22,15 @@ class SoulHybridClient:
         bot_id: str | None = None,
         enabled: bool | None = None,
         timeout: float = 60.0,
+        gateway_secret: str | None = None,
+        account_id: str | None = None,
     ) -> None:
         self.base_url = (
             base_url or os.getenv("SOULOS_KERNEL_URL", "http://localhost:8000")
         ).rstrip("/")
         self.bot_id = bot_id or os.getenv("SOULOS_BOT_ID", "").strip() or None
+        self.gateway_secret = gateway_secret or os.getenv("SOULOS_GATEWAY_SECRET", "").strip() or None
+        self.account_id = account_id or os.getenv("SOULOS_ACCOUNT_ID", "").strip() or None
         if enabled is None:
             self.enabled = os.getenv("SOULOS_ENABLED", "1").lower() not in (
                 "0",
@@ -38,9 +42,17 @@ class SoulHybridClient:
         self.timeout = timeout
         self._client: httpx.AsyncClient | None = None
 
+    def _request_headers(self) -> dict[str, str]:
+        headers: dict[str, str] = {}
+        if self.gateway_secret:
+            headers["X-SoulOS-Gateway-Secret"] = self.gateway_secret
+        if self.account_id:
+            headers["X-SoulOS-Account-Id"] = self.account_id
+        return headers
+
     async def _get_client(self) -> httpx.AsyncClient:
         if self._client is None:
-            self._client = httpx.AsyncClient(timeout=self.timeout)
+            self._client = httpx.AsyncClient(timeout=self.timeout, headers=self._request_headers())
         return self._client
 
     async def close(self) -> None:

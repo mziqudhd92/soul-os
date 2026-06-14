@@ -112,9 +112,15 @@ Example souls: `examples/support-bot/`, `examples/dev-twin/`, `examples/companio
 | `POST` | `/memory/retrieve` | `{ bot_id, query, top_k? }` → `{ memories[] }` |
 | `POST` | `/chat/generate` | `{ bot_id, message }` → **SSE** |
 | `POST` | `/state/update` | `{ bot_id, new_msv }` |
-| `POST` | `/state/reflect` | `{ bot_id, message }` — hybrid integrations |
+| `POST` | `/state/reflect` | `{ bot_id, message, reflect_async? }` — hybrid integrations |
+| `GET` | `/ready` | Sidecar health (db + inference) |
+| `POST` | `/hybrid/prepare` | `{ bot_id, query, session_id?, top_k? }` → `system_prompt` |
+| `POST` | `/hybrid/complete` | ingest + async reflect |
+| `POST` | `/v1/avatars/ensure` | `{ external_key, soul, runtime_config? }` |
 | `GET` | `/bot/{bot_id}/identity` | name, role, description, current_msv |
-| `GET` | `/bot/{bot_id}/memories` | `?limit=50` episodic log |
+| `GET` | `/bot/{bot_id}/memories` | `?limit=50&session_id=` episodic log |
+
+**Sidecar integrators:** [guides/sidecar-integration.md](guides/sidecar-integration.md) · [reference/hybrid-api.md](reference/hybrid-api.md)
 
 Validation errors on register: `422` with trait-level detail.
 

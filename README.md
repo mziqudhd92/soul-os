@@ -43,7 +43,7 @@ Wait until the kernel is up (first build can take several minutes).
 | **Test the API with curl** (no code) | [Quickstart Path A](docs/getting-started/quickstart.md#path-a) | ~10 min |
 | **Use SoulOS from Cursor / Claude** | [MCP guide](docs/guides/mcp.md) → `http://localhost:8000/mcp/sse` | ~15 min |
 | **Deploy on my own servers** | [Plug in SoulOS](docs/guides/plug-in-soulos.md) · [Self-hosted](docs/deployment/self-hosted.md) | ~15 min |
-| **Add SoulOS to my existing LLM app** | [Hybrid orchestrator](docs/guides/hybrid-orchestrator.md) | ~20 min |
+| **Add SoulOS to my existing LLM app** | [Sidecar integration](docs/guides/sidecar-integration.md) · [Hybrid orchestrator](docs/guides/hybrid-orchestrator.md) | ~20 min |
 
 ### 3. Register a soul and chat (minimal API smoke test)
 

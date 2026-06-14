@@ -35,6 +35,7 @@ if await soul.is_ready():
 
 ## Docs
 
+- [Sidecar integration](../../docs/guides/sidecar-integration.md) — start here for Bedrock/OpenAI apps
+- [Hybrid API schemas](../../docs/reference/hybrid-api.md)
 - [Plug in SoulOS](../../docs/guides/plug-in-soulos.md)
-- [Hybrid orchestrator guide](../../docs/guides/hybrid-orchestrator.md)
 - [Sidecar compose](../../docker-compose.sidecar.yml)

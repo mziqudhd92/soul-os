@@ -8,7 +8,14 @@
     "directory": "packages/soulos-sdk/ts"
   },
   "homepage": "https://github.com/mziqudhd92/soul-os#readme",
-  "keywords": ["soulos", "ai-agents", "mcp", "sse", "chatbot", "hexaco"],
+  "keywords": [
+    "soulos",
+    "ai-agents",
+    "mcp",
+    "sse",
+    "chatbot",
+    "hexaco"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -21,10 +28,17 @@
       "default": "./dist/node.js"
     }
   },
-  "files": ["dist", "src"],
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^25.9.3",
+    "typescript": "^6.0.3"
+  }
 }
