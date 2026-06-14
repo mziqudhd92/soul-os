@@ -14,9 +14,16 @@ Open-source runtime for persistent AI avatars — HEXACO personality, episodic m
 
 ## GitHub Pages (one-time)
 
-**Settings → Pages → Build and deployment → Source: GitHub Actions**
+After the **GitHub Pages** workflow runs successfully, enable hosting:
 
-Then re-run the **GitHub Pages** workflow from the Actions tab (or push to `main`).
+**Settings → Pages → Build and deployment**
+
+- **Source:** Deploy from a branch  
+- **Branch:** `gh-pages` · folder `/ (root)`
+
+Site URL: `https://mziqudhd92.github.io/soul-os/`
+
+(The workflow pushes built files to the `gh-pages` branch on each push to `main`.)
 
 ## Topics (copy-paste)
 

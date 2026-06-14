@@ -15,12 +15,15 @@ def get_python_bot_tutorial() -> dict[str, Any]:
         "steps": [
             {
                 "id": "intro",
+                "label": "Why",
                 "title": "Why SoulOS?",
                 "subtitle": "Replace fragile system prompts with a validated soul + memory.",
                 "kind": "intro",
+                "arch_focus": ["bot", "sdk", "kernel", "db"],
             },
             {
                 "id": "soul",
+                "label": "Soul",
                 "title": "Create a soul file",
                 "subtitle": "Export `.soul` or `.soul.json` from Studio or copy an example.",
                 "kind": "code",
@@ -39,9 +42,12 @@ psychology:
 You help with orders and refunds. Be concise and empathetic.""",
                 "language": "markdown",
                 "action": "open_studio",
+                "arch_focus": ["bot"],
+                "nerd_fact": "YAML front matter compiles to validated soul dict — same schema as .soul.json.",
             },
             {
                 "id": "register",
+                "label": "Register",
                 "title": "Register once",
                 "subtitle": "Persist `avatar_id` — do not register on every message.",
                 "kind": "code",
@@ -57,27 +63,35 @@ async def bootstrap():
 asyncio.run(bootstrap())""",
                 "language": "python",
                 "action": "check_kernel",
+                "arch_focus": ["bot", "sdk", "kernel"],
+                "nerd_fact": "POST /v1/avatars accepts raw .soul bodies — compiler runs server-side.",
             },
             {
                 "id": "memory",
+                "label": "Memory",
                 "title": "Teach the bot",
                 "subtitle": "Ingest facts via API or commit `.soul-memory/` and sync.",
-                "kind": "code",
+                "kind": "memory_playground",
                 "code": """await soul.ingest_memory(avatar_id, "Refunds within 30 days.")
 
 # Git ledger (team repos)
 # soulos memory-append "Refunds within 30 days."
 # await soul.sync_memory(avatar_id, "/path/to/project")""",
-                "language": "python",
+                "arch_focus": ["kernel", "db"],
+                "nerd_fact": "pgvector cosine search + optional .soul-memory/ git ledger sync.",
             },
             {
                 "id": "chat",
+                "label": "SSE",
                 "title": "Stream chat + telemetry",
                 "subtitle": "Handle `message`, `msv_update`, and `cognitive_state` events.",
                 "kind": "sse_playground",
+                "arch_focus": ["bot", "sdk", "kernel", "db"],
+                "nerd_fact": "Dual-process pipeline emits cognitive_state alongside token chunks.",
             },
             {
                 "id": "wire",
+                "label": "Wire",
                 "title": "Wire your bot loop",
                 "subtitle": "Swap your LLM call for `send_message` in Discord, FastAPI, or REPL.",
                 "kind": "code",
@@ -89,6 +103,8 @@ asyncio.run(bootstrap())""",
     return "".join(parts)""",
                 "language": "python",
                 "action": "complete",
+                "arch_focus": ["bot"],
+                "nerd_fact": "Same async iterator pattern works for Discord, Telegram, FastAPI SSE proxies.",
             },
         ],
     }

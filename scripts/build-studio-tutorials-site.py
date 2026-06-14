@@ -69,6 +69,7 @@ def build(out: Path, base: str) -> None:
     out_index = out / "index.html"
     out_index.write_text(html, encoding="utf-8")
     shutil.copy2(out_index, out / "404.html")
+    (out / ".nojekyll").touch()
 
     print(f"Built static tutorials site → {out.resolve()}")
     print(f"  base URL path: {base}")
