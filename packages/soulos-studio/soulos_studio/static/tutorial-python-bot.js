@@ -131,19 +131,31 @@ function mountPythonBotTutorial(container, data, ctx) {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "btn primary sm it-action";
-        btn.textContent = "Open Soul Builder";
-        btn.addEventListener("click", () => {
-          if (ctx.switchView) ctx.switchView("studio");
-          if (ctx.closeTutorialDetail) ctx.closeTutorialDetail();
-        });
+        if (window.STUDIO_STATIC) {
+          btn.textContent = "Run Soul Builder locally";
+          btn.addEventListener("click", () => {
+            window.open("http://localhost:8765", "_blank", "noopener");
+          });
+        } else {
+          btn.textContent = "Open Soul Builder";
+          btn.addEventListener("click", () => {
+            if (ctx.switchView) ctx.switchView("studio");
+            if (ctx.closeTutorialDetail) ctx.closeTutorialDetail();
+          });
+        }
         panelEl.appendChild(btn);
       }
 
       if (step.action === "check_kernel") {
         const status = document.createElement("p");
         status.className = "it-status mono hint";
-        status.textContent = "Checking kernel…";
         panelEl.appendChild(status);
+        if (window.STUDIO_STATIC) {
+          status.textContent =
+            "Kernel runs on your machine — docker compose up, then open http://localhost:8765 for health checks and live chat.";
+          return;
+        }
+        status.textContent = "Checking kernel…";
         fetch("/api/kernel-health")
           .then((r) => r.json())
           .then((j) => {

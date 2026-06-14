@@ -8,7 +8,7 @@
     "type": "git",
     "url": "git+https://github.com/mziqudhd92/soul-os.git"
   },
-  "homepage": "https://github.com/mziqudhd92/soul-os#readme",
+  "homepage": "https://mziqudhd92.github.io/soul-os/",
   "bugs": {
     "url": "https://github.com/mziqudhd92/soul-os/issues"
   },
@@ -41,6 +41,7 @@
     "studio": "soulos-studio",
     "build:sdk": "npm run build -w @soulos/sdk",
     "seed": "python3 scripts/seed.py",
-    "doc:gen": "python3 scripts/doc-gen/generate_docs.py"
+    "doc:gen": "python3 scripts/doc-gen/generate_docs.py",
+    "build:tutorials-site": "python3 scripts/build-studio-tutorials-site.py --out site --base /soul-os/"
   }
 }

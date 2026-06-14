@@ -32,6 +32,8 @@ packages = ["soulos_studio"]
 "soulos_studio/static/studio.css" = "soulos_studio/static/studio.css"
 "soulos_studio/static/studio.js" = "soulos_studio/static/studio.js"
 "soulos_studio/static/tutorial-python-bot.js" = "soulos_studio/static/tutorial-python-bot.js"
+"soulos_studio/static/tutorials-static.js" = "soulos_studio/static/tutorials-static.js"
+"soulos_studio/static/tutorials-index.html" = "soulos_studio/static/tutorials-index.html"
 "soulos_studio/content/tutorials/first-soul-wizard.md" = "soulos_studio/content/tutorials/first-soul-wizard.md"
 "soulos_studio/content/tutorials/deploy-and-chat.md" = "soulos_studio/content/tutorials/deploy-and-chat.md"
 

@@ -2,7 +2,7 @@
 
 **Recommended first tutorial:** **[Python bot integration](../guides/python-bot.md)** — wire SoulOS into an existing bot (Discord, CLI, FastAPI) without rewriting your stack.
 
-Same list appears in **Soul Studio** → **Tutorials** at http://localhost:8765.
+Same list appears online at **https://mziqudhd92.github.io/soul-os/** or in **Soul Studio** → **Tutorials** at http://localhost:8765.
 
 ## Learning path (recommended order)
 

@@ -1,7 +1,7 @@
 # Tutorial: Add SoulOS to Your Python Bot
 
-> **Interactive tutorial (recommended):** open Soul Studio → **Tutorials** → **Python bot integration** for step-by-step animations, kernel health check, and SSE playground.  
-> **Studio URL:** http://localhost:8765 → Tutorials tab
+> **Interactive tutorial (recommended):** [browse online](https://mziqudhd92.github.io/soul-os/?tutorial=python-bot) or open Soul Studio → **Tutorials** → **Python bot integration** for step-by-step animations, kernel health check, and SSE playground.  
+> **Local Studio:** http://localhost:8765 → Tutorials tab
 
 > **Start here** — recommended first tutorial for human developers building real bots.
 
