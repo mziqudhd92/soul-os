@@ -215,9 +215,9 @@ function mountPythonBotTutorial(container, data, ctx) {
     `;
     const slider = wrap.querySelector(".it-morph-slider");
     const stage = wrap.querySelector(".it-morph-stage");
-    stage.style.setProperty("--morph", `${slider.value}%`);
+    stage.style.setProperty("--morph", slider.value);
     slider.addEventListener("input", () => {
-      stage.style.setProperty("--morph", `${slider.value}%`);
+      stage.style.setProperty("--morph", slider.value);
     });
     panelEl.appendChild(wrap);
     if (!prefersReducedMotion()) {

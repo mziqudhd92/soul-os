@@ -1578,33 +1578,33 @@ code {
 }
 
 .it-morph-stage {
-  --morph: 0%;
+  --morph: 55;
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.5rem;
-  min-height: 140px;
+  min-height: 148px;
 }
 
 .it-morph-col {
   padding: 0.75rem;
   border-radius: var(--radius-md);
   font-size: 13px;
-  transition: opacity 0.35s, transform 0.35s;
+  transition: opacity 0.35s, box-shadow 0.35s, transform 0.35s;
 }
 
 .it-morph-col.bad {
   background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  opacity: calc(1 - var(--morph) / 100);
-  transform: scale(calc(1 - var(--morph) / 200));
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  opacity: calc(0.5 + (100 - var(--morph)) * 0.005);
+  box-shadow: 0 0 0 calc((100 - var(--morph)) / 25 * 1px) rgba(239, 68, 68, 0.35);
 }
 
 .it-morph-col.good {
   background: var(--emerald-soft);
-  border: 1px solid color-mix(in srgb, var(--emerald) 35%, transparent);
-  opacity: calc(var(--morph) / 100);
-  transform: scale(calc(0.92 + var(--morph) / 1000));
+  border: 1px solid color-mix(in srgb, var(--emerald) 40%, transparent);
+  opacity: calc(0.5 + var(--morph) * 0.005);
+  box-shadow: 0 0 0 calc(var(--morph) / 25 * 1px) color-mix(in srgb, var(--emerald) 45%, transparent);
 }
 
 .it-morph-col h4 {
@@ -1623,9 +1623,10 @@ code {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(105deg, transparent 45%, rgba(167, 139, 250, 0.15) 50%, transparent 55%);
+  background: linear-gradient(105deg, transparent 45%, rgba(167, 139, 250, 0.12) 50%, transparent 55%);
   opacity: calc(var(--morph) / 100);
   animation: it-shimmer 2.5s ease-in-out infinite;
+  border-radius: var(--radius-md);
 }
 
 @keyframes it-shimmer {
