@@ -2224,6 +2224,218 @@ html[data-theme="dark"] .term-sim-badge {
   color: #9a9590;
 }
 
+/* —— Soul Builder interactive tutorial —— */
+
+.interactive-studio .sb-path-grid {
+  display: grid;
+  gap: 0.65rem;
+}
+
+@media (min-width: 520px) {
+  .interactive-studio .sb-path-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.sb-path-card {
+  text-align: left;
+  padding: 0.85rem;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border);
+  background: var(--panel);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.sb-path-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.sb-path-card.active {
+  border-color: var(--violet);
+  box-shadow: 0 0 0 3px var(--violet-glow);
+}
+
+.sb-path-card.vibe.active {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.15);
+}
+
+.sb-path-emoji {
+  font-size: 1.4rem;
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.sb-path-card h4 {
+  margin: 0 0 0.35rem;
+  font-size: 14px;
+}
+
+.sb-path-card p {
+  margin: 0 0 0.5rem;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.sb-path-card ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 12px;
+}
+
+.sb-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sb-check-item h4 {
+  margin: 0 0 0.25rem;
+  font-size: 13px;
+}
+
+.sb-mock-studio {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 560px) {
+  .sb-mock-studio {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.sb-mock-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+  font-size: 12px;
+}
+
+.sb-mock-form input,
+.sb-mock-form textarea {
+  padding: 0.45rem 0.55rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.sb-preview-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 0 0 0.35rem;
+}
+
+.sb-mock-preview .it-code {
+  max-height: 200px;
+  margin: 0;
+}
+
+.sb-hexaco {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.sb-hex-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.sb-hex-row input[type="range"] {
+  width: 100%;
+  accent-color: var(--violet);
+}
+
+.sb-hex-bar {
+  height: 4px;
+  background: var(--border);
+  border-radius: var(--radius-full);
+  margin-top: 0.25rem;
+  overflow: hidden;
+}
+
+.sb-hex-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--violet), var(--cyan));
+  border-radius: var(--radius-full);
+  transition: width 0.15s ease;
+}
+
+.sb-hex-hint {
+  margin: 0.2rem 0 0;
+  font-size: 11px;
+}
+
+.sb-export-tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.sb-export-tabs button {
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: var(--panel);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sb-export-tabs button.active {
+  background: var(--violet-soft);
+  border-color: var(--violet);
+  color: var(--violet);
+}
+
+.sb-export-body .it-code {
+  max-height: 220px;
+  margin: 0;
+}
+
+.sb-export-tip {
+  margin-top: 0.5rem;
+  font-size: 12px;
+}
+
+.sb-chat-demo {
+  padding: 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--input-bg);
+}
+
+.sb-wire {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sb-wire-block h4 {
+  margin: 0 0 0.35rem;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.sb-wire .btn {
+  margin-top: 0.35rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .term-led {
     animation: none;

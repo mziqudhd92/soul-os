@@ -888,7 +888,7 @@ async function openTutorial(id) {
       <div class="tutorial-card-meta">
         <span>${escapeHtml(data.category || "")}</span>
         <span>${escapeHtml(data.duration || "")}</span>
-        ${data.format === "interactive" || data.format === "interactive_terminal" ? "<span class='it-badge'>Interactive</span>" : ""}
+        ${data.format === "interactive" || data.format === "interactive_terminal" || data.format === "interactive_studio" ? "<span class='it-badge'>Interactive</span>" : ""}
       </div>
     `;
     const contentEl = $("tutorial-content");

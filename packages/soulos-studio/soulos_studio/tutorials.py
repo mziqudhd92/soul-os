@@ -42,10 +42,11 @@ TUTORIALS: list[dict[str, Any]] = [
     {
         "id": "soul-builder",
         "title": "Soul Builder deep dive",
-        "description": "Import, export, sliders, and kernel deploy from Studio.",
+        "description": "Interactive Studio walkthrough — Wizard, HEXACO, export, deploy, wire to SDK/MCP.",
         "duration": "10 min",
         "category": "Getting started",
-        "source": {"type": "docs", "path": "getting-started/soul-builder.md"},
+        "interactive": True,
+        "source": {"type": "interactive", "path": "getting-started/soul-builder.md"},
     },
     {
         "id": "psychometrics",

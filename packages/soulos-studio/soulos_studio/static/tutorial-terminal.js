@@ -244,11 +244,13 @@ function mountTerminalTutorial(container, data, ctx) {
 function mountInteractiveTutorial(contentEl, data, ctx) {
   if (data.format === "interactive_terminal") {
     mountTerminalTutorial(contentEl, data, ctx);
+  } else if (data.format === "interactive_studio") {
+    mountSoulBuilderTutorial(contentEl, data, ctx);
   } else {
     mountPythonBotTutorial(contentEl, data, ctx);
   }
 }
 
 function isInteractiveTutorial(data) {
-  return data.format === "interactive" || data.format === "interactive_terminal";
+  return data.format === "interactive" || data.format === "interactive_terminal" || data.format === "interactive_studio";
 }

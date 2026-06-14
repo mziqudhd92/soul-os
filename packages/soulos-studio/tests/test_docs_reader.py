@@ -52,3 +52,10 @@ def test_load_interactive_quickstart_tutorial():
     assert doc["format"] == "interactive_terminal"
     assert len(doc["steps"]) >= 5
     assert doc["steps"][0]["script"]
+
+
+def test_load_interactive_soul_builder_tutorial():
+    doc = get_tutorial_content("soul-builder")
+    assert doc["format"] == "interactive_studio"
+    assert len(doc["steps"]) >= 5
+    assert doc["steps"][0]["kind"] == "paths"

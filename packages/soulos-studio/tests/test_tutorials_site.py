@@ -44,6 +44,10 @@ def test_build_tutorials_site():
     assert quickstart["format"] == "interactive_terminal"
     assert len(quickstart["steps"]) >= 5
 
+    soul_builder = json.loads((out / "data" / "tutorials" / "soul-builder.json").read_text())
+    assert soul_builder["format"] == "interactive_studio"
+    assert len(soul_builder["steps"]) >= 5
+
     import shutil
 
     shutil.rmtree(out)

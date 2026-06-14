@@ -2,6 +2,8 @@
 
 Configure a validated soul in your browser — **`.soul`** (YAML + Markdown) or legacy **`.soul.json`** — no hand-editing required.
 
+> **Interactive tutorial (recommended):** [Browse online](https://mziqudhd92.github.io/soul-os/?tutorial=soul-builder) — Wizard mock, HEXACO dials, export tabs, deploy demo, curl/SDK/MCP copy blocks.
+
 Python + JSON. No Node.js build step.
 
 ## Quick start
