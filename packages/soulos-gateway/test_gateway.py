@@ -54,6 +54,37 @@ async def test_gateway_rejects_invalid_key():
 
 
 @pytest.mark.asyncio
+async def test_gateway_proxies_memory_sync():
+    demo_key = "sk_test_demo_key_for_local_dev"
+    mock_upstream = MagicMock()
+    mock_upstream.status_code = 200
+    mock_upstream.content = json.dumps(
+        {"status": "success", "imported": 2, "skipped": 0, "total": 2}
+    ).encode()
+    mock_upstream.headers = httpx.Headers({"content-type": "application/json"})
+
+    mock_client = MagicMock()
+    mock_client.request = AsyncMock(return_value=mock_upstream)
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=False)
+
+    with patch("main.httpx.AsyncClient", return_value=mock_client):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+            response = await ac.post(
+                "/memory/sync",
+                headers={"Authorization": f"Bearer {demo_key}"},
+                json={
+                    "bot_id": "123e4567-e89b-12d3-a456-426614174000",
+                    "workspace_path": "/tmp/project",
+                },
+            )
+
+    assert response.status_code == 200
+    assert response.json()["imported"] == 2
+    mock_client.request.assert_awaited_once()
+
+
+@pytest.mark.asyncio
 async def test_gateway_proxies_mcp_sse_as_stream():
     demo_key = "sk_test_demo_key_for_local_dev"
     chunks = [b"event: endpoint\n", b"data: /mcp/messages\n\n"]

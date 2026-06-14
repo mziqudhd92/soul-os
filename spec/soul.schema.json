@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://senticore.dev/schemas/soul.schema.json",
-  "title": "SentiCore Soul File",
-  "description": "Personality specification for a SentiCore avatar (.soul.json). All psychometric traits use HEXACO.",
+  "$id": "https://soulos.dev/schemas/soul.schema.json",
+  "title": "SoulOS Soul File",
+  "description": "Personality specification for a SoulOS avatar (.soul.json validated fields). Unified .soul files compile to this shape; runtime_config (dual_process thresholds) is stored on the bot row outside this schema.",
   "type": "object",
   "additionalProperties": false,
   "required": ["name", "role", "description", "attachment_style", "baseline_msv"],

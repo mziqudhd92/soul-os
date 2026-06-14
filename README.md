@@ -27,7 +27,8 @@
 │  Memory ........... Episodic pgvector RAG                                    │
 │  Inference ........ Dual-process SSE (System 1 + System 2)                   │
 │  MCP .............. 6 tools · HTTP SSE · /mcp/sse                            │
-│  Tests ............ 49 passing                                               │
+│  Tests ............ 77 passing                                               │
+│  Memory ledger .... .soul-memory/ (git-sync) + pgvector                      │
 │                                                                              │
 │  Kernel ........... http://localhost:8000                                    │
 │  Soul Studio ...... http://localhost:8765                                    │
@@ -39,7 +40,8 @@
 │                                                                              │
 │  1. git clone https://github.com/mziqudhd92/soul-os.git && cd soul-os         │
 │  2. docker compose up --build                                                │
-│  3. Register soul:  POST /v1/avatars  (+ examples/support-bot/*.soul.json)  │
+│  3. Register soul:  POST /v1/avatars  (.soul or examples/*/*.soul.json)     │
+│  3b. Git memory:    .soul-memory/ + POST /memory/sync (optional)             │
 │  4. Ingest memory:  POST /memory/ingest                                      │
 │  5. Chat SSE:       POST /chat/generate                                      │
 │                                                                              │
@@ -88,7 +90,7 @@ Full index: **[docs/tutorials/README.md](docs/tutorials/README.md)** · Studio U
 
 ## What is SoulOS?
 
-Open-source **avatar operating system** for AI agents and chatbots. Register a validated **`.soul.json`** (HEXACO MSV), ingest episodic memory, stream dual-process chat with live `msv_update` drift. **REST**, **@soulos/sdk**, or **MCP** at `/mcp/sse`. Soul Studio on port **8765**.
+Open-source **avatar operating system** for AI agents and chatbots. Register a validated **`.soul`** or **`.soul.json`** (HEXACO MSV), ingest episodic memory (API or **`.soul-memory/`** ledger), stream dual-process chat with `msv_update` drift and **`cognitive_state`** telemetry. **REST**, **@soulos/sdk**, or **MCP** at `/mcp/sse`. Soul Studio on port **8765**.
 
 | Also known as | Related terms |
 |---------------|---------------|
@@ -109,7 +111,9 @@ Run `docker compose up`, then add MCP URL `http://localhost:8000/mcp/sse`. See [
 </details>
 
 <details>
-<summary><strong>What is a .soul.json file?</strong></summary>
+<summary><strong>What is a .soul / .soul.json file?</strong></summary>
+
+Unified **`.soul`** files use YAML front matter + Markdown; legacy **`.soul.json`** remains fully supported. Both define name, role, HEXACO `baseline_msv`, and behavior (`description`). Optional `dual_process` thresholds compile to `runtime_config` on the bot.
 
 A JSON personality spec: `name`, `role`, `description`, `attachment_style`, and `baseline_msv`. Validated by [spec/soul.schema.json](spec/soul.schema.json). See [Soul standard](docs/reference/soul-standard.md).
 </details>

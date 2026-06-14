@@ -1,12 +1,12 @@
 # Build your first soul with the Wizard
 
-**Time:** ~15 minutes · **Level:** beginner · **Outcome:** a validated `my-bot.soul.json` you can deploy or hand to the Python SDK
+**Time:** ~15 minutes · **Level:** beginner · **Outcome:** a validated `my-bot.soul` or `my-bot.soul.json` you can deploy or hand to the Python SDK
 
 ## What you will learn
 
-- How SoulOS splits **behavior** (`description`) from **personality** (HEXACO sliders)
-- What each Wizard step writes into `.soul.json`
-- How to export a soul file for `POST /v1/avatars` or `register_avatar`
+- How SoulOS splits **behavior** (`description` / Markdown body) from **personality** (HEXACO sliders)
+- What each Wizard step writes into the soul file
+- How to **Export JSON** or **Export .soul** for `POST /v1/avatars` or `register_avatar`
 
 ## Before you start
 
@@ -135,7 +135,8 @@ Example: `Ready to help with clarity and fairness.`
 
 1. Read the full JSON in the preview panel — confirm **valid** (no red errors).
 2. Click **Create soul** — Wizard loads values into the main Studio editor.
-3. Click **Export** — downloads `your-name-slug.soul.json`.
+3. Click **Export JSON** (`your-name-slug.soul.json`) or **Export .soul** (YAML + Markdown).
+4. Optional: commit `.soul-memory/` and sync with `soulos memory-sync <bot_id>`.
 
 **Verify export:**
 

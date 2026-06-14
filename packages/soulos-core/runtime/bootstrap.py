@@ -61,6 +61,9 @@ async def init_database() -> None:
                 "ADD COLUMN IF NOT EXISTS source_hash VARCHAR(64);"
             )
         )
+        await conn.execute(
+            text("ALTER TABLE bots ADD COLUMN IF NOT EXISTS cognitive_meta JSONB;")
+        )
     await engine.dispose()
     logger.info("Database initialized successfully.")
 

@@ -10,6 +10,11 @@ export type MsvUpdateEvent = {
   msv: Record<string, unknown>;
 };
 
+export type CognitiveStateEvent = {
+  type: "cognitive_state";
+  state: Record<string, unknown>;
+};
+
 export type MessageEvent = {
   type: "message";
   text: string;
@@ -20,7 +25,11 @@ export type ErrorEvent = {
   message: string;
 };
 
-export type SoulStreamEvent = MsvUpdateEvent | MessageEvent | ErrorEvent;
+export type SoulStreamEvent =
+  | MsvUpdateEvent
+  | CognitiveStateEvent
+  | MessageEvent
+  | ErrorEvent;
 
 export type RegisterAvatarResponse = {
   id: string;
@@ -29,6 +38,13 @@ export type RegisterAvatarResponse = {
   attachment_style?: string;
   baseline_msv: Record<string, unknown>;
   current_msv: Record<string, unknown>;
+};
+
+export type MemorySyncResponse = {
+  status: string;
+  imported: number;
+  skipped: number;
+  total: number;
 };
 
 export class SoulOSClient {
@@ -47,19 +63,17 @@ export class SoulOSClient {
     }
   }
 
-  private headers(): Record<string, string> {
-    const h: Record<string, string> = { "Content-Type": "application/json" };
+  private headers(contentType = "application/json"): Record<string, string> {
+    const h: Record<string, string> = { "Content-Type": contentType };
     if (this.apiKey) h["Authorization"] = `Bearer ${this.apiKey}`;
     return h;
   }
 
   async registerAvatar(soul: Record<string, unknown>): Promise<RegisterAvatarResponse> {
-    const payload = soul;
-
     const res = await fetch(`${this.baseUrl}/v1/avatars`, {
       method: "POST",
       headers: this.headers(),
-      body: JSON.stringify(payload),
+      body: JSON.stringify(soul),
     });
 
     const body = await res.json();
@@ -69,6 +83,25 @@ export class SoulOSClient {
     return body as RegisterAvatarResponse;
   }
 
+  async registerAvatarFromRaw(
+    body: Uint8Array,
+    filename: string,
+    contentType = "text/markdown"
+  ): Promise<RegisterAvatarResponse> {
+    const headers = this.headers(contentType);
+    headers["X-Filename"] = filename;
+    const res = await fetch(`${this.baseUrl}/v1/avatars`, {
+      method: "POST",
+      headers,
+      body,
+    });
+    const parsed = await res.json();
+    if (!res.ok) {
+      throw new Error(parsed.detail || `registerAvatarFromRaw failed (${res.status})`);
+    }
+    return parsed as RegisterAvatarResponse;
+  }
+
   async ingestMemory(avatarId: string, content: string): Promise<void> {
     const res = await fetch(`${this.baseUrl}/memory/ingest`, {
       method: "POST",
@@ -76,6 +109,25 @@ export class SoulOSClient {
       body: JSON.stringify({ bot_id: avatarId, content }),
     });
     if (!res.ok) throw new Error(`ingestMemory failed (${res.status})`);
+  }
+
+  async syncMemory(
+    avatarId: string,
+    workspacePath: string
+  ): Promise<MemorySyncResponse> {
+    const res = await fetch(`${this.baseUrl}/memory/sync`, {
+      method: "POST",
+      headers: this.headers(),
+      body: JSON.stringify({
+        bot_id: avatarId,
+        workspace_path: workspacePath,
+      }),
+    });
+    const body = await res.json();
+    if (!res.ok) {
+      throw new Error(body.detail || `syncMemory failed (${res.status})`);
+    }
+    return body as MemorySyncResponse;
   }
 
   async getIdentity(avatarId: string): Promise<Record<string, unknown>> {
@@ -131,6 +183,8 @@ export class SoulOSClient {
           yield { type: "message", text: data.text };
         } else if (event === "msv_update") {
           yield { type: "msv_update", msv: data };
+        } else if (event === "cognitive_state") {
+          yield { type: "cognitive_state", state: data };
         } else if (event === "error") {
           yield { type: "error", message: String(data) };
         }

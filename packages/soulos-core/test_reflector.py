@@ -25,6 +25,16 @@ async def test_reflector_uses_own_connection_not_shared_db():
     mock_client.__aexit__ = AsyncMock(return_value=False)
 
     mock_conn = AsyncMock()
+
+    class MockRow:
+        baseline_msv = current_msv
+        cognitive_meta = {}
+
+    class MockResult:
+        def fetchone(self):
+            return MockRow()
+
+    mock_conn.execute = AsyncMock(return_value=MockResult())
     mock_begin_ctx = AsyncMock()
     mock_begin_ctx.__aenter__ = AsyncMock(return_value=mock_conn)
     mock_begin_ctx.__aexit__ = AsyncMock(return_value=False)
@@ -38,6 +48,6 @@ async def test_reflector_uses_own_connection_not_shared_db():
 
     assert result.msv["epistemic_uncertainty"] == 0.42
     mock_engine.begin.assert_called_once()
-    mock_conn.execute.assert_awaited_once()
+    assert mock_conn.execute.await_count >= 1
     shared_db.commit.assert_not_awaited()
     shared_db.execute.assert_not_awaited()

@@ -9,6 +9,8 @@ from typing import Any
 import httpx
 from sqlalchemy import text
 
+from runtime.boot_memory import sync_memory_on_boot
+from runtime.crystallization import apply_crystallization_if_needed
 from config import INFERENCE_API_URL, MODEL_NAME, engine
 
 logger = logging.getLogger(__name__)
@@ -24,7 +26,10 @@ class ReflectorResult:
 
 
 async def run_system_2_reflector(
-    bot_id: str, message: str, current_msv: dict
+    bot_id: str,
+    message: str,
+    current_msv: dict,
+    active_mcp_tools: list[str] | None = None,
 ) -> ReflectorResult:
     prompt = f"""
     System: You are the subconscious metacognitive layer of an AI agent.
@@ -60,12 +65,26 @@ async def run_system_2_reflector(
                         text("UPDATE bots SET current_msv = :msv WHERE id = :id"),
                         {"msv": json.dumps(new_msv), "id": bot_id},
                     )
+                    baseline_row = await conn.execute(
+                        text("SELECT baseline_msv FROM bots WHERE id = :id"),
+                        {"id": bot_id},
+                    )
+                    baseline_fetch = baseline_row.fetchone()
+                    baseline = baseline_fetch.baseline_msv if baseline_fetch else current_msv
+                    if isinstance(baseline, str):
+                        baseline = json.loads(baseline)
+                    await apply_crystallization_if_needed(
+                        conn, bot_id, baseline or current_msv, new_msv
+                    )
+                tools = list(active_mcp_tools or [])
+                if "run_system_2_reflector" not in tools:
+                    tools.append("system_2_reflector")
                 return ReflectorResult(
                     msv=new_msv,
                     latency_ms=latency_ms,
                     reasoning_tokens=max(1, len(prompt) // 4),
                     loop_count=1,
-                    active_mcp_tools=[],
+                    active_mcp_tools=tools,
                 )
         except Exception as e:
             logger.error("System 2 Reflection failed: %s", e)
@@ -75,5 +94,5 @@ async def run_system_2_reflector(
         latency_ms=int((time.monotonic() - started) * 1000),
         reasoning_tokens=0,
         loop_count=1,
-        active_mcp_tools=[],
+        active_mcp_tools=list(active_mcp_tools or []),
     )

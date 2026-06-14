@@ -22,6 +22,9 @@ GATEWAY_SECRET = os.getenv("GATEWAY_SECRET", DEFAULT_GATEWAY_SECRET)
 ACCOUNT_ID_HEADER = "X-SoulOS-Account-Id"
 GATEWAY_SECRET_HEADER = "X-SoulOS-Gateway-Secret"
 
+MEMORY_SYNC_WORKSPACE = os.getenv("SOULOS_MEMORY_SYNC_WORKSPACE", "").strip()
+MEMORY_SYNC_BOT_ID = os.getenv("SOULOS_MEMORY_SYNC_BOT_ID", "").strip()
+
 WEAK_GATEWAY_SECRETS = frozenset(
     {DEFAULT_GATEWAY_SECRET, "changeme", "secret", "password", ""}
 )

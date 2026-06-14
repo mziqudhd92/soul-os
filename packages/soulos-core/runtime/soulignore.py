@@ -36,13 +36,29 @@ def is_ignored_path(rel_path: str, patterns: list[str]) -> bool:
     return False
 
 
+def content_matches_ignore_patterns(content: str, patterns: list[str]) -> bool:
+    for line in content.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        for pattern in patterns:
+            if is_ignored_path(stripped, [pattern]):
+                return True
+            if "*" not in pattern and "/" not in pattern and pattern in stripped:
+                return True
+    return False
+
+
 def contains_secret(text: str) -> bool:
     return any(pattern.search(text) for pattern in SECRET_PATTERNS)
 
 
 def validate_memory_content(content: str, workspace_root: Path | None = None) -> None:
-    del workspace_root  # reserved for path-based rules on file ingest
     if contains_secret(content):
         raise ValueError(
             "Memory content blocked: possible secret detected by .soulignore scanner"
         )
+    if workspace_root is not None:
+        patterns = load_soulignore_patterns(workspace_root)
+        if patterns and content_matches_ignore_patterns(content, patterns):
+            raise ValueError("Memory content blocked by .soulignore pattern match")

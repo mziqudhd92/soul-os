@@ -167,7 +167,8 @@ During every interaction, System 2 evaluates the user's prompt against the basel
    A raw, unfiltered sentence reflecting the AI's true, internal reaction to the prompt before formatting its polite output. 
 
 ### Memory Crystallization
-If a user consistently violates the bot's Moral Foundations or attacks it (driving up Emotionality and down Agreeableness over 50 consecutive turns), the system performs a database crystallization, permanently rewriting the `baseline_msv`. This fundamentally alters the "Soul" of that specific instance.
+
+If sustained stress turns (Agreeableness drop or Emotionality rise vs baseline) reach **50 consecutive** chat turns, the kernel **crystallizes** — `baseline_msv` is permanently rewritten to match `current_msv`. Tracked in `cognitive_meta.stress_streak` on the bot row.
 
 ---
 

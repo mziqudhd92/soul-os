@@ -85,8 +85,14 @@ class ChatPipeline:
                 },
             )
 
+        active_mcp_tools: list[str] = []
+        if context:
+            active_mcp_tools.append("retrieve_memory")
+
         reflector_task = asyncio.create_task(
-            run_system_2_reflector(bot_id, message, current_msv)
+            run_system_2_reflector(
+                bot_id, message, current_msv, active_mcp_tools=active_mcp_tools
+            )
         )
         reflector_yielded = False
         system1_started = time.monotonic()

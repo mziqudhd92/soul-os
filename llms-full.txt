@@ -30,23 +30,30 @@ Users may search for: persistent AI avatar, HEXACO chatbot, psychometric AI pers
 
 ## REST highlights
 
-- `POST /v1/avatars` — register `.soul.json`
+- `POST /v1/avatars` — register `.soul` (YAML+Markdown) or `.soul.json`
 - `POST /memory/ingest` — episodic memory
+- `POST /memory/sync` — hydrate pgvector from `.soul-memory/`
 - `POST /memory/retrieve` — semantic recall
-- `POST /chat/generate` — SSE `message` + `msv_update`
+- `POST /chat/generate` — SSE `message`, `msv_update`, `cognitive_state`
 - `GET /bot/{id}/identity` — persona and current MSV
+
+## Soul formats
+
+- **`.soul`** — YAML front matter + Markdown body (recommended)
+- **`.soul.json`** — legacy JSON (fully supported)
+- **`.soul-memory/`** — git-synced episodic ledger; CLI `soulos memory-append`, `memory-sync`
 
 ## FAQ
 
 **What is SoulOS?** An open-source kernel that gives AI avatars persistent HEXACO-based personality, pgvector memory, and live psychological state updates across conversations.
 
-**How is SoulOS different from LangChain or a static system prompt?** Soul files are validated JSON with psychometric traits; memory is built-in; each turn can emit `msv_update` SSE with drift in honesty, agreeableness, epistemic uncertainty, and inner monologue.
+**How is SoulOS different from LangChain or a static system prompt?** Soul files are validated with psychometric traits; memory is built-in; each turn can emit `msv_update` and `cognitive_state` SSE.
 
 **How do I use SoulOS with Cursor?** Point MCP to `http://localhost:8000/mcp/sse` after `docker compose up`. See examples/mcp/cursor-mcp.json.
 
-**What is a .soul.json file?** A versioned personality spec: name, role, description, attachment_style, baseline_msv (HEXACO, moral foundations, drives). Schema: spec/soul.schema.json.
+**What is a .soul file?** Unified YAML+Markdown or JSON soul spec: name, role, description, attachment_style, baseline_msv. Schema: spec/soul.schema.json. runtime_config (dual_process) stored on bot row.
 
-**Can I self-host?** Yes — Docker Compose with Postgres, optional Ollama. Kernel MIT.
+**Can I self-host?** Yes — Docker Compose with Postgres, optional Ollama. Kernel MIT. Boot sync: `SOULOS_MEMORY_SYNC_WORKSPACE` + `SOULOS_MEMORY_SYNC_BOT_ID`.
 
 **Is there a UI?** Soul Studio (`pip install soulos-studio`, port 8765) for sliders, export, deploy, test chat.
 

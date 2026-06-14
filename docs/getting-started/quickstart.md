@@ -2,7 +2,7 @@
 
 **Level:** beginner · **Outcome:** two working avatars on one kernel — you will see how **only the soul file and memory** change behavior.
 
-SoulOS uses **one kernel** for every avatar type. Same Postgres, same inference, same API — different `.soul.json` + different ingested facts.
+SoulOS uses **one kernel** for every avatar type. Same Postgres, same inference, same API — different **`.soul`** / `.soul.json` + different ingested facts or **`.soul-memory/`** ledger.
 
 **Recommended if you write Python bots:** start with [Python bot integration](../guides/python-bot.md) instead — this quickstart is ideal for **curl / API exploration**.
 
@@ -33,6 +33,17 @@ curl -s http://localhost:8000/health || curl -s -o /dev/null -w "%{http_code}" h
 **Goal:** customer-support avatar that knows refund policy from **memory**, not from a giant system prompt.
 
 ### A1 — Register the soul
+
+**Option 1 — `.soul` (recommended):**
+
+```bash
+curl -s -X POST http://localhost:8000/v1/avatars \
+  -H "Content-Type: text/markdown" \
+  -H "X-Filename: support-bot.soul" \
+  --data-binary @examples/support-bot/support-bot.soul | tee /tmp/support-register.json
+```
+
+**Option 2 — `.soul.json`:**
 
 ```bash
 curl -s -X POST http://localhost:8000/v1/avatars \
@@ -80,9 +91,22 @@ data: {"text":"..."}
 
 event: msv_update
 data: {"hexaco":{...},"epistemic_uncertainty":0.2,...}
+
+event: cognitive_state
+data: {"current_path":"system_1_heuristic","system_1":{"confidence_score":0.85,...}}
 ```
 
 The reply should mention **30 days** because memory was recalled — not because you pasted FAQ into the soul file.
+
+### A3b — Git memory ledger (optional)
+
+```bash
+soulos memory-sync "$SUPPORT_ID" --workspace examples/support-bot
+# or: curl -X POST http://localhost:8000/memory/sync \
+#   -d "{\"bot_id\":\"$SUPPORT_ID\",\"workspace_path\":\"examples/support-bot\"}"
+```
+
+Commit `.soul-memory/` to git; sync after clone hydrates pgvector.
 
 ### A4 — Sanity check (optional)
 

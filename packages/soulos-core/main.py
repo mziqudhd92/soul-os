@@ -25,6 +25,7 @@ from config import (
 )
 from dependencies import get_db, get_embedder, get_llm_service
 from mcp_server import mcp_server
+from runtime.boot_memory import sync_memory_on_boot
 from runtime.bootstrap import init_database, pull_model, wait_for_ollama
 from runtime.avatars import get_bot_identity, register_avatar_record
 from runtime.memory import ingest_memory as ingest_memory_record
@@ -73,6 +74,11 @@ async def lifespan(app: FastAPI):
         await pull_model(EMBED_MODEL_NAME)
     except Exception as e:
         logger.error("Failed to initialize inference API: %s", e)
+
+    try:
+        await sync_memory_on_boot()
+    except Exception as e:
+        logger.error("Boot memory sync failed: %s", e)
 
     yield
     logger.info("Shutting down SoulOS Kernel...")
