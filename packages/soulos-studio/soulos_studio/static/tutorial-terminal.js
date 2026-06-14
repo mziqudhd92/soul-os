@@ -24,13 +24,19 @@ function mountTerminalTutorial(container, data, ctx) {
     <div class="it-progress-bar" aria-hidden="true"><span class="it-progress-fill"></span></div>
     <p class="it-nerd-fact mono hidden" id="it-term-nerd-fact"></p>
     <div class="it-step-head it-term-head"></div>
-    <div class="term-wrap">
-      <div class="term-toolbar">
-        <span class="term-dots" aria-hidden="true"><span></span><span></span><span></span></span>
-        <span class="term-title mono">soulos — zsh — 80×24</span>
-        <span class="term-sim-badge mono">simulated</span>
+    <div class="term-vintage">
+      <div class="term-bezel" role="group" aria-label="Simulated terminal">
+        <div class="term-bezel-brand mono">SOUL-OS · CRT-80</div>
+        <div class="term-crt">
+          <div class="term-scanlines" aria-hidden="true"></div>
+          <div class="term-vignette" aria-hidden="true"></div>
+          <div class="term-screen mono" aria-live="polite"></div>
+        </div>
+        <div class="term-bezel-foot">
+          <span class="term-led" aria-hidden="true"></span>
+          <span class="term-sim-badge mono">SIMULATED</span>
+        </div>
       </div>
-      <div class="term-screen mono" aria-live="polite"></div>
       <div class="term-actions">
         <button type="button" class="btn primary sm" id="term-run">▶ Run step</button>
         <button type="button" class="btn ghost sm" id="term-copy">Copy commands</button>
