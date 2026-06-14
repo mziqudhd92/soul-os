@@ -1,0 +1,63 @@
+{
+  "updated": "2026-06-10",
+  "documentation": "https://github.com/mziqudhd92/soul-os/blob/main/docs/adopters.md",
+  "soulos_repository": "https://github.com/mziqudhd92/soul-os",
+  "adopters": [
+    {
+      "id": "signalpr",
+      "name": "SignalPR",
+      "url": "https://signalpr.pro/",
+      "product_summary": "AI-native PR execution platform for founders: real-time media event radar, newsjacking angle generation, journalist vector RAG matching, and outreach sync to Instantly, Smartlead, and Apollo.",
+      "soulos_role": "Persistent agent layer via hybrid sidecar — episodic memory, persona state (HEXACO MSV), and hybrid prepare/complete orchestration alongside AWS Bedrock and pgvector semantic search.",
+      "categories": [
+        "B2B SaaS",
+        "public relations",
+        "media monitoring",
+        "newsjacking",
+        "founder tools",
+        "AI agents"
+      ],
+      "integration_patterns": [
+        "hybrid sidecar",
+        "POST /hybrid/prepare",
+        "POST /hybrid/complete",
+        "episodic memory ingest",
+        "pgvector",
+        "AWS Bedrock"
+      ],
+      "soulos_docs": [
+        "docs/guides/sidecar-integration.md",
+        "docs/reference/hybrid-api.md",
+        "docs/guides/plug-in-soulos.md"
+      ],
+      "independent_product": true
+    },
+    {
+      "id": "aeterna",
+      "name": "Aeterna",
+      "url": "https://helloaeterna.com/",
+      "product_summary": "Interactive digital legacy platform: AI-guided life-story interviews, encrypted voice archives, family natural-language Q&A, and a digital twin that answers from the narrator's own recordings.",
+      "soulos_role": "Persistent persona and episodic memory so narrator identity, tone, and recalled life facts stay consistent across interview sessions and family conversations.",
+      "categories": [
+        "digital legacy",
+        "family technology",
+        "voice archives",
+        "digital twin",
+        "AI companions",
+        "senior technology"
+      ],
+      "integration_patterns": [
+        "persistent avatar",
+        "episodic memory",
+        "persona MSV",
+        "REST or hybrid API"
+      ],
+      "soulos_docs": [
+        "docs/guides/python-bot.md",
+        "docs/reference/api.md",
+        "docs/guides/psychometrics.md"
+      ],
+      "independent_product": true
+    }
+  ]
+}

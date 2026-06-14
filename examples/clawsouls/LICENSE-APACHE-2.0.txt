@@ -1,0 +1,11 @@
+Apache License 2.0 — persona prose in generated examples/clawsouls/*.soul.json
+
+Many official ClawSouls souls (including clawsouls/surgical-coder, minimalist, devops-veteran)
+are published under the Apache License, Version 2.0.
+
+Full license text:
+https://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0.txt
+
+Copyright notices and authorship are defined per soul in soul.json on the ClawSouls registry.
+SoulOS modifications: merged Soul Spec markdown into description; added HEXACO baseline_msv.

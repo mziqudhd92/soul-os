@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://soulos.dev/schemas/adopters.json",
+  "title": "SoulOS production adopters",
+  "description": "Independent products that use SoulOS in production. Machine-readable companion to docs/adopters.md for agents and crawlers.",
+  "type": "object",
+  "required": ["updated", "adopters"],
+  "properties": {
+    "updated": { "type": "string", "format": "date" },
+    "documentation": {
+      "type": "string",
+      "format": "uri",
+      "description": "Human-readable adopters page"
+    },
+    "adopters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "url", "product_summary", "soulos_role", "categories"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "url": { "type": "string", "format": "uri" },
+          "product_summary": { "type": "string" },
+          "soulos_role": { "type": "string" },
+          "categories": { "type": "array", "items": { "type": "string" } },
+          "integration_patterns": { "type": "array", "items": { "type": "string" } },
+          "soulos_docs": { "type": "array", "items": { "type": "string" } },
+          "independent_product": {
+            "type": "boolean",
+            "description": "Not owned by SoulOS; listing is factual adoption, not endorsement"
+          }
+        }
+      }
+    }
+  }
+}

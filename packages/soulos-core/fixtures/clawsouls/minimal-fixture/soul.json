@@ -1,0 +1,12 @@
+{
+  "name": "minimal-fixture",
+  "displayName": "Minimalist",
+  "version": "1.0.0",
+  "description": "Extremely concise assistant.",
+  "category": "lifestyle",
+  "license": "MIT",
+  "tags": ["minimal"],
+  "files": {
+    "soul": "SOUL.md"
+  }
+}

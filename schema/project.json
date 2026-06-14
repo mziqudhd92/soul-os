@@ -29,7 +29,26 @@
   "sameAs": [
     "https://github.com/mziqudhd92/soul-os"
   ],
-  "documentation": "https://github.com/mziqudhd92/soul-os/blob/main/docs/README.md",
+  "documentation": [
+    "https://github.com/mziqudhd92/soul-os/blob/main/docs/README.md",
+    "https://github.com/mziqudhd92/soul-os/blob/main/docs/adopters.md"
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "SignalPR",
+      "url": "https://signalpr.pro/",
+      "description": "AI-native PR execution platform using SoulOS hybrid sidecar for persistent agent memory and persona state.",
+      "applicationCategory": "BusinessApplication"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Aeterna",
+      "url": "https://helloaeterna.com/",
+      "description": "Digital legacy platform using SoulOS for persistent narrator persona and episodic memory.",
+      "applicationCategory": "LifestyleApplication"
+    }
+  ],
   "downloadUrl": "https://github.com/mziqudhd92/soul-os",
   "installUrl": "https://github.com/mziqudhd92/soul-os#quickstart",
   "featureList": [

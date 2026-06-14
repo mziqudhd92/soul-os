@@ -34,6 +34,11 @@ from runtime.avatars import (
     fetch_bot_identity,
     register_avatar_record,
 )
+from runtime.clawsouls_import import (
+    default_external_key,
+    import_clawsouls_soul,
+    import_enabled,
+)
 from runtime.hybrid import build_hybrid_system_prompt, extract_inner_monologue
 from runtime.hybrid_tasks import run_reflect_background
 from runtime.memory import ingest_memory as ingest_memory_record
@@ -45,6 +50,7 @@ from schemas import (
     EnsureAvatarRequest,
     HybridCompleteRequest,
     HybridPrepareRequest,
+    ImportClawSoulsRequest,
     MemoryIngest,
     MemoryRetrieve,
     MemorySync,
@@ -161,6 +167,63 @@ async def ensure_avatar(
         )
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e)) from e
+
+
+@app.post("/v1/avatars/import-clawsouls")
+async def import_clawsouls_avatar(
+    payload: ImportClawSoulsRequest,
+    db: AsyncConnection = Depends(get_db),
+    account: AccountContext = Depends(get_account_context),
+):
+    if not import_enabled():
+        raise HTTPException(
+            status_code=403,
+            detail="ClawSouls import is disabled (set CLAWSOULS_IMPORT_ENABLED=1)",
+        )
+    try:
+        soul, runtime_config, warnings = await import_clawsouls_soul(
+            payload.owner.strip(),
+            payload.name.strip(),
+            version=payload.version,
+            msv_preset=payload.msv_preset,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+
+    merged_runtime = dict(runtime_config)
+    if payload.runtime_config:
+        merged_runtime.update(payload.runtime_config)
+
+    version = payload.version or merged_runtime.get("source", {}).get("version")
+    external_key = payload.external_key or default_external_key(
+        payload.owner, payload.name, version
+    )
+
+    if not payload.persist:
+        return {
+            "soul": soul,
+            "runtime_config": merged_runtime,
+            "warnings": warnings,
+            "external_key": external_key,
+        }
+
+    try:
+        record = await ensure_avatar_record(
+            db,
+            account.account_id,
+            external_key,
+            soul,
+            merged_runtime,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+
+    return {
+        **record,
+        "warnings": warnings,
+        "external_key": external_key,
+        "runtime_config": merged_runtime,
+    }
 
 
 @app.post("/memory/ingest")

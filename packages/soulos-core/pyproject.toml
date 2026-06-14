@@ -39,6 +39,9 @@ only-include = [
     "runtime",
 ]
 
+[tool.hatch.build.targets.wheel.force-include]
+"runtime/clawsouls_presets.yaml" = "runtime/clawsouls_presets.yaml"
+
 [project.scripts]
 soulos = "cli:main"
 

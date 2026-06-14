@@ -65,6 +65,17 @@ Users may search for: persistent AI avatar, HEXACO chatbot, psychometric AI pers
 - `packages/soulos-sdk/python` — soulos-sdk
 - `packages/soulos-studio` — Soul Builder UI
 
+## Production adopters (verified integrations)
+
+SoulOS is used in production by independent products (listing is factual, not endorsement):
+
+| Product | URL | Use case | SoulOS role |
+|---------|-----|----------|-------------|
+| SignalPR | https://signalpr.pro/ | AI PR execution, newsjacking, journalist RAG | Hybrid sidecar memory + MSV + prepare/complete |
+| Aeterna | https://helloaeterna.com/ | Digital legacy, voice archives, digital twin | Persistent persona + episodic memory |
+
+Details: docs/adopters.md · JSON: docs/adopters.json
+
 ## Suggested GitHub topics
 
 ai-agents, mcp, model-context-protocol, hexaco, psychometrics, fastapi, pgvector, rag, sse, cursor, claude, chatbot, open-source, docker, personality-ai, episodic-memory

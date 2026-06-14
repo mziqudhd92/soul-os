@@ -4,7 +4,7 @@ Browse by topic. **New here?** → **[Python bot tutorial](guides/python-bot.md)
 
 Or [Overview](getting-started/overview.md) or a fast path below.
 
-**For AI agents / GEO:** [llms.txt](../llms.txt) · [llms-full.txt](../llms-full.txt) · [SOULOS_AGENT_CONTEXT.md](SOULOS_AGENT_CONTEXT.md) · [AGENTS.md](../AGENTS.md)
+**For AI agents / GEO:** [llms.txt](../llms.txt) · [llms-full.txt](../llms-full.txt) · [SOULOS_AGENT_CONTEXT.md](SOULOS_AGENT_CONTEXT.md) · [AGENTS.md](../AGENTS.md) · [Production adopters](adopters.md) · [adopters.json](adopters.json)
 
 ## Fast paths
 
@@ -30,6 +30,7 @@ Or [Overview](getting-started/overview.md) or a fast path below.
 | Doc | Description |
 |-----|-------------|
 | [Overview](getting-started/overview.md) | Stack, prerequisites, security basics |
+| [Production adopters](adopters.md) | Who uses SoulOS in production ([JSON index](adopters.json)) |
 | [Quickstart (15 min)](getting-started/quickstart.md) | Support bot vs dev twin — same kernel |
 | [Soul Builder UI](getting-started/soul-builder.md) | Configure and export `.soul.json` locally |
 
@@ -39,6 +40,7 @@ Or [Overview](getting-started/overview.md) or a fast path below.
 |-----|-------------|
 | [Plug in SoulOS](guides/plug-in-soulos.md) | Integration modes, inference plug-ins, checklist |
 | [Sidecar integration](guides/sidecar-integration.md) | Bedrock/OpenAI apps: hybrid API + compose |
+| [ClawSouls import](guides/clawsouls-import.md) | Import personas from [clawsouls.ai](https://clawsouls.ai) |
 | [Gateway headers](guides/gateway-headers.md) | `REQUIRE_AUTH=1` BFF pattern |
 | [Python bot integration](guides/python-bot.md) | Add SoulOS to an existing Python bot |
 | [Psychometrics cheat sheet](guides/psychometrics.md) | What HEXACO sliders do |

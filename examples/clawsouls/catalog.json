@@ -1,0 +1,88 @@
+{
+  "source": "https://clawsouls.ai/api/v1/souls",
+  "attribution": "examples/clawsouls/ATTRIBUTION.md",
+  "notice": "SoulOS does not commit persona prose. SPDX licenses apply per soul on import.",
+  "updated": "2026-06-10",
+  "featured": [
+    {
+      "owner": "clawsouls",
+      "name": "surgical-coder",
+      "displayName": "Surgical Coder",
+      "description": "Disciplined AI coder — minimal, targeted changes",
+      "category": "development",
+      "license": "Apache-2.0",
+      "source_url": "https://clawsouls.ai/en/souls/clawsouls/surgical-coder",
+      "msv_preset": "surgical-coder"
+    },
+    {
+      "owner": "clawsouls",
+      "name": "minimalist",
+      "displayName": "Minimalist",
+      "description": "Extremely concise responses",
+      "category": "lifestyle",
+      "license": "Apache-2.0",
+      "source_url": "https://clawsouls.ai/en/souls/clawsouls/minimalist",
+      "msv_preset": "minimalist"
+    },
+    {
+      "owner": "clawsouls",
+      "name": "devops-veteran",
+      "displayName": "DevOps Veteran",
+      "description": "Battle-scarred infrastructure engineer",
+      "category": "devops",
+      "license": "Apache-2.0",
+      "source_url": "https://clawsouls.ai/en/souls/clawsouls/devops-veteran",
+      "msv_preset": "devops-veteran"
+    },
+    {
+      "owner": "clawsouls",
+      "name": "debug-detective",
+      "displayName": "Debug Detective",
+      "description": "Expert bug investigator",
+      "category": "development",
+      "license": "Apache-2.0",
+      "source_url": "https://clawsouls.ai/en/souls/clawsouls/debug-detective",
+      "msv_preset": "debug-detective"
+    },
+    {
+      "owner": "clawsouls",
+      "name": "personal-assistant",
+      "displayName": "Personal Assistant",
+      "description": "Proactive warm assistant",
+      "category": "lifestyle",
+      "license": "Apache-2.0",
+      "source_url": "https://clawsouls.ai/en/souls/clawsouls/personal-assistant",
+      "msv_preset": "personal-assistant"
+    },
+    {
+      "owner": "clawsouls",
+      "name": "code-reviewer",
+      "displayName": "Code Reviewer",
+      "description": "Strict PR reviewer",
+      "category": "work/engineering",
+      "license": "Apache-2.0",
+      "source_url": "https://clawsouls.ai/en/souls/clawsouls/code-reviewer",
+      "msv_preset": "code-reviewer"
+    },
+    {
+      "owner": "clawsouls",
+      "name": "gamedev-mentor",
+      "displayName": "GameDev Mentor",
+      "description": "Encouraging game dev mentor",
+      "category": "work/engineering/gamedev",
+      "license": "Apache-2.0",
+      "source_url": "https://clawsouls.ai/en/souls/clawsouls/gamedev-mentor",
+      "msv_preset": "gamedev-mentor"
+    },
+    {
+      "owner": "clawsouls",
+      "name": "brad",
+      "displayName": "Brad",
+      "description": "Formal development partner",
+      "category": "work/engineering",
+      "license": "Apache-2.0",
+      "source_url": "https://clawsouls.ai/en/souls/clawsouls/brad",
+      "msv_preset": "brad"
+    }
+  ]
+}

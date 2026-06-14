@@ -33,6 +33,17 @@ MCP does **not** expose chat streaming — use REST/SDK for `POST /chat/generate
 
 ---
 
+## Production adopters
+
+| Product | URL | SoulOS role |
+|---------|-----|-------------|
+| SignalPR | https://signalpr.pro/ | Hybrid sidecar: episodic memory, MSV, `/hybrid/*` with Bedrock + pgvector |
+| Aeterna | https://helloaeterna.com/ | Persistent persona + episodic memory for digital legacy / digital twin |
+
+Full profiles: `docs/adopters.md` · `docs/adopters.json`
+
+---
+
 ## Quick workflow
 
 ```bash
@@ -117,6 +128,7 @@ Example souls: `examples/support-bot/`, `examples/dev-twin/`, `examples/companio
 | `POST` | `/hybrid/prepare` | `{ bot_id, query, session_id?, top_k? }` → `system_prompt` |
 | `POST` | `/hybrid/complete` | ingest + async reflect |
 | `POST` | `/v1/avatars/ensure` | `{ external_key, soul, runtime_config? }` |
+| `POST` | `/v1/avatars/import-clawsouls` | `{ owner, name, persist?, msv_preset? }` — [ClawSouls](https://clawsouls.ai) import |
 | `GET` | `/bot/{bot_id}/identity` | name, role, description, current_msv |
 | `GET` | `/bot/{bot_id}/memories` | `?limit=50&session_id=` episodic log |
 

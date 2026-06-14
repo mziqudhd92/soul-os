@@ -12,6 +12,31 @@ Give your bot a **soul file** instead of a fragile system prompt. Same REST API,
 
 **Tutorials (interactive)** · [GitHub Pages](https://mziqudhd92.github.io/soul-os/) · [Python bot guide](docs/guides/python-bot.md) · [Full docs](docs/README.md) · [FAQ](#faq)
 
+## Trust & adoption
+
+SoulOS is maintained in the open so you can inspect, fork, and self-host before you depend on it.
+
+| | |
+|---|---|
+| **License** | [MIT](LICENSE) — kernel, SDK, Studio, examples |
+| **CI** | Tests on every push to `main` ([workflow](https://github.com/mziqudhd92/soul-os/actions/workflows/ci.yml)) |
+| **Security** | Report vulnerabilities privately — [SECURITY.md](SECURITY.md) |
+| **Contributing** | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| **Third-party** | Upstream licenses (e.g. ClawSouls personas) — [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) |
+
+### Production adopters
+
+Independent products use SoulOS for **persistent persona and episodic memory** in production. Full profiles (for humans, crawlers, and agents): **[docs/adopters.md](docs/adopters.md)** · JSON index: **[docs/adopters.json](docs/adopters.json)**
+
+| Product | Website | What they build | SoulOS in production |
+|---------|---------|-----------------|----------------------|
+| **SignalPR** | [https://signalpr.pro/](https://signalpr.pro/) | AI-native PR for founders — media event radar, newsjacking angles, journalist vector RAG, outreach to Instantly / Apollo | Hybrid sidecar: memory, persona MSV, [`/hybrid/prepare`](docs/reference/hybrid-api.md) / [`/complete`](docs/reference/hybrid-api.md) with Bedrock + pgvector |
+| **Aeterna** | [https://helloaeterna.com/](https://helloaeterna.com/) | Digital legacy — AI life interviews, encrypted voice archives, family Q&A, digital twin | Persistent narrator persona + episodic memory across sessions |
+
+These are **independent companies**; listing describes factual integration, not mutual endorsement. SoulOS is MIT-licensed open source — inspect, fork, and self-host before you depend on it.
+
+Independent teams self-host the kernel unless they use SoulOS Cloud via the gateway. To be listed, open a PR updating [docs/adopters.md](docs/adopters.md) and [docs/adopters.json](docs/adopters.json).
+
 ---
 
 ## New here? Do this first
@@ -44,6 +69,7 @@ Wait until the kernel is up (first build can take several minutes).
 | **Use SoulOS from Cursor / Claude** | [MCP guide](docs/guides/mcp.md) → `http://localhost:8000/mcp/sse` | ~15 min |
 | **Deploy on my own servers** | [Plug in SoulOS](docs/guides/plug-in-soulos.md) · [Self-hosted](docs/deployment/self-hosted.md) | ~15 min |
 | **Add SoulOS to my existing LLM app** | [Sidecar integration](docs/guides/sidecar-integration.md) · [Hybrid orchestrator](docs/guides/hybrid-orchestrator.md) | ~20 min |
+| **Use a ClawSouls persona** | [ClawSouls import](docs/guides/clawsouls-import.md) · Studio **ClawSouls** tab | ~10 min |
 
 ### 3. Register a soul and chat (minimal API smoke test)
 
@@ -274,4 +300,4 @@ Same SDK surface. Self-host: kernel on `:8000`. Cloud: API key through the gatew
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE). Third-party persona content (e.g. [ClawSouls](https://clawsouls.ai) import) remains under upstream licenses — see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

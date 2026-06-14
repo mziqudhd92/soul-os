@@ -27,6 +27,7 @@
       <span class="header-divider" id="toolbar-divider" aria-hidden="true"></span>
 
       <div class="nav-group">
+        <button type="button" id="nav-clawsouls" class="btn nav" data-view="clawsouls">ClawSouls</button>
         <button type="button" id="nav-docs" class="btn nav" data-view="docs">Docs</button>
         <button type="button" id="nav-tutorial" class="btn nav" data-view="tutorial">Tutorials</button>
         <button type="button" id="nav-studio" class="btn primary nav" data-view="studio">Studio</button>
@@ -162,6 +163,32 @@
           </div>
         </section>
       </main>
+    </div>
+
+    <div id="view-clawsouls" class="view hidden">
+      <div class="tutorial-wrap">
+        <header class="page-intro">
+          <h1>ClawSouls gallery</h1>
+          <p>
+            Browse personas from
+            <a href="https://clawsouls.ai" target="_blank" rel="noopener">clawsouls.ai</a>
+            and import into SoulOS with HEXACO MSV presets.
+            SoulOS is not affiliated with or endorsed by ClawSouls.
+          </p>
+        </header>
+        <div class="clawsouls-toolbar">
+          <input
+            type="search"
+            id="clawsouls-search"
+            class="clawsouls-search"
+            placeholder="Search souls…"
+            aria-label="Search ClawSouls"
+          />
+          <button type="button" id="clawsouls-refresh" class="btn ghost sm">Refresh</button>
+        </div>
+        <p id="clawsouls-status" class="hint"></p>
+        <div id="clawsouls-grid" class="tutorial-grid"></div>
+      </div>
     </div>
 
     <div id="view-docs" class="view hidden">

@@ -51,3 +51,12 @@ avatar
 ## Social preview
 
 GitHub uses README for the social card. Keep the README title and first paragraph keyword-rich (see README FAQ section).
+
+## Production adopters (README + GEO)
+
+Link independent products that use SoulOS in production in README **Trust & adoption** and maintain:
+
+- `docs/adopters.md` — crawler-friendly profiles with full `https` URLs
+- `docs/adopters.json` — machine-readable index for agents
+
+Current adopters: https://signalpr.pro/ (SignalPR), https://helloaeterna.com/ (Aeterna).

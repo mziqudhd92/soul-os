@@ -791,6 +791,7 @@ function switchView(view) {
 
   if (view === "docs" && !docsCatalog) loadDocsCatalog();
   if (view === "tutorial" && !document.getElementById("tutorial-grid").children.length) loadTutorials();
+  if (view === "clawsouls" && !clawsoulsLoaded) loadClawSoulsCatalog();
 }
 
 async function loadDocsCatalog() {
@@ -913,6 +914,106 @@ function closeTutorialDetail() {
   $("tutorial-detail-view").classList.add("hidden");
 }
 
+let clawsoulsLoaded = false;
+
+async function loadClawSoulsCatalog(query = "") {
+  const grid = $("clawsouls-grid");
+  const status = $("clawsouls-status");
+  if (!grid) return;
+  grid.innerHTML = "<p class='hint'>Loading from clawsouls.ai…</p>";
+  status.textContent = "";
+  const params = new URLSearchParams({ limit: "60" });
+  if (query.trim()) params.set("q", query.trim());
+  try {
+    const res = await fetch(`/api/clawsouls/souls?${params}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "load failed");
+    const souls = data.souls || [];
+    grid.innerHTML = "";
+    if (!souls.length) {
+      grid.innerHTML = "<p class='hint'>No souls matched your search.</p>";
+      return;
+    }
+    souls.forEach((s) => {
+      const card = document.createElement("div");
+      card.className = "tutorial-card clawsouls-card";
+      const owner = s.owner || "clawsouls";
+      const name = s.name || "";
+      card.innerHTML = `
+        <h3>${escapeHtml(s.displayName || name)}</h3>
+        <p>${escapeHtml(s.description || "")}</p>
+        <div class="tutorial-card-meta">
+          <span class="mono">${escapeHtml(owner)}/${escapeHtml(name)}</span>
+          <span>${escapeHtml(s.category || "")}</span>
+        </div>
+        <div class="clawsouls-card-actions">
+          <button type="button" class="btn ghost sm" data-action="studio">Open in Studio</button>
+          <button type="button" class="btn primary sm" data-action="deploy">Deploy to kernel</button>
+        </div>
+      `;
+      card.querySelector("[data-action=studio]").addEventListener("click", () =>
+        importClawSoul(owner, name, false)
+      );
+      card.querySelector("[data-action=deploy]").addEventListener("click", () =>
+        importClawSoul(owner, name, true)
+      );
+      grid.appendChild(card);
+    });
+    status.textContent = `${data.total ?? souls.length} souls · MSV presets on import · not affiliated with ClawSouls`;
+    clawsoulsLoaded = true;
+  } catch (e) {
+    grid.innerHTML = `<p class='hint'>${escapeHtml(e.message)}</p>`;
+  }
+}
+
+async function importClawSoul(owner, name, register) {
+  const status = $("clawsouls-status");
+  status.textContent = `Importing ${owner}/${name}…`;
+  try {
+    const res = await fetch("/api/clawsouls/import", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ owner, name, persist: register }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "import failed");
+
+    if (register) {
+      state.avatarId = data.id;
+      $("avatar-id").textContent = `Avatar ID: ${data.id}`;
+      $("chat-send").disabled = false;
+      status.textContent = `Deployed ${data.name} (${data.id})`;
+      if (data.warnings?.length) {
+        status.textContent += ` — ${data.warnings.join("; ")}`;
+      }
+      switchView("studio");
+      return;
+    }
+
+    const soul = data.soul;
+    if (!soul?.baseline_msv) throw new Error("Invalid soul payload from kernel");
+    state.form = {
+      name: soul.name,
+      role: soul.role,
+      description: soul.description,
+      attachment_style: soul.attachment_style,
+      hexaco: { ...soul.baseline_msv.hexaco },
+      moral_foundations: { ...soul.baseline_msv.moral_foundations },
+      drives: { ...soul.baseline_msv.drives },
+      epistemic_uncertainty: soul.baseline_msv.epistemic_uncertainty,
+      inner_monologue: soul.baseline_msv.inner_monologue || "",
+    };
+    writeFormToDom();
+    buildSliders();
+    await refreshSoul();
+    status.textContent =
+      (data.warnings || []).join("; ") || `Loaded ${soul.name} into Studio`;
+    switchView("studio");
+  } catch (e) {
+    status.textContent = String(e.message);
+  }
+}
+
 /** Copy buttons + collapsible enhancements for markdown tutorials */
 function enhanceProseTutorial(root) {
   root.querySelectorAll("pre").forEach((pre) => {
@@ -952,6 +1053,23 @@ async function init() {
     btn.addEventListener("click", () => switchView(btn.dataset.view));
   });
   $("tutorial-back").addEventListener("click", closeTutorialDetail);
+
+  const csSearch = $("clawsouls-search");
+  const csRefresh = $("clawsouls-refresh");
+  if (csSearch) {
+    csSearch.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        clawsoulsLoaded = false;
+        loadClawSoulsCatalog(csSearch.value);
+      }
+    });
+  }
+  if (csRefresh) {
+    csRefresh.addEventListener("click", () => {
+      clawsoulsLoaded = false;
+      loadClawSoulsCatalog(csSearch?.value || "");
+    });
+  }
 
   const metaRes = await fetch("/api/meta");
   state.meta = await metaRes.json();

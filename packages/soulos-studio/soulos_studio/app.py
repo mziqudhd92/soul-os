@@ -9,7 +9,7 @@ import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from soulos_studio.docs_reader import (
     build_docs_catalog,
@@ -31,6 +31,9 @@ from soulos_studio.soul_markdown import build_soul_markdown, parse_soul_markdown
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 KERNEL_URL = os.getenv("SOULOS_KERNEL_URL", "http://localhost:8000").rstrip("/")
+CLAWSOULS_API = os.getenv("CLAWSOULS_API_BASE", "https://clawsouls.ai/api/v1").rstrip(
+    "/"
+)
 
 app = FastAPI(title="SoulOS Studio", version="0.1.0")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -59,6 +62,21 @@ class TextPayload(BaseModel):
 class ChatPayload(BaseModel):
     avatar_id: str
     message: str
+
+
+class ClawSoulsImportPayload(BaseModel):
+    owner: str
+    name: str
+    msv_preset: str | None = None
+    persist: bool = False
+
+
+class ClawSoulsListQuery(BaseModel):
+    q: str | None = None
+    category: str | None = None
+    tag: str | None = None
+    page: int = Field(default=1, ge=1)
+    limit: int = Field(default=50, ge=1, le=100)
 
 
 @app.get("/")
@@ -190,6 +208,59 @@ async def tutorial_content(tutorial_id: str):
         return get_tutorial_content(tutorial_id)
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
+
+
+@app.get("/api/clawsouls/souls")
+async def clawsouls_list(
+    q: str | None = None,
+    category: str | None = None,
+    tag: str | None = None,
+    page: int = 1,
+    limit: int = 50,
+):
+    params: dict[str, str | int] = {"page": page, "limit": min(limit, 100)}
+    if q:
+        params["q"] = q
+    if category:
+        params["category"] = category
+    if tag:
+        params["tag"] = tag
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            res = await client.get(f"{CLAWSOULS_API}/souls", params=params)
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=502, detail=f"ClawSouls API unreachable: {e}") from e
+    if res.status_code >= 400:
+        raise HTTPException(status_code=res.status_code, detail=res.text[:500])
+    return res.json()
+
+
+@app.post("/api/clawsouls/import")
+async def clawsouls_import(body: ClawSoulsImportPayload):
+    payload = {
+        "owner": body.owner,
+        "name": body.name,
+        "msv_preset": body.msv_preset,
+        "persist": body.persist,
+    }
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            res = await client.post(
+                f"{KERNEL_URL}/v1/avatars/import-clawsouls",
+                json=payload,
+            )
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Kernel unreachable at {KERNEL_URL}: {e}",
+        ) from e
+    data = res.json()
+    if res.status_code != 200:
+        raise HTTPException(
+            status_code=res.status_code,
+            detail=data.get("detail", "import failed"),
+        )
+    return data
 
 
 @app.post("/api/chat")

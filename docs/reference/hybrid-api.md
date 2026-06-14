@@ -40,6 +40,27 @@ Idempotent registration by `external_key` (per tenant / workspace / product).
 
 **Response** — same as `POST /v1/avatars`: `{ "id", "name", "role", "baseline_msv", "current_msv" }`
 
+## `POST /v1/avatars/import-clawsouls`
+
+Fetch a persona from [ClawSouls](https://clawsouls.ai), merge Soul Spec markdown into `description`, apply MSV preset, optionally persist via `ensure`.
+
+**Request**
+
+```json
+{
+  "owner": "clawsouls",
+  "name": "surgical-coder",
+  "persist": true,
+  "msv_preset": "surgical-coder"
+}
+```
+
+**Response** (persist) — avatar record plus `warnings`, `external_key`, `runtime_config`.
+
+Set `persist: false` to convert without writing to the database. Field alias `register` is accepted.
+
+See [ClawSouls import guide](../guides/clawsouls-import.md).
+
 ## `POST /hybrid/prepare`
 
 Single pre-turn call (replaces `GET /bot/{id}/identity` + `POST /memory/retrieve`).
