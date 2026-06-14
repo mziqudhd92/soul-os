@@ -1,5 +1,8 @@
 # Tutorial: Add SoulOS to Your Python Bot
 
+> **Interactive tutorial (recommended):** open Soul Studio → **Tutorials** → **Python bot integration** for step-by-step animations, kernel health check, and SSE playground.  
+> **Studio URL:** http://localhost:8765 → Tutorials tab
+
 > **Start here** — recommended first tutorial for human developers building real bots.
 
 You already have a Python bot — a script, Discord/Telegram handler, or FastAPI app that calls an LLM with a fixed `system` prompt. This guide plugs in **SoulOS** for **persistent personality** and **stable behavior** without rewriting your transport layer.
@@ -7,6 +10,16 @@ You already have a Python bot — a script, Discord/Telegram handler, or FastAPI
 SoulOS does **not** replace webhooks, CLI, or Slack SDK. It replaces the fragile part: *one big system prompt + hope the model remembers.*
 
 **Time:** ~25 minutes · **Outcome:** working REPL (or pattern you can paste into Discord/FastAPI)
+
+<details open>
+<summary><strong>Quick path (interactive)</strong></summary>
+
+1. `docker compose up --build`
+2. Open http://localhost:8765 → **Tutorials** → **Python bot integration**
+3. Follow the 6-step rail (copy code, check kernel, run SSE demo)
+4. Open **Soul Builder** from step 2 to export your `.soul`
+
+</details>
 
 ## Learning objectives
 
@@ -34,6 +47,17 @@ By the end you will:
 
 ## Architecture (keep your bot, add a kernel)
 
+```mermaid
+flowchart LR
+  Bot[Your Python bot] --> SDK[soulos-sdk]
+  SDK --> Kernel[SoulOS kernel :8000]
+  Kernel --> DB[(Postgres + pgvector)]
+  Kernel --> LLM[Ollama / Cloud LLM]
+```
+
+<details>
+<summary><strong>ASCII diagram</strong></summary>
+
 ```text
 Your Python bot (Discord / CLI / FastAPI)
         │
@@ -44,6 +68,8 @@ SoulOS kernel (:8000)  — personality + memory + dual-process chat
         ▼
 Postgres (pgvector) + your LLM provider (Ollama locally, or Cloud)
 ```
+
+</details>
 
 Your bot still receives user messages and sends replies. SoulOS becomes the **brain** for *who the bot is* and *what it remembers*.
 

@@ -167,6 +167,18 @@ async def docs_content(path: str):
         raise HTTPException(status_code=404, detail=str(e)) from e
 
 
+@app.get("/api/kernel-health")
+async def kernel_health():
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            res = await client.get(f"{KERNEL_URL}/health")
+        if res.status_code == 200:
+            return {"ok": True, "url": KERNEL_URL, "service": res.json().get("service")}
+        return {"ok": False, "url": KERNEL_URL, "detail": f"status {res.status_code}"}
+    except httpx.RequestError as e:
+        return {"ok": False, "url": KERNEL_URL, "detail": str(e)}
+
+
 @app.get("/api/tutorials")
 async def tutorials_list():
     return {"tutorials": get_tutorials_catalog()}

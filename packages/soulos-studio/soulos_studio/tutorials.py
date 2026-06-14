@@ -8,10 +8,11 @@ TUTORIALS: list[dict[str, Any]] = [
     {
         "id": "python-bot",
         "title": "Python bot integration",
-        "description": "Recommended first tutorial — migrate from static system prompts.",
+        "description": "Interactive walkthrough — migrate from static system prompts.",
         "duration": "25 min",
         "category": "Guides",
-        "source": {"type": "docs", "path": "guides/python-bot.md"},
+        "interactive": True,
+        "source": {"type": "interactive", "path": "guides/python-bot.md"},
     },
     {
         "id": "quickstart",

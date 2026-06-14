@@ -38,3 +38,10 @@ def test_load_bundled_tutorial():
     doc = get_tutorial_content("first-soul")
     assert "Wizard" in doc["title"] or "soul" in doc["title"].lower()
     assert doc["html"]
+
+
+def test_load_interactive_python_bot_tutorial():
+    doc = get_tutorial_content("python-bot")
+    assert doc["format"] == "interactive"
+    assert len(doc["steps"]) >= 5
+    assert doc["steps"][0]["id"] == "intro"

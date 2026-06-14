@@ -184,6 +184,16 @@ def get_tutorial_content(tutorial_id: str) -> dict[str, Any]:
     if meta is None:
         raise FileNotFoundError(tutorial_id)
 
+    if meta.get("interactive"):
+        from soulos_studio.interactive_tutorials.python_bot import get_python_bot_tutorial
+
+        if tutorial_id == "python-bot":
+            doc = get_python_bot_tutorial()
+            doc["category"] = meta.get("category", "")
+            doc["duration"] = meta.get("duration", "")
+            return doc
+        raise FileNotFoundError(tutorial_id)
+
     source = meta["source"]
     if source["type"] == "docs":
         doc = get_doc_content(source["path"])

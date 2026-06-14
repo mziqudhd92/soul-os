@@ -862,6 +862,7 @@ async function loadTutorials() {
         <div class="tutorial-card-meta">
           <span>${escapeHtml(t.category)}</span>
           <span>${escapeHtml(t.duration)}</span>
+          ${t.interactive ? "<span class='it-badge'>Interactive</span>" : ""}
         </div>
       `;
       card.addEventListener("click", () => openTutorial(t.id));
@@ -876,7 +877,8 @@ async function openTutorial(id) {
   $("tutorial-list-view").classList.add("hidden");
   $("tutorial-detail-view").classList.remove("hidden");
   $("tutorial-meta").innerHTML = "<p class='hint'>Loading…</p>";
-  $("tutorial-content").innerHTML = "";
+    $("tutorial-content").innerHTML = "";
+    $("tutorial-content").className = "prose";
   try {
     const res = await fetch(`/api/tutorials/${encodeURIComponent(id)}`);
     const data = await res.json();
@@ -886,9 +888,21 @@ async function openTutorial(id) {
       <div class="tutorial-card-meta">
         <span>${escapeHtml(data.category || "")}</span>
         <span>${escapeHtml(data.duration || "")}</span>
+        ${data.format === "interactive" ? "<span class='it-badge'>Interactive</span>" : ""}
       </div>
     `;
-    $("tutorial-content").innerHTML = data.html;
+    const contentEl = $("tutorial-content");
+    if (data.format === "interactive" && typeof mountPythonBotTutorial === "function") {
+      contentEl.className = "";
+      mountPythonBotTutorial(contentEl, data, {
+        switchView,
+        closeTutorialDetail,
+      });
+    } else {
+      contentEl.className = "prose";
+      contentEl.innerHTML = data.html;
+      enhanceProseTutorial(contentEl);
+    }
   } catch (e) {
     $("tutorial-meta").innerHTML = `<p class='hint'>${e.message}</p>`;
   }
@@ -897,6 +911,31 @@ async function openTutorial(id) {
 function closeTutorialDetail() {
   $("tutorial-list-view").classList.remove("hidden");
   $("tutorial-detail-view").classList.add("hidden");
+}
+
+/** Copy buttons + collapsible enhancements for markdown tutorials */
+function enhanceProseTutorial(root) {
+  root.querySelectorAll("pre").forEach((pre) => {
+    if (pre.parentElement?.classList.contains("it-code-wrap")) return;
+    const wrap = document.createElement("div");
+    wrap.className = "it-code-wrap";
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "btn ghost sm it-copy";
+    btn.textContent = "Copy";
+    btn.addEventListener("click", async () => {
+      const text = pre.textContent || "";
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.textContent = "Copied!";
+        setTimeout(() => { btn.textContent = "Copy"; }, 1500);
+      } catch (_) {
+        btn.textContent = "Failed";
+      }
+    });
+    pre.parentNode.insertBefore(wrap, pre);
+    wrap.append(pre, btn);
+  });
 }
 
 async function init() {
