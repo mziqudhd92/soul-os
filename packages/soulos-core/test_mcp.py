@@ -138,6 +138,30 @@ async def test_mcp_retrieve_memory():
 
 
 @pytest.mark.asyncio
+async def test_mcp_retrieve_memory_denies_wrong_tenant():
+    from mcp_server import handle_call_tool
+
+    set_mcp_account_context(
+        AccountContext(account_id="bbbbbbbb-cccc-dddd-eeee-ffffffffffff")
+    )
+    mock_conn = AsyncMock()
+
+    with (
+        patch("mcp_server.engine") as mock_engine,
+        patch("mcp_server.verify_bot_access", new_callable=AsyncMock) as mock_verify,
+    ):
+        mock_engine.connect.return_value.__aenter__.return_value = mock_conn
+        mock_verify.side_effect = HTTPException(status_code=403, detail="Access denied")
+
+        with pytest.raises(HTTPException) as exc:
+            await handle_call_tool(
+                "retrieve_memory",
+                {"bot_id": "bot-1", "query": "refund"},
+            )
+        assert exc.value.status_code == 403
+
+
+@pytest.mark.asyncio
 async def test_mcp_get_identity():
     from mcp_server import handle_call_tool
 
