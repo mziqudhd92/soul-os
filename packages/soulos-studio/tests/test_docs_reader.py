@@ -45,3 +45,10 @@ def test_load_interactive_python_bot_tutorial():
     assert doc["format"] == "interactive"
     assert len(doc["steps"]) >= 5
     assert doc["steps"][0]["id"] == "intro"
+
+
+def test_load_interactive_quickstart_tutorial():
+    doc = get_tutorial_content("quickstart")
+    assert doc["format"] == "interactive_terminal"
+    assert len(doc["steps"]) >= 5
+    assert doc["steps"][0]["script"]

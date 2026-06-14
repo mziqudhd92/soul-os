@@ -17,10 +17,11 @@ TUTORIALS: list[dict[str, Any]] = [
     {
         "id": "quickstart",
         "title": "15-minute quickstart",
-        "description": "Support agent vs dev twin — curl register, ingest, SSE chat.",
+        "description": "Terminal walkthrough — support agent vs dev twin (curl + SSE).",
         "duration": "15 min",
         "category": "Getting started",
-        "source": {"type": "docs", "path": "getting-started/quickstart.md"},
+        "interactive": True,
+        "source": {"type": "interactive", "path": "getting-started/quickstart.md"},
     },
     {
         "id": "first-soul",

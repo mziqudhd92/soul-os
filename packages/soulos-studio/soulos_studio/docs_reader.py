@@ -185,14 +185,19 @@ def get_tutorial_content(tutorial_id: str) -> dict[str, Any]:
         raise FileNotFoundError(tutorial_id)
 
     if meta.get("interactive"):
-        from soulos_studio.interactive_tutorials.python_bot import get_python_bot_tutorial
-
         if tutorial_id == "python-bot":
+            from soulos_studio.interactive_tutorials.python_bot import get_python_bot_tutorial
+
             doc = get_python_bot_tutorial()
-            doc["category"] = meta.get("category", "")
-            doc["duration"] = meta.get("duration", "")
-            return doc
-        raise FileNotFoundError(tutorial_id)
+        elif tutorial_id == "quickstart":
+            from soulos_studio.interactive_tutorials.quickstart import get_quickstart_tutorial
+
+            doc = get_quickstart_tutorial()
+        else:
+            raise FileNotFoundError(tutorial_id)
+        doc["category"] = meta.get("category", "")
+        doc["duration"] = meta.get("duration", "")
+        return doc
 
     source = meta["source"]
     if source["type"] == "docs":

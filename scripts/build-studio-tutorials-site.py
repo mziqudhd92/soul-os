@@ -46,6 +46,7 @@ def build(out: Path, base: str) -> None:
     for name in (
         "studio.css",
         "tutorial-python-bot.js",
+        "tutorial-terminal.js",
         "tutorials-static.js",
     ):
         shutil.copy2(static_src / name, static_out / name)

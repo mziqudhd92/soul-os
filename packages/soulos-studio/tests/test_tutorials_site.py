@@ -41,7 +41,8 @@ def test_build_tutorials_site():
     assert len(python_bot["steps"]) >= 5
 
     quickstart = json.loads((out / "data" / "tutorials" / "quickstart.json").read_text())
-    assert quickstart["html"]
+    assert quickstart["format"] == "interactive_terminal"
+    assert len(quickstart["steps"]) >= 5
 
     import shutil
 

@@ -6,6 +6,8 @@ SoulOS uses **one kernel** for every avatar type. Same Postgres, same inference,
 
 **Recommended if you write Python bots:** start with [Python bot integration](../guides/python-bot.md) instead — this quickstart is ideal for **curl / API exploration**.
 
+> **Interactive terminal (recommended):** [Browse online](https://mziqudhd92.github.io/soul-os/?tutorial=quickstart) — simulated shell with typing animation, Path A + Path B.
+
 ## Prerequisites
 
 ```bash

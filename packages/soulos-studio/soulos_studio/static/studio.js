@@ -888,13 +888,13 @@ async function openTutorial(id) {
       <div class="tutorial-card-meta">
         <span>${escapeHtml(data.category || "")}</span>
         <span>${escapeHtml(data.duration || "")}</span>
-        ${data.format === "interactive" ? "<span class='it-badge'>Interactive</span>" : ""}
+        ${data.format === "interactive" || data.format === "interactive_terminal" ? "<span class='it-badge'>Interactive</span>" : ""}
       </div>
     `;
     const contentEl = $("tutorial-content");
-    if (data.format === "interactive" && typeof mountPythonBotTutorial === "function") {
+    if (isInteractiveTutorial(data) && typeof mountInteractiveTutorial === "function") {
       contentEl.className = "";
-      mountPythonBotTutorial(contentEl, data, {
+      mountInteractiveTutorial(contentEl, data, {
         switchView,
         closeTutorialDetail,
       });
