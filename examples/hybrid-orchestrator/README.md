@@ -52,6 +52,6 @@ python ../../scripts/soulos-doctor.py --kernel http://localhost:8000 --inference
 - [Plug in SoulOS](../../docs/guides/plug-in-soulos.md)
 - [Hybrid orchestrator guide](../../docs/guides/hybrid-orchestrator.md)
 
-## Example projects
+## Sample scenario (generic)
 
-- [Ved-travels sample](../ved-travels/README.md) — travel planner with LiteLLM tools
+An app with `POST /api/chat/stream`, LiteLLM (or OpenAI SDK) tool calling (`update_preferences`, `search_knowledge`, etc.), and custom SSE events (`thought`, `text`, `tool_call`). SoulOS provides the assistant's HEXACO soul and episodic memory; your stack keeps generation and tools.

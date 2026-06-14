@@ -64,4 +64,4 @@ Preflight: `python scripts/soulos-doctor.py --embedding-dimension 768`
 
 ## Custom bridge
 
-Implement the four endpoints above. Reference: [packages/soulos-inference-bridge](../../packages/soulos-inference-bridge/).
+Implement the four endpoints above in your own service if you need private networking, custom auth, or org-specific Bedrock/Vertex wiring. Contract reference: [packages/soulos-inference-bridge](../../packages/soulos-inference-bridge/).

@@ -25,14 +25,14 @@ Keep your **existing chat + tools + SSE**; use SoulOS for **soul + episodic memo
 Episodic rows are keyed by `bot_id`. For per-session isolation prefix content:
 
 ```text
-[session:<uuid>] User asked about Dubrovnik hotels
+[session:<uuid>] User asked about pricing for the enterprise plan
 ```
 
 Or use one `bot_id` per user.
 
 ## Two databases
 
-Your domain KB (e.g. verified travel facts) stays in **your** Postgres. SoulOS episodic memory lives in the **kernel** Postgres. Only your LiteLLM tools query your KB.
+Your domain KB (e.g. product catalog, verified facts) stays in **your** Postgres. SoulOS episodic memory lives in the **kernel** Postgres. Only your app's tools query your KB.
 
 ## Inference
 
@@ -40,5 +40,4 @@ Your app's LLM can call Bedrock/GCP/OpenAI directly. SoulOS kernel still needs a
 
 ## Reference
 
-- [examples/hybrid-orchestrator](../../examples/hybrid-orchestrator/)
-- [examples/ved-travels](../../examples/ved-travels/) (sample travel planner)
+- [examples/hybrid-orchestrator](../../examples/hybrid-orchestrator/) — copy `soul_client.py` into your backend

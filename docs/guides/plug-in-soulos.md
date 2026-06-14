@@ -48,8 +48,7 @@ Copy [.env.example](../../.env.example) and uncomment the block for your plug-in
 | Example | Path |
 |---------|------|
 | Full chat support bot | [examples/support-bot](../../examples/support-bot/) |
-| Hybrid adapter | [examples/hybrid-orchestrator](../../examples/hybrid-orchestrator/) |
-| Travel planner sample | [examples/ved-travels](../../examples/ved-travels/) |
+| Hybrid adapter (existing LLM + tools) | [examples/hybrid-orchestrator](../../examples/hybrid-orchestrator/) |
 
 ## Related
 
