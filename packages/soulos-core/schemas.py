@@ -14,6 +14,11 @@ class MemoryRetrieve(BaseModel):
     top_k: int = 5
 
 
+class MemorySync(BaseModel):
+    bot_id: str
+    workspace_path: str
+
+
 class ChatRequest(BaseModel):
     bot_id: str
     message: str

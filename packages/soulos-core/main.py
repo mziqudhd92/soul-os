@@ -3,6 +3,7 @@
 import json
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -28,7 +29,8 @@ from runtime.bootstrap import init_database, pull_model, wait_for_ollama
 from runtime.avatars import get_bot_identity, register_avatar_record
 from runtime.memory import ingest_memory as ingest_memory_record
 from runtime.memory import list_memories, retrieve_memories
-from schemas import ChatRequest, MemoryIngest, MemoryRetrieve, UpdateStateRequest
+from runtime.memory_sync import sync_memory_directory
+from schemas import ChatRequest, MemoryIngest, MemoryRetrieve, MemorySync, UpdateStateRequest
 from soul_compile import parse_soul_request_bundle
 from soul_validation import validate_msv_payload
 from tenant import verify_bot_access
@@ -130,6 +132,24 @@ async def retrieve_memory(
         db, embedder, payload.bot_id, payload.query, payload.top_k
     )
     return {"memories": memories}
+
+
+@app.post("/memory/sync")
+async def sync_memory(
+    payload: MemorySync,
+    db: AsyncConnection = Depends(get_db),
+    embedder=Depends(get_embedder),
+    account: AccountContext = Depends(get_account_context),
+):
+    await verify_bot_access(db, payload.bot_id, account)
+    workspace = Path(payload.workspace_path).resolve()
+    if not workspace.is_dir():
+        raise HTTPException(status_code=422, detail="workspace_path is not a directory")
+    try:
+        stats = await sync_memory_directory(db, embedder, payload.bot_id, workspace)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+    return {"status": "success", **stats}
 
 
 @app.post("/chat/generate")

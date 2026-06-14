@@ -55,6 +55,12 @@ async def init_database() -> None:
                 "ALTER TABLE bots ADD COLUMN IF NOT EXISTS runtime_config JSONB;"
             )
         )
+        await conn.execute(
+            text(
+                "ALTER TABLE episodic_memories "
+                "ADD COLUMN IF NOT EXISTS source_hash VARCHAR(64);"
+            )
+        )
     await engine.dispose()
     logger.info("Database initialized successfully.")
 

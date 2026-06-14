@@ -74,6 +74,22 @@ class SoulOSClient:
             if res.status_code != 200:
                 raise RuntimeError(f"ingest_memory failed ({res.status_code})")
 
+    async def sync_memory(self, avatar_id: str, workspace_path: str | Path) -> dict[str, Any]:
+        async with httpx.AsyncClient() as client:
+            res = await client.post(
+                f"{self.base_url}/memory/sync",
+                headers=self._headers(),
+                json={
+                    "bot_id": avatar_id,
+                    "workspace_path": str(workspace_path),
+                },
+                timeout=120.0,
+            )
+            body = res.json()
+            if res.status_code != 200:
+                raise RuntimeError(body.get("detail") or f"sync_memory failed ({res.status_code})")
+            return body
+
     async def get_identity(self, avatar_id: str) -> dict[str, Any]:
         async with httpx.AsyncClient() as client:
             res = await client.get(

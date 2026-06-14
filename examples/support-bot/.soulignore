@@ -1,0 +1,5 @@
+# Patterns excluded from .soul-memory ingestion scans
+.env
+.env.*
+*.pem
+**/credentials.json

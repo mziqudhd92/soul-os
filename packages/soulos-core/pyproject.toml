@@ -35,8 +35,12 @@ only-include = [
     "mcp_server.py",
     "soul_validation.py",
     "soul_compile.py",
+    "cli.py",
     "runtime",
 ]
+
+[project.scripts]
+soulos = "cli:main"
 
 [tool.ruff]
 line-length = 88
