@@ -377,6 +377,47 @@ async function deploy() {
   $("btn-deploy").disabled = false;
 }
 
+function showCognitiveRails() {
+  const el = $("cognitive-rails");
+  if (el) el.classList.remove("hidden");
+}
+
+function updateCognitiveState(data) {
+  showCognitiveRails();
+  const pathEl = $("cognitive-path");
+  if (pathEl) pathEl.textContent = data.current_path || "idle";
+
+  const rail1 = document.querySelector(".cognitive-rail.system-1");
+  const rail2 = document.querySelector(".cognitive-rail.system-2");
+  const s1 = data.system_1;
+  const s2 = data.system_2;
+
+  if (s1 && rail1) {
+    rail1.classList.add("active");
+    const conf = s1.confidence_score ?? 0;
+    const pulse1 = $("pulse-system-1");
+    if (pulse1) pulse1.style.width = `${Math.round(conf * 100)}%`;
+    const meta1 = $("meta-system-1");
+    if (meta1) meta1.textContent = `conf ${conf.toFixed(2)} · ${s1.latency_ms ?? 0}ms`;
+  } else if (rail1) {
+    rail1.classList.remove("active");
+  }
+
+  if (s2 && rail2) {
+    rail2.classList.add("active");
+    const tokens = s2.reasoning_tokens ?? 0;
+    const pulse2 = $("pulse-system-2");
+    if (pulse2) pulse2.style.width = `${Math.min(100, Math.round(tokens / 8))}%`;
+    const tools = (s2.active_mcp_tools || []).join(", ") || "none";
+    const meta2 = $("meta-system-2");
+    if (meta2) meta2.textContent = `loop ${s2.loop_count ?? 0} · ${s2.latency_ms ?? 0}ms · ${tools}`;
+  } else if (rail2 && data.current_path === "system_2_deliberation") {
+    rail2.classList.add("active");
+  } else if (rail2) {
+    rail2.classList.remove("active");
+  }
+}
+
 async function sendChat(message) {
   if (!state.avatarId) return;
   logChat(message, "user");
@@ -406,6 +447,8 @@ async function sendChat(message) {
         const data = JSON.parse(dataLine);
         if (event === "message" && data.text) {
           botLine.textContent += data.text;
+        } else if (event === "cognitive_state") {
+          updateCognitiveState(data);
         } else if (event === "msv_update" && data.hexaco) {
           state.form.hexaco = { ...state.form.hexaco, ...data.hexaco };
           writeFormToDom();

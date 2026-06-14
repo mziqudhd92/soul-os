@@ -640,6 +640,89 @@ body {
 }
 
 
+.cognitive-rails {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.75rem;
+  margin-bottom: 0.65rem;
+  background: var(--panel);
+}
+
+.cognitive-rails.hidden {
+  display: none;
+}
+
+.cognitive-rail {
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.45rem;
+}
+
+.cognitive-rail-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.cognitive-rail-track {
+  position: relative;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--border);
+  overflow: hidden;
+}
+
+.cognitive-rail.system-1 .cognitive-rail-track {
+  background: rgba(34, 197, 94, 0.15);
+}
+
+.cognitive-rail.system-2 .cognitive-rail-track {
+  background: rgba(139, 92, 246, 0.15);
+}
+
+.cognitive-pulse {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0%;
+  border-radius: var(--radius-full);
+  transition: width 0.25s ease, opacity 0.25s ease;
+  opacity: 0.35;
+}
+
+.cognitive-rail.system-1 .cognitive-pulse {
+  background: var(--emerald);
+}
+
+.cognitive-rail.system-2 .cognitive-pulse {
+  background: var(--violet);
+}
+
+.cognitive-rail.active .cognitive-pulse {
+  opacity: 1;
+  animation: cognitive-pulse 1.2s ease-in-out infinite;
+}
+
+.cognitive-meta {
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.cognitive-path {
+  font-size: 10px;
+  color: var(--muted);
+  margin: 0.25rem 0 0;
+}
+
+@keyframes cognitive-pulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.35); }
+}
+
 .chat-log {
   min-height: 160px;
   max-height: 220px;

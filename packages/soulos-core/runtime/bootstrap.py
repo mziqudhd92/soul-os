@@ -50,6 +50,11 @@ async def init_database() -> None:
                 "ALTER TABLE bots ADD COLUMN IF NOT EXISTS attachment_style VARCHAR(50);"
             )
         )
+        await conn.execute(
+            text(
+                "ALTER TABLE bots ADD COLUMN IF NOT EXISTS runtime_config JSONB;"
+            )
+        )
     await engine.dispose()
     logger.info("Database initialized successfully.")
 

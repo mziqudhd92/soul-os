@@ -36,7 +36,7 @@ async def test_reflector_uses_own_connection_not_shared_db():
         mock_engine.begin.return_value = mock_begin_ctx
         result = await run_system_2_reflector("bot-1", "hello", current_msv)
 
-    assert result["epistemic_uncertainty"] == 0.42
+    assert result.msv["epistemic_uncertainty"] == 0.42
     mock_engine.begin.assert_called_once()
     mock_conn.execute.assert_awaited_once()
     shared_db.commit.assert_not_awaited()

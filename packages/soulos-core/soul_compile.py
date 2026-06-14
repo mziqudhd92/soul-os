@@ -27,6 +27,11 @@ HEXACO_SHORT = frozenset("HEXACO")
 PHASE2_TOP_LEVEL = frozenset({"id", "version", "engine", "dual_process"})
 PHASE2_PSYCHOLOGY = frozenset({"dual_process"})
 
+DEFAULT_DUAL_PROCESS = {
+    "system1_threshold": 0.35,
+    "system2_max_loops": 3,
+}
+
 MORAL_KEYS = (
     "care_harm",
     "fairness_cheating",
@@ -35,6 +40,21 @@ MORAL_KEYS = (
     "sanctity_degradation",
 )
 DRIVE_KEYS = ("curiosity", "autonomy", "social_approval")
+
+
+def extract_runtime_config(fm: dict[str, Any]) -> dict[str, Any]:
+    """Extract engine + dual_process from front matter (Phase 2 runtime config)."""
+    runtime: dict[str, Any] = {}
+    if isinstance(fm.get("engine"), dict):
+        runtime["engine"] = dict(fm["engine"])
+    dual: dict[str, Any] = dict(DEFAULT_DUAL_PROCESS)
+    if isinstance(fm.get("dual_process"), dict):
+        dual.update(fm["dual_process"])
+    psychology = fm.get("psychology")
+    if isinstance(psychology, dict) and isinstance(psychology.get("dual_process"), dict):
+        dual.update(psychology["dual_process"])
+    runtime["dual_process"] = dual
+    return runtime
 
 
 def _strip_phase2_front_matter(fm: dict[str, Any]) -> dict[str, Any]:
@@ -129,8 +149,10 @@ def _front_matter_to_payload(fm: dict[str, Any], body: str) -> dict[str, Any]:
     return payload
 
 
-def compile_soul_text(text: str, filename_hint: str | None = None) -> dict[str, Any]:
-    """Parse .soul text (YAML front matter + Markdown body) into a soul dict."""
+def compile_soul_bundle(
+    text: str, filename_hint: str | None = None
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Parse .soul text into soul dict and runtime_config."""
     del filename_hint  # reserved for future diagnostics
     normalized = text.lstrip("\ufeff")
     match = FRONT_MATTER_RE.match(normalized)
@@ -148,7 +170,14 @@ def compile_soul_text(text: str, filename_hint: str | None = None) -> dict[str, 
     if not isinstance(fm, dict):
         raise ValueError(".soul front matter must be a YAML mapping")
 
-    return _front_matter_to_payload(fm, body)
+    runtime_config = extract_runtime_config(fm)
+    return _front_matter_to_payload(fm, body), runtime_config
+
+
+def compile_soul_text(text: str, filename_hint: str | None = None) -> dict[str, Any]:
+    """Parse .soul text (YAML front matter + Markdown body) into a soul dict."""
+    payload, _ = compile_soul_bundle(text, filename_hint=filename_hint)
+    return payload
 
 
 def compile_soul_bytes(data: bytes, filename_hint: str | None = None) -> dict[str, Any]:
@@ -173,12 +202,35 @@ def _hint_is_soul(filename_hint: str | None) -> bool:
     return lower.endswith(".soul") and not lower.endswith(".soul.json")
 
 
-def parse_soul_request_payload(
+def normalize_runtime_config(raw: dict[str, Any] | None) -> dict[str, Any]:
+    runtime: dict[str, Any] = {"dual_process": dict(DEFAULT_DUAL_PROCESS)}
+    if not raw:
+        return runtime
+    if isinstance(raw.get("dual_process"), dict):
+        runtime["dual_process"].update(raw["dual_process"])
+    if isinstance(raw.get("engine"), dict):
+        runtime["engine"] = dict(raw["engine"])
+    return runtime
+
+
+def split_registration_payload(data: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Separate soul fields from optional runtime_config for registration."""
+    payload = dict(data)
+    runtime_raw = payload.pop("runtime_config", None)
+    runtime_config = (
+        normalize_runtime_config(runtime_raw)
+        if isinstance(runtime_raw, dict)
+        else normalize_runtime_config(None)
+    )
+    return payload, runtime_config
+
+
+def parse_soul_request_bundle(
     raw: bytes,
     content_type: str,
     filename_hint: str | None = None,
-) -> dict[str, Any]:
-    """Parse HTTP request body as JSON or compiled .soul."""
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Parse HTTP request body as JSON or compiled .soul with runtime_config."""
     ct = (content_type or "").split(";")[0].strip().lower()
 
     if ct == "application/json" or _looks_like_json(raw):
@@ -188,28 +240,40 @@ def parse_soul_request_payload(
             raise ValueError(f"Invalid JSON soul payload: {exc}") from exc
         if not isinstance(data, dict):
             raise ValueError("Soul JSON payload must be an object")
-        return data
+        return split_registration_payload(data)
 
     if _hint_is_soul(filename_hint) or _looks_like_soul(raw):
-        return compile_soul_bytes(raw, filename_hint=filename_hint)
+        text = raw.decode("utf-8")
+        return compile_soul_bundle(text, filename_hint=filename_hint)
 
     errors: list[str] = []
     try:
         data = json.loads(raw.decode("utf-8"))
         if isinstance(data, dict):
-            return data
+            return split_registration_payload(data)
         errors.append("JSON payload must be an object")
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         errors.append(f"JSON: {exc}")
 
     try:
-        return compile_soul_bytes(raw, filename_hint=filename_hint)
+        text = raw.decode("utf-8")
+        return compile_soul_bundle(text, filename_hint=filename_hint)
     except ValueError as exc:
         errors.append(f".soul: {exc}")
         raise ValueError(
             "Could not parse soul payload as JSON or .soul:\n"
             + "\n".join(f"  • {line}" for line in errors)
         ) from exc
+
+
+def parse_soul_request_payload(
+    raw: bytes,
+    content_type: str,
+    filename_hint: str | None = None,
+) -> dict[str, Any]:
+    """Parse HTTP request body as JSON or compiled .soul."""
+    payload, _ = parse_soul_request_bundle(raw, content_type, filename_hint)
+    return payload
 
 
 def load_soul_path(path: Path) -> dict[str, Any]:

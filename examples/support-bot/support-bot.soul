@@ -11,6 +11,9 @@ psychology:
     agreeableness: 0.92
     conscientiousness: 0.88
     openness: 0.45
+  dual_process:
+    system1_threshold: 0.35
+    system2_max_loops: 3
   moral_foundations:
     care_harm: 1.0
     fairness_cheating: 0.95

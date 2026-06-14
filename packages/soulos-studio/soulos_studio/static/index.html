@@ -125,8 +125,25 @@
           <div class="chat-block">
             <header class="panel-head compact">
               <h2>Test chat</h2>
-              <p>Deploy first, then watch <code>msv_update</code> drift in the radar.</p>
+              <p>Deploy first, then watch <code>cognitive_state</code> rails and <code>msv_update</code> drift.</p>
             </header>
+            <div id="cognitive-rails" class="cognitive-rails hidden" aria-label="Dual-process telemetry">
+              <div class="cognitive-rail system-1">
+                <span class="cognitive-rail-label">System 1</span>
+                <div class="cognitive-rail-track" id="rail-system-1">
+                  <span class="cognitive-pulse" id="pulse-system-1"></span>
+                </div>
+                <span class="cognitive-meta mono" id="meta-system-1">—</span>
+              </div>
+              <div class="cognitive-rail system-2">
+                <span class="cognitive-rail-label">System 2</span>
+                <div class="cognitive-rail-track" id="rail-system-2">
+                  <span class="cognitive-pulse" id="pulse-system-2"></span>
+                </div>
+                <span class="cognitive-meta mono" id="meta-system-2">—</span>
+              </div>
+              <p class="cognitive-path mono" id="cognitive-path">idle</p>
+            </div>
             <div id="chat-log" class="chat-log"></div>
             <form id="chat-form" class="chat-form">
               <input id="chat-input" type="text" placeholder="Message your avatar…" disabled />

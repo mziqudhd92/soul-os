@@ -45,22 +45,25 @@ async def register_avatar_record(
     conn: AsyncConnection,
     owner_id: str | None,
     payload: dict[str, Any],
+    runtime_config: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     soul = validate_soul_payload(payload)
     msv_json = json.dumps(soul.baseline_msv.model_dump())
     capabilities_json = json.dumps(soul.capabilities) if soul.capabilities else None
+    runtime_json = json.dumps(runtime_config or {})
 
     result = await conn.execute(
         text("""
             INSERT INTO bots (
                 owner_id, name, role, description, attachment_style,
                 baseline_msv, current_msv,
-                capabilities, hourly_rate, status, avatar_url
+                capabilities, hourly_rate, status, avatar_url, runtime_config
             )
             VALUES (
                 CAST(:owner_id AS uuid), :name, :role, :description, :attachment_style,
                 CAST(:baseline_msv AS jsonb), CAST(:current_msv AS jsonb),
-                CAST(:capabilities AS jsonb), :hourly_rate, :status, :avatar_url
+                CAST(:capabilities AS jsonb), :hourly_rate, :status, :avatar_url,
+                CAST(:runtime_config AS jsonb)
             )
             RETURNING id
         """),
@@ -76,6 +79,7 @@ async def register_avatar_record(
             "hourly_rate": soul.hourly_rate,
             "status": soul.status or "available",
             "avatar_url": soul.avatar_url,
+            "runtime_config": runtime_json,
         },
     )
     row = result.fetchone()

@@ -2,6 +2,9 @@
 
 import json
 import logging
+import time
+from dataclasses import dataclass
+from typing import Any
 
 import httpx
 from sqlalchemy import text
@@ -11,9 +14,18 @@ from config import INFERENCE_API_URL, MODEL_NAME, engine
 logger = logging.getLogger(__name__)
 
 
+@dataclass
+class ReflectorResult:
+    msv: dict[str, Any]
+    latency_ms: int
+    reasoning_tokens: int
+    loop_count: int = 1
+    active_mcp_tools: list[str] | None = None
+
+
 async def run_system_2_reflector(
     bot_id: str, message: str, current_msv: dict
-) -> dict:
+) -> ReflectorResult:
     prompt = f"""
     System: You are the subconscious metacognitive layer of an AI agent.
     Analyze the user's message: "{message}"
@@ -26,6 +38,7 @@ async def run_system_2_reflector(
     Format strictly as JSON: {{"hexaco": {{"H": float, "E": float, "X": float, "A": float, "C": float, "O": float}}, "moral_foundations": {{"care_harm": float, "fairness_cheating": float, "loyalty_betrayal": float, "authority_subversion": float, "sanctity_degradation": float}}, "drives": {{"curiosity": float, "autonomy": float, "social_approval": float}}, "epistemic_uncertainty": float, "inner_monologue": "string"}}
     """
 
+    started = time.monotonic()
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.post(
@@ -38,15 +51,29 @@ async def run_system_2_reflector(
                 },
                 timeout=30.0,
             )
+            latency_ms = int((time.monotonic() - started) * 1000)
             if resp.status_code == 200:
-                new_msv = json.loads(resp.json()["response"])
+                response_text = resp.json()["response"]
+                new_msv = json.loads(response_text)
                 async with engine.begin() as conn:
                     await conn.execute(
                         text("UPDATE bots SET current_msv = :msv WHERE id = :id"),
                         {"msv": json.dumps(new_msv), "id": bot_id},
                     )
-                return new_msv
+                return ReflectorResult(
+                    msv=new_msv,
+                    latency_ms=latency_ms,
+                    reasoning_tokens=max(1, len(prompt) // 4),
+                    loop_count=1,
+                    active_mcp_tools=[],
+                )
         except Exception as e:
             logger.error("System 2 Reflection failed: %s", e)
 
-    return current_msv
+    return ReflectorResult(
+        msv=current_msv,
+        latency_ms=int((time.monotonic() - started) * 1000),
+        reasoning_tokens=0,
+        loop_count=1,
+        active_mcp_tools=[],
+    )
