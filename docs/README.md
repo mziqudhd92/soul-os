@@ -49,6 +49,7 @@ Or [Overview](getting-started/overview.md) or a fast path below.
 | [MCP tools](reference/mcp-tools.md) | Tool argument schemas |
 | [Soul standard](reference/soul-standard.md) | `.soul.json` anatomy |
 | [Architecture](reference/architecture.md) | Kernel, runtime pipeline, monorepo |
+| [Design / TDD](design/README.md) | Evolution Matrix and roadmap alignment |
 
 ## Deployment
 
