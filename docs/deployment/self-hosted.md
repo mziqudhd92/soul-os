@@ -19,7 +19,12 @@ Services:
 | `soulos-kernel` | 8000 | FastAPI runtime |
 | `soulos-studio` | 8765 | Soul Builder UI (optional) |
 | `db` | 5432 | PostgreSQL + pgvector |
-| `ollama` | 11434 | Local inference (optional) |
+| `ollama` | 11434 | Local inference (default stack) |
+| `soulos-inference-bridge` | 11434 | Ollama-compatible bridge (profiles: `bridge-mock`, `bridge-aws`, `bridge-vertex`) |
+
+Plug-in guide: [guides/plug-in-soulos.md](../guides/plug-in-soulos.md) · Inference: [inference.md](inference.md)
+
+Preflight: `python scripts/soulos-doctor.py`
 
 SDK (direct to kernel):
 
@@ -41,7 +46,9 @@ Environment variables for the kernel:
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `DATABASE_URL` | postgres in docker | Avatar + memory storage |
-| `INFERENCE_API_URL` | `http://ollama:11434` | LLM + embeddings |
+| `INFERENCE_API_URL` | `http://ollama:11434` | LLM + embeddings (Ollama or bridge) |
+| `EMBEDDING_DIMENSION` | `768` | pgvector embedding size |
+| `INFERENCE_SKIP_PULL` | `0` | Set `1` when using cloud bridge |
 | `MODEL_NAME` | `llama3` | Chat model |
 | `EMBED_MODEL_NAME` | `nomic-embed-text` | Embedding model |
 | `REQUIRE_AUTH` | `0` | Set `1` in Cloud — kernel rejects direct HTTP without gateway headers |

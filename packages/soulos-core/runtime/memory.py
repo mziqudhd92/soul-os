@@ -3,6 +3,7 @@
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
+from config import EMBEDDING_DIMENSION
 from runtime.embedder import Embedder
 
 
@@ -29,7 +30,7 @@ async def retrieve_memories(
     embedding = await embedder.get_embedding(query)
     result = await db.execute(
         text("""
-            SELECT content, embedding <-> CAST(:embedding AS vector(768)) AS distance
+            SELECT content, embedding <-> CAST(:embedding AS vector({EMBEDDING_DIMENSION})) AS distance
             FROM episodic_memories
             WHERE bot_id = :bot_id
             ORDER BY distance

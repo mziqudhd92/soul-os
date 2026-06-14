@@ -31,7 +31,15 @@ from runtime.avatars import get_bot_identity, register_avatar_record
 from runtime.memory import ingest_memory as ingest_memory_record
 from runtime.memory import list_memories, retrieve_memories
 from runtime.memory_sync import sync_memory_directory
-from schemas import ChatRequest, MemoryIngest, MemoryRetrieve, MemorySync, UpdateStateRequest
+from schemas import (
+    ChatRequest,
+    MemoryIngest,
+    MemoryRetrieve,
+    MemorySync,
+    ReflectStateRequest,
+    UpdateStateRequest,
+)
+from runtime.reflector import run_system_2_reflector
 from soul_compile import parse_soul_request_bundle
 from soul_validation import validate_msv_payload
 from tenant import verify_bot_access
@@ -68,10 +76,13 @@ async def lifespan(app: FastAPI):
 
     try:
         await wait_for_ollama()
-        from config import EMBED_MODEL_NAME, MODEL_NAME
+        from config import EMBED_MODEL_NAME, INFERENCE_SKIP_PULL, MODEL_NAME
 
-        await pull_model(MODEL_NAME)
-        await pull_model(EMBED_MODEL_NAME)
+        if not INFERENCE_SKIP_PULL:
+            await pull_model(MODEL_NAME)
+            await pull_model(EMBED_MODEL_NAME)
+        else:
+            logger.info("INFERENCE_SKIP_PULL=1 — skipping model pull")
     except Exception as e:
         logger.error("Failed to initialize inference API: %s", e)
 
@@ -193,6 +204,27 @@ async def update_state(
     return {
         "status": "success",
         "message": f"Cognitive State updated for bot {payload.bot_id}",
+    }
+
+
+@app.post("/state/reflect")
+async def reflect_state(
+    payload: ReflectStateRequest,
+    db: AsyncConnection = Depends(get_db),
+    pipeline=Depends(get_llm_service),
+    account: AccountContext = Depends(get_account_context),
+):
+    """Run System 2 reflector for hybrid integrations that skip /chat/generate."""
+    await verify_bot_access(db, payload.bot_id, account)
+    current_msv = await pipeline.load_current_msv(db, payload.bot_id)
+    result = await run_system_2_reflector(
+        payload.bot_id, payload.message, current_msv, active_mcp_tools=[]
+    )
+    return {
+        "status": "success",
+        "bot_id": payload.bot_id,
+        "current_msv": result.msv,
+        "latency_ms": result.latency_ms,
     }
 
 

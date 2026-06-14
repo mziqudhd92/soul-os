@@ -14,6 +14,12 @@ DATABASE_URL = os.getenv(
 INFERENCE_API_URL = os.getenv("INFERENCE_API_URL", "http://ollama:11434")
 MODEL_NAME = os.getenv("MODEL_NAME", "llama3")
 EMBED_MODEL_NAME = os.getenv("EMBED_MODEL_NAME", "nomic-embed-text")
+EMBEDDING_DIMENSION = int(os.getenv("EMBEDDING_DIMENSION", "768"))
+INFERENCE_SKIP_PULL = os.getenv("INFERENCE_SKIP_PULL", "0").lower() in (
+    "1",
+    "true",
+    "yes",
+)
 
 # Cloud: gateway injects account id; kernel rejects direct public access when enabled.
 REQUIRE_AUTH = os.getenv("REQUIRE_AUTH", "0").lower() in ("1", "true", "yes")

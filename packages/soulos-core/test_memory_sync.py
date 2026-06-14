@@ -13,9 +13,12 @@ from runtime.memory_sync import sync_memory_directory
 from runtime.soulignore import content_matches_ignore_patterns, validate_memory_content
 
 
+from config import EMBEDDING_DIMENSION
+
+
 class MockEmbedder:
     async def get_embedding(self, text: str) -> list[float]:
-        return [0.1] * 768
+        return [0.1] * EMBEDDING_DIMENSION
 
 
 @pytest.mark.asyncio

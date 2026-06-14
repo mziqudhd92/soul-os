@@ -24,6 +24,11 @@ class ChatRequest(BaseModel):
     message: str
 
 
+class ReflectStateRequest(BaseModel):
+    bot_id: str
+    message: str
+
+
 class UpdateStateRequest(BaseModel):
     bot_id: str
     new_msv: dict

@@ -16,7 +16,7 @@ SoulOS is an open-source runtime for persistent AI avatars — HEXACO psychometr
 ## Prerequisites
 
 - **Docker & Docker Compose** — kernel, Postgres, optional Ollama (`docker compose up --build`)
-- **Ollama** (recommended locally) — `llama3` and `nomic-embed-text`, or a remote OpenAI-compatible endpoint via `INFERENCE_API_URL`
+- **Inference** — Ollama (`llama3`, `nomic-embed-text`) or [inference bridge](deployment/inference.md) for AWS/GCP; set `INFERENCE_API_URL` accordingly
 - **Python 3.12+** — optional; `pip install soulos-studio` and the Python SDK
 - **Node.js 20+** — optional; `npm run up`, `npm run test:all`, SDK build
 

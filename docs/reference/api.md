@@ -151,6 +151,13 @@ Hydrate pgvector from a workspace `.soul-memory/` directory (dedupes by content 
 - **Payload:** `{"bot_id": "uuid", "new_msv": { ... }}`
 - **Response:** `{"status": "success", "message": "..."}`
 
+### `POST /state/reflect`
+
+Run System 2 reflector for hybrid integrations that skip `/chat/generate`.
+
+- **Payload:** `{"bot_id": "uuid", "message": "string"}`
+- **Response:** `{"status": "success", "bot_id": "...", "current_msv": { ... }, "latency_ms": N}`
+
 ### `GET /bot/{bot_id}/identity`
 
 - **Response:** `name`, `role`, `description`, `current_msv`.

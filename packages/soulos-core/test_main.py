@@ -57,9 +57,12 @@ async def mock_get_db():
     yield MockConnection()
 
 
+from config import EMBEDDING_DIMENSION
+
+
 class MockEmbedder:
     async def get_embedding(self, text: str) -> list[float]:
-        return [0.1] * 768
+        return [0.1] * EMBEDDING_DIMENSION
 
 
 class MockLLMService:

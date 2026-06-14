@@ -112,6 +112,7 @@ Example souls: `examples/support-bot/`, `examples/dev-twin/`, `examples/companio
 | `POST` | `/memory/retrieve` | `{ bot_id, query, top_k? }` → `{ memories[] }` |
 | `POST` | `/chat/generate` | `{ bot_id, message }` → **SSE** |
 | `POST` | `/state/update` | `{ bot_id, new_msv }` |
+| `POST` | `/state/reflect` | `{ bot_id, message }` — hybrid integrations |
 | `GET` | `/bot/{bot_id}/identity` | name, role, description, current_msv |
 | `GET` | `/bot/{bot_id}/memories` | `?limit=50` episodic log |
 

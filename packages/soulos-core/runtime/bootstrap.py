@@ -7,7 +7,13 @@ import httpx
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from config import DATABASE_URL, EMBED_MODEL_NAME, INFERENCE_API_URL, MODEL_NAME
+from config import (
+    DATABASE_URL,
+    EMBED_MODEL_NAME,
+    EMBEDDING_DIMENSION,
+    INFERENCE_API_URL,
+    MODEL_NAME,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -36,12 +42,12 @@ async def init_database() -> None:
         """)
         )
         await conn.execute(
-            text("""
+            text(f"""
             CREATE TABLE IF NOT EXISTS episodic_memories (
                 id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                 bot_id UUID REFERENCES bots(id) ON DELETE CASCADE,
                 content TEXT NOT NULL,
-                embedding vector(768)
+                embedding vector({EMBEDDING_DIMENSION})
             );
         """)
         )

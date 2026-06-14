@@ -26,12 +26,14 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - DATABASE_URL=postgresql+asyncpg://postgres:changeme_local_dev@db:5432/senticore
-      - INFERENCE_API_URL=http://ollama:11434
+      - INFERENCE_API_URL=${INFERENCE_API_URL:-http://ollama:11434}
+      - EMBEDDING_DIMENSION=${EMBEDDING_DIMENSION:-768}
+      - INFERENCE_SKIP_PULL=${INFERENCE_SKIP_PULL:-0}
+      - MODEL_NAME=${MODEL_NAME:-llama3}
+      - EMBED_MODEL_NAME=${EMBED_MODEL_NAME:-nomic-embed-text}
     depends_on:
       db:
         condition: service_healthy
-      ollama:
-        condition: service_started
     networks:
       - senticore_net
 
@@ -64,6 +66,27 @@ services:
     networks:
       - senticore_net
     command: ["serve"]
+
+  soulos-inference-bridge:
+    build:
+      context: .
+      dockerfile: packages/soulos-inference-bridge/Dockerfile
+    container_name: senticore-inference-bridge
+    profiles: ["bridge-mock", "bridge-aws", "bridge-vertex"]
+    ports:
+      - "11434:11434"
+    environment:
+      - BRIDGE_MODE=${BRIDGE_MODE:-mock}
+      - EMBEDDING_DIMENSION=${EMBEDDING_DIMENSION:-768}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - BEDROCK_CHAT_MODEL_ID=${BEDROCK_CHAT_MODEL_ID:-amazon.nova-lite-v1:0}
+      - BEDROCK_EMBED_MODEL_ID=${BEDROCK_EMBED_MODEL_ID:-amazon.titan-embed-text-v2:0}
+      - VERTEX_PROJECT_ID=${VERTEX_PROJECT_ID:-}
+      - VERTEX_LOCATION=${VERTEX_LOCATION:-us-central1}
+      - VERTEX_CHAT_MODEL=${VERTEX_CHAT_MODEL:-gemini-2.0-flash-001}
+      - VERTEX_EMBED_MODEL=${VERTEX_EMBED_MODEL:-text-embedding-004}
+    networks:
+      - senticore_net
 
 networks:
   senticore_net:

@@ -42,7 +42,8 @@ Wait until the kernel is up (first build can take several minutes).
 | **Click around in a UI** | Open http://localhost:8765 → **Wizard** or **Tutorials** | ~15 min |
 | **Test the API with curl** (no code) | [Quickstart Path A](docs/getting-started/quickstart.md#path-a) | ~10 min |
 | **Use SoulOS from Cursor / Claude** | [MCP guide](docs/guides/mcp.md) → `http://localhost:8000/mcp/sse` | ~15 min |
-| **Deploy on my own servers** | [Self-hosted guide](docs/deployment/self-hosted.md) | ~15 min |
+| **Deploy on my own servers** | [Plug in SoulOS](docs/guides/plug-in-soulos.md) · [Self-hosted](docs/deployment/self-hosted.md) | ~15 min |
+| **Add SoulOS to my existing LLM app** | [Hybrid orchestrator](docs/guides/hybrid-orchestrator.md) | ~20 min |
 
 ### 3. Register a soul and chat (minimal API smoke test)
 
@@ -175,7 +176,7 @@ flowchart LR
     MSV[HEXACO MSV]
     Mem[pgvector memory]
   end
-  LLM[Ollama / OpenAI-compatible]
+  LLM[Ollama or inference bridge]
 
   Bot --> API
   API --> MSV
@@ -254,7 +255,7 @@ Unified format: **YAML front matter + Markdown** body (compiles to the same sche
 <details>
 <summary><strong>Does SoulOS replace my LLM?</strong></summary>
 
-No. SoulOS orchestrates personality, memory, and routing. Generation uses Ollama locally (default in Docker Compose) or any OpenAI-compatible API you configure.
+No. SoulOS orchestrates personality, memory, and routing. Inference uses Ollama locally (default) or an [Ollama-compatible inference bridge](docs/deployment/inference.md) for AWS Bedrock / GCP Vertex — not raw OpenAI `/v1` URLs.
 </details>
 
 <details>

@@ -32,8 +32,9 @@
     "packages/soulos-sdk/ts"
   ],
   "scripts": {
-    "test:all": "npm run test:kernel && npm run test:gateway && npm run test:studio",
+    "test:all": "npm run test:kernel && npm run test:bridge && npm run test:gateway && npm run test:studio",
     "test:kernel": "cd packages/soulos-core && (test -x .venv/bin/pytest && .venv/bin/pytest -q || python3 -m pytest -q)",
+    "test:bridge": "cd packages/soulos-inference-bridge && python3 -m pytest -q",
     "test:gateway": "cd packages/soulos-gateway && python3 -m pytest -q",
     "test:studio": "cd packages/soulos-studio && (test -x .venv/bin/pytest && .venv/bin/pytest -q || python3 -m pytest -q)",
     "cloud:up": "docker compose -f docker-compose.cloud.yml up --build",
