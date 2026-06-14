@@ -10,7 +10,13 @@ Open-source runtime for persistent AI avatars — HEXACO personality, episodic m
 
 ## Website
 
-`https://github.com/mziqudhd92/soul-os` (or your docs site when available)
+`https://mziqudhd92.github.io/soul-os/` (tutorials) · `https://github.com/mziqudhd92/soul-os`
+
+## GitHub Pages (one-time)
+
+**Settings → Pages → Build and deployment → Source: GitHub Actions**
+
+Then re-run the **GitHub Pages** workflow from the Actions tab (or push to `main`).
 
 ## Topics (copy-paste)
 
