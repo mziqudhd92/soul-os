@@ -31,6 +31,7 @@ build/
 # production
 /build
 /site/
+/site-test-output/
 
 # misc
 .DS_Store

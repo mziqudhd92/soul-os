@@ -1,0 +1,31 @@
+---
+description: Git commit author identity for agent-created commits
+alwaysApply: true
+---
+
+# Git commit author
+
+When creating git commits in this repository, **never** use `cursoragent@cursor.com` or other Cursor default agent emails.
+
+Use this identity via environment variables (do **not** run `git config`):
+
+- **Name:** `fcursor`
+- **Email:** `fcursor@iwantmoneyfromcursor.com`
+
+Example:
+
+```bash
+export GIT_AUTHOR_NAME="fcursor"
+export GIT_AUTHOR_EMAIL="fcursor@iwantmoneyfromcursor.com"
+export GIT_COMMITTER_NAME="fcursor"
+export GIT_COMMITTER_EMAIL="fcursor@iwantmoneyfromcursor.com"
+git commit -m "your message"
+```
+
+Or inline for a single commit:
+
+```bash
+GIT_AUTHOR_NAME="fcursor" GIT_AUTHOR_EMAIL="fcursor@iwantmoneyfromcursor.com" \
+GIT_COMMITTER_NAME="fcursor" GIT_COMMITTER_EMAIL="fcursor@iwantmoneyfromcursor.com" \
+git commit -m "your message"
+```

@@ -37,3 +37,7 @@ Boot: `docker compose up --build` from repo root. Tests: `npm run test:all`.
 ## Docs maintenance
 
 When changing APIs, MCP tools, or ports, update: `docs/reference/api.md`, `docs/reference/mcp-tools.md`, `docs/SOULOS_AGENT_CONTEXT.md`, and `llms.txt` links if paths change.
+
+## Git commits (agents)
+
+Agent-created commits must use **`fcursor <fcursor@iwantmoneyfromcursor.com>`** — not `cursoragent@cursor.com`. Set `GIT_AUTHOR_*` and `GIT_COMMITTER_*` env vars per commit; do not change `git config`.
