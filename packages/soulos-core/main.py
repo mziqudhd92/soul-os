@@ -29,6 +29,7 @@ from runtime.avatars import get_bot_identity, register_avatar_record
 from runtime.memory import ingest_memory as ingest_memory_record
 from runtime.memory import list_memories, retrieve_memories
 from schemas import ChatRequest, MemoryIngest, MemoryRetrieve, UpdateStateRequest
+from soul_compile import parse_soul_request_payload
 from soul_validation import validate_msv_payload
 from tenant import verify_bot_access
 
@@ -87,11 +88,15 @@ async def health_check():
 
 @app.post("/v1/avatars")
 async def register_avatar(
-    payload: dict,
+    request: Request,
     db: AsyncConnection = Depends(get_db),
     account: AccountContext = Depends(get_account_context),
 ):
+    raw = await request.body()
+    content_type = request.headers.get("content-type", "")
+    filename_hint = request.headers.get("x-filename")
     try:
+        payload = parse_soul_request_payload(raw, content_type, filename_hint)
         return await register_avatar_record(db, account.account_id, payload)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e)) from e

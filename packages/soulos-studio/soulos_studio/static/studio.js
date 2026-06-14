@@ -429,17 +429,45 @@ function exportSoul() {
   a.click();
 }
 
-async function importFile(file) {
-  const text = await file.text();
-  const soul = JSON.parse(text);
-  const res = await fetch("/api/import", {
+async function exportSoulMarkdown() {
+  const res = await fetch("/api/build-soul", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ soul }),
+    body: JSON.stringify(state.form),
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.detail || "import failed");
-  state.form = data.form;
+  if (!res.ok) throw new Error(data.detail || "export failed");
+  const blob = new Blob([data.text], { type: "text/plain" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  const slug = (state.form.name || "my-bot").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "my-bot";
+  a.download = `${slug}.soul`;
+  a.click();
+}
+
+async function importFile(file) {
+  const text = await file.text();
+  const isSoul = file.name.toLowerCase().endsWith(".soul") || text.trimStart().startsWith("---");
+  if (isSoul) {
+    const res = await fetch("/api/import-text", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "import failed");
+    state.form = data.form;
+  } else {
+    const soul = JSON.parse(text);
+    const res = await fetch("/api/import", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ soul }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "import failed");
+    state.form = data.form;
+  }
   writeFormToDom();
   buildSliders();
   await refreshSoul();
@@ -886,6 +914,9 @@ async function init() {
   $("btn-deploy").addEventListener("click", deploy);
   $("btn-copy-mcp").addEventListener("click", copyMcpConfig);
   $("btn-export").addEventListener("click", exportSoul);
+  $("btn-export-soul").addEventListener("click", async () => {
+    try { await exportSoulMarkdown(); } catch (err) { alert(err.message); }
+  });
   $("btn-reset").addEventListener("click", async () => {
     const res = await fetch("/api/defaults");
     state.form = await res.json();

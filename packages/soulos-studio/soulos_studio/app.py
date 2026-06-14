@@ -27,6 +27,7 @@ from soulos_studio.soul_form import (
     parse_soul_file,
     validate_soul,
 )
+from soulos_studio.soul_markdown import build_soul_markdown, parse_soul_markdown
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 KERNEL_URL = os.getenv("SOULOS_KERNEL_URL", "http://localhost:8000").rstrip("/")
@@ -49,6 +50,10 @@ class FormPayload(BaseModel):
 
 class SoulPayload(BaseModel):
     soul: dict
+
+
+class TextPayload(BaseModel):
+    text: str
 
 
 class ChatPayload(BaseModel):
@@ -85,6 +90,23 @@ async def build_soul(form: FormPayload):
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e)) from e
     return payload
+
+
+@app.post("/api/build-soul")
+async def build_soul_text(form: FormPayload):
+    text = build_soul_markdown(form.model_dump())
+    return {"text": text}
+
+
+@app.post("/api/import-text")
+async def import_soul_text(body: TextPayload):
+    try:
+        form = parse_soul_markdown(body.text)
+        payload = build_soul_payload(form)
+        validate_soul(payload)
+        return {"form": form, "soul": payload}
+    except (ValueError, TypeError, KeyError) as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
 
 
 @app.post("/api/validate")
