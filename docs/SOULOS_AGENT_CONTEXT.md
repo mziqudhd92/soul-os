@@ -2,7 +2,7 @@
 
 > Index: repo root [`llms.txt`](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/llms.txt) · [`llms-full.txt`](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/llms-full.txt)
 
-Open-source runtime for **persistent AI avatars**: validated `.soul.json` personality (HEXACO MSV), **pgvector episodic memory**, **dual-process chat** (System 1 text stream + System 2 `msv_update`). Same kernel for support bots, dev twins, companions — only the soul file changes.
+Open-source runtime for **persistent AI avatars**: validated **`.soul`** / `.soul.json` personality (HEXACO MSV), **pgvector episodic memory** (+ optional **`.soul-memory/`** git ledger), **dual-process chat** (System 1 text + System 2 `msv_update` + `cognitive_state` telemetry). Same kernel for support bots, dev twins, companions — only the soul file changes.
 
 Full docs live in repo `docs/` · regenerate full dump: `python3 scripts/doc-gen/bundle_agent_context.py --full`
 
@@ -60,9 +60,13 @@ Cloud MCP: same path on gateway URL + Bearer API key.
 
 ---
 
-## `.soul.json` (required fields)
+## `.soul` and `.soul.json`
 
-Schema: `spec/soul.schema.json`. Register via `POST /v1/avatars` or MCP `register_avatar`.
+Schema for validated fields: `spec/soul.schema.json`. Register via `POST /v1/avatars` (JSON or raw `.soul` body), MCP `register_avatar`, or SDK `register_avatar("path.soul")`.
+
+**`.soul`** — YAML front matter + Markdown body (`examples/support-bot/support-bot.soul`). Long HEXACO names map to `H,E,X,A,C,O`. Optional `psychology.dual_process` → `runtime_config.system1_threshold`.
+
+**`.soul.json`** — legacy JSON (still fully supported):
 
 ```json
 {
@@ -104,6 +108,7 @@ Example souls: `examples/support-bot/`, `examples/dev-twin/`, `examples/companio
 |--------|------|----------------|
 | `POST` | `/v1/avatars` | Full soul JSON → `{ id, name, role, baseline_msv, current_msv }` |
 | `POST` | `/memory/ingest` | `{ bot_id, content }` |
+| `POST` | `/memory/sync` | `{ bot_id, workspace_path }` → hydrate from `.soul-memory/` |
 | `POST` | `/memory/retrieve` | `{ bot_id, query, top_k? }` → `{ memories[] }` |
 | `POST` | `/chat/generate` | `{ bot_id, message }` → **SSE** |
 | `POST` | `/state/update` | `{ bot_id, new_msv }` |
@@ -120,6 +125,9 @@ Validation errors on register: `422` with trait-level detail.
 |-------|---------|
 | `message` | `{"text": "..."}` — System 1 tokens (concatenate) |
 | `msv_update` | Full MSV JSON — System 2 reflection (handle mid-stream) |
+| `cognitive_state` | `current_path`, `system_1` (confidence, latency), `system_2` (loops, tokens, MCP tools) |
+
+**CLI** (from `packages/soulos-core`): `soulos memory-append`, `memory-export`, `memory-sync <bot_id>`.
 
 ---
 

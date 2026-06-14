@@ -1,6 +1,6 @@
 # Soul Builder (local UI)
 
-Configure a validated `.soul.json` in your browser — no hand-editing JSON required.
+Configure a validated soul in your browser — **`.soul`** (YAML + Markdown) or legacy **`.soul.json`** — no hand-editing required.
 
 Python + JSON. No Node.js build step.
 
@@ -18,9 +18,9 @@ Open **http://localhost:8765**
 |------|--------|
 | 1 | Set **name**, **role**, **description**, attachment style |
 | 2 | Tune **HEXACO**, moral foundations, and drives |
-| 3 | **Export** → downloads `your-bot.soul.json` |
-| 4 | (Optional) **Deploy to kernel** → register with kernel and test in chat |
-| 5 | (Optional) **Import** → load an existing soul file to edit |
+| 3 | **Export JSON** or **Export .soul** → downloads soul file |
+| 4 | (Optional) **Deploy to kernel** → register with kernel and test in chat (watch **cognitive_state** rails) |
+| 5 | (Optional) **Import** → load `.soul`, `.soul.json`, or JSON from disk |
 
 Same one-liner from npm:
 
@@ -53,9 +53,9 @@ The exported file matches `spec/soul.schema.json` and works with:
 
 ## Import / export
 
-- **Import** — `.json` soul file from disk (e.g. `examples/support-bot/support-bot.soul.json`)
-- **Export** — current form state as `name-slug.soul.json`
-- **Deploy to kernel** — `POST /v1/avatars` (requires kernel on :8000)
+- **Import** — `.soul`, `.soul.json`, or JSON from disk (e.g. `examples/support-bot/support-bot.soul`)
+- **Export JSON** / **Export .soul** — current form state
+- **Deploy to kernel** — `POST /v1/avatars` (requires kernel on :8000); chat panel shows dual-process rails on `cognitive_state` SSE
 
 You can **export without deploying** — useful when building a soul for a Python bot on another machine.
 

@@ -4,6 +4,8 @@ SoulOS rejects stateless, sterile AI. Every avatar has a persistent **Soul** —
 
 SoulOS uses a computational psychology matrix combining **HEXACO**, **Moral Foundations**, **Intrinsic Drives**, and **Attachment Theory**. The canonical JSON Schema is [spec/soul.schema.json](../../spec/soul.schema.json).
 
+Soul files can be **`.soul`** (YAML front matter + Markdown body) or legacy **`.soul.json`**. Both register via `POST /v1/avatars`.
+
 This document is the official specification for building and configuring a SoulOS avatar.
 
 **See also:** [Psychometrics cheat sheet](../guides/psychometrics.md) · [Soul Builder](../getting-started/soul-builder.md) · [API reference](api.md)
@@ -21,7 +23,59 @@ At the database level, a bot's identity is defined in the `bots` table. When cre
 | `description`| `TEXT` | The foundational system prompt defining core beliefs. |
 | `baseline_msv`| `JSONB` | The starting psychological state. The bot naturally tries to return to this baseline unless repeatedly traumatized/crystallized. |
 
-### The `.soul.json` File Format
+### The `.soul` file format (recommended)
+
+Human-editable souls use **Markdown with YAML front matter**. Psychology weights live in front matter; behavior rules live in the Markdown body (compiled into `description`).
+
+```markdown
+---
+name: Site Support
+role: Customer Support Agent
+attachment_style: Secure
+psychology:
+  hexaco:
+    honesty_humility: 0.95
+    emotionality: 0.35
+    extraversion: 0.55
+    agreeableness: 0.92
+    conscientiousness: 0.88
+    openness: 0.45
+  moral_foundations:
+    care_harm: 1.0
+    fairness_cheating: 0.95
+  drives:
+    curiosity: 0.45
+    social_approval: 0.85
+  epistemic_uncertainty: 0.1
+  inner_monologue: Ready to help customers with clarity and care.
+  dual_process:
+    system1_threshold: 0.35
+    system2_max_loops: 3
+---
+
+You help users with billing, refunds, and product questions. Be concise and empathetic.
+```
+
+| Front matter | Maps to |
+|--------------|---------|
+| `psychology.hexaco` long names (`honesty_humility`, …) | `baseline_msv.hexaco` keys `H,E,X,A,C,O` |
+| Markdown body | `description` |
+| `psychology.dual_process` | `runtime_config` on the bot row (threshold for System 1 vs 2 telemetry) |
+| `engine` (optional) | Stored in `runtime_config` (kernel LLM still defaults to env/Ollama) |
+
+Register with raw `.soul` body:
+
+```bash
+curl -X POST http://localhost:8000/v1/avatars \
+  -H "Content-Type: text/markdown" \
+  -H "X-Filename: support-bot.soul" \
+  --data-binary @examples/support-bot/support-bot.soul
+```
+
+Or use Soul Studio **Export .soul** / Python SDK `register_avatar("my-bot.soul")`.
+
+### The `.soul.json` file format (legacy, still supported)
+
 While identities are stored in PostgreSQL, the standard way to define and version-control a SoulOS personality is via a `.soul.json` file. 
 
 If you are bootstrapping a new agent, your `.soul.json` file must strictly adhere to this schema:
@@ -114,3 +168,34 @@ During every interaction, System 2 evaluates the user's prompt against the basel
 
 ### Memory Crystallization
 If a user consistently violates the bot's Moral Foundations or attacks it (driving up Emotionality and down Agreeableness over 50 consecutive turns), the system performs a database crystallization, permanently rewriting the `baseline_msv`. This fundamentally alters the "Soul" of that specific instance.
+
+---
+
+## 4. Git-backed episodic memory (`.soul-memory/`)
+
+For team workflows, episodic facts can live in the project as append-only JSONL files:
+
+```text
+project-root/
+├── my-bot.soul
+├── .soulignore
+└── .soul-memory/
+    ├── episodes/
+    │   └── 2026-06-14_a8f9b2c3.jsonl
+    └── index.json
+```
+
+Each line in `episodes/*.jsonl` is one episode:
+
+```json
+{"timestamp": 1781432100, "type": "interaction", "hash": "a8f9b2c3", "summary": "User prefers concise billing answers."}
+```
+
+| Command | Purpose |
+|---------|---------|
+| `soulos memory-append "fact"` | Append to `.soul-memory/` (blocks secrets via scanner) |
+| `soulos memory-export` | Dump ledger JSON |
+| `soulos memory-sync <bot_id>` | Hydrate kernel pgvector via `POST /memory/sync` |
+| Python SDK `sync_memory(avatar_id, workspace_path)` | Same as sync API |
+
+Commit `.soul-memory/` to git; run sync after clone so the kernel embeds team knowledge. See `examples/support-bot/.soul-memory/`.

@@ -66,6 +66,31 @@ event: msv_update
 data: {"hexaco": {"H": 0.8, "E": 0.4, "X": 0.6, "A": 0.9, "C": 0.5, "O": 0.7}, "moral_foundations": {...}, "drives": {...}, "epistemic_uncertainty": 0.1, "inner_monologue": "The user is greeting me."}
 ```
 
+### Cognitive telemetry (`cognitive_state`)
+
+Emitted alongside `message` and `msv_update` for dual-process observability (Studio rails, SDK `event["type"] == "cognitive_state"`).
+
+```text
+event: cognitive_state
+data: {
+  "timestamp": 1781432100,
+  "current_path": "system_2_deliberation",
+  "system_1": {
+    "confidence_score": 0.21,
+    "cached_response_triggered": false,
+    "latency_ms": 45
+  },
+  "system_2": {
+    "loop_count": 1,
+    "reasoning_tokens": 512,
+    "active_mcp_tools": [],
+    "latency_ms": 1120
+  }
+}
+```
+
+`confidence_score` is derived from `1 - epistemic_uncertainty`. When confidence falls below `dual_process.system1_threshold` from the soul's `runtime_config`, the stream signals `system_2_deliberation`.
+
 **Payload:** `{"bot_id": "uuid", "message": "string"}`
 
 ---
@@ -97,9 +122,10 @@ Base URL (self-host): `http://localhost:8000`
 
 ### `POST /v1/avatars`
 
-Register a new avatar from a `.soul.json` payload. Validates against [spec/soul.schema.json](../../spec/soul.schema.json).
+Register a new avatar from a **`.soul.json` object** or a raw **`.soul`** file body. Validates soul fields against [spec/soul.schema.json](../../spec/soul.schema.json).
 
-- **Payload:** Full soul file JSON (`name`, `role`, `description`, `attachment_style`, `baseline_msv`, optional marketplace fields).
+- **JSON payload:** Full soul file (`name`, `role`, `description`, `attachment_style`, `baseline_msv`, optional marketplace fields). Optional `runtime_config` for `dual_process` thresholds.
+- **`.soul` body:** `Content-Type: text/markdown` (or `application/octet-stream`) with `X-Filename: my-bot.soul` header; YAML front matter + Markdown body compiled server-side.
 - **Success:** `200` with `{ "id", "name", "role", "baseline_msv", "current_msv" }` — `current_msv` is initialized from `baseline_msv`.
 - **Validation error:** `422` with a human-readable detail string listing each invalid trait.
 
@@ -107,6 +133,13 @@ Register a new avatar from a `.soul.json` payload. Validates against [spec/soul.
 
 - **Payload:** `{"bot_id": "uuid", "content": "string"}`
 - **Response:** `{"status": "success"}`
+
+### `POST /memory/sync`
+
+Hydrate pgvector from a workspace `.soul-memory/` directory (dedupes by content hash).
+
+- **Payload:** `{"bot_id": "uuid", "workspace_path": "/path/to/project"}`
+- **Response:** `{"status": "success", "imported": N, "skipped": N, "total": N}`
 
 ### `POST /memory/retrieve`
 

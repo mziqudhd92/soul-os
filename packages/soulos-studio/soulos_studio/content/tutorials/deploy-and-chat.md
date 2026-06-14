@@ -97,12 +97,14 @@ Ask again: `Can I get a refund after 20 days?` — reply should reference the po
 
 ---
 
-## Step 5 — Watch MSV drift
+## Step 5 — Watch MSV drift and cognitive telemetry
 
-During streaming, System 2 may emit **`event: msv_update`**:
+During streaming:
 
-- Studio updates **HEXACO sliders** and the **radar chart** mid-stream
-- Check `epistemic_uncertainty` — spikes when the model is unsure (good escalation signal for support bots)
+- **`event: msv_update`** — System 2 reflection; Studio updates **HEXACO sliders** and the **radar chart**
+- **`event: cognitive_state`** — dual-process rails (System 1 confidence vs System 2 deliberation loops)
+
+Check `epistemic_uncertainty` in `msv_update` — spikes when the model is unsure (good escalation signal for support bots). Low `system_1.confidence_score` in `cognitive_state` means System 2 is driving the turn.
 
 Try messages that stress the avatar:
 

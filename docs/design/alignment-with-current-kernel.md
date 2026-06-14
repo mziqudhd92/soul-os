@@ -4,11 +4,11 @@ This maps the [Evolution Matrix TDD](evolution-matrix.md) to what ships today in
 
 ## Summary
 
-| TDD pillar | Today (main) | Gap |
-|------------|--------------|-----|
-| `.soul` front matter | `.soul.json` only; validated JSON Schema | **Phase 1:** compiler `.soul` → internal `SoulFile` |
-| Dual-process debugger | SSE `message` + `msv_update` (HEXACO drift) | **Phase 2:** new `cognitive_state` event + Studio rails |
-| Git memory ledger | Postgres + pgvector (`episodic_memories`) | **Phase 3:** `.soul-memory/` sync layer (hybrid or migration) |
+| TDD pillar | Today (main) | Status |
+|------------|--------------|--------|
+| `.soul` front matter | `.soul` + `.soul.json`; `soul_compile.py` | **Shipped (Phase 1)** |
+| Dual-process debugger | `cognitive_state` SSE + Studio rails | **Shipped (Phase 2)** |
+| Git memory ledger | `.soul-memory/`, sync API, CLI | **Shipped (Phase 3)** |
 
 ---
 

@@ -12,9 +12,9 @@ SoulOS does **not** replace webhooks, CLI, or Slack SDK. It replaces the fragile
 
 By the end you will:
 
-1. Map your system prompt → `.soul.json` + episodic memory
+1. Map your system prompt → `.soul` or `.soul.json` + episodic memory
 2. Register once, persist `avatar_id`, chat via `send_message`
-3. Handle `msv_update` for uncertainty / escalation signals
+3. Handle `msv_update` and `cognitive_state` for uncertainty / escalation signals
 4. Know when to re-register vs when memory alone is enough
 
 ---
@@ -75,12 +75,42 @@ pip install -e packages/soulos-sdk/python
 
 ```bash
 docker compose up --build   # or: npm run up
-# Open http://localhost:8765 → tune sliders → Export
+# Open http://localhost:8765 → tune sliders → Export JSON or Export .soul
 ```
 
 See [Soul Builder guide](../getting-started/soul-builder.md).
 
-**Manual path:** if your bot today looks like this:
+**Manual path:** create `my-bot.soul` (recommended) or `my-bot.soul.json`.
+
+**`.soul` example** (see `examples/support-bot/support-bot.soul`):
+
+```markdown
+---
+name: Acme Support
+role: Customer Support Agent
+attachment_style: Secure
+psychology:
+  hexaco:
+    honesty_humility: 0.9
+    emotionality: 0.4
+    extraversion: 0.5
+    agreeableness: 0.9
+    conscientiousness: 0.85
+    openness: 0.5
+  moral_foundations:
+    care_harm: 0.95
+    fairness_cheating: 0.9
+  drives:
+    curiosity: 0.5
+    social_approval: 0.8
+  epistemic_uncertainty: 0.15
+  inner_monologue: Ready to help with clarity and fairness.
+---
+
+You help users with orders, refunds, and product questions. Be concise and empathetic. Escalate when policy is unclear.
+```
+
+**`.soul.json` example** if your bot today looks like this:
 
 ```python
 SYSTEM = """
@@ -116,7 +146,7 @@ Create `my-bot.soul.json`:
 - **`description`** ≈ your old system prompt (behavior rules).
 - **`baseline_msv`** ≈ personality knobs (honesty, warmth, structure). See [Psychometric cheat sheet](psychometrics.md).
 
-You can start from `examples/support-bot/support-bot.soul.json` and edit names/traits.
+You can start from `examples/support-bot/support-bot.soul` or `support-bot.soul.json` and edit names/traits.
 
 ---
 
@@ -126,7 +156,7 @@ You can start from `examples/support-bot/support-bot.soul.json` and edit names/t
 import asyncio
 from soulos.client import SoulOSClient
 
-SOUL_PATH = "my-bot.soul.json"
+SOUL_PATH = "my-bot.soul"  # or my-bot.soul.json
 KERNEL_URL = "http://localhost:8000"
 
 async def bootstrap():
@@ -141,13 +171,15 @@ if __name__ == "__main__":
     asyncio.run(bootstrap())
 ```
 
-Save `avatar_id` somewhere durable. Registration creates a row in Postgres with `baseline_msv` and `current_msv`.
+The SDK sends `.soul` files as raw body with `X-Filename`; JSON souls use `application/json`.
+
+Save `avatar_id` somewhere durable. Registration creates a row in Postgres with `baseline_msv`, `current_msv`, and optional `runtime_config` (from `dual_process` in `.soul` front matter).
 
 ---
 
 ## Step 3 — Ingest what your bot should “know”
 
-Move FAQ, policies, and docs out of the prompt and into memory:
+**Option A — kernel API** (good for scripts and one-off seeding):
 
 ```python
 async def seed_knowledge(soul: SoulOSClient, avatar_id: str):
@@ -172,6 +204,20 @@ for line in Path("faq.txt").read_text().splitlines():
 ```
 
 On each chat, the kernel **recalls** relevant chunks automatically — you do not need to paste them into every request.
+
+**Option B — git-backed `.soul-memory/`** (good for team repos):
+
+```bash
+# From repo root (after pip install -e packages/soulos-core)
+soulos memory-append "Full refunds within 30 days of purchase."
+soulos memory-sync "$SOULOS_AVATAR_ID" --workspace .
+```
+
+Commit `.soul-memory/` to git. After clone, run `sync_memory` so pgvector matches the ledger. Secrets matching `.soulignore` patterns are blocked from append. See [Soul standard](../reference/soul-standard.md#4-git-backed-episodic-memory-soul-memory).
+
+```python
+await soul.sync_memory(avatar_id, "/path/to/project")
+```
 
 ---
 
@@ -212,6 +258,11 @@ async def chat(user_text: str) -> str:
             uncertainty = msv.get("epistemic_uncertainty")
             if uncertainty and uncertainty > 0.7:
                 print(f"[soul] high uncertainty: {uncertainty}")
+        elif event["type"] == "cognitive_state":
+            state = event["state"]
+            s1 = state.get("system_1") or {}
+            if s1.get("confidence_score", 1) < 0.35:
+                print(f"[soul] System 2 deliberation: {state.get('current_path')}")
     return "".join(parts)
 
 
@@ -219,11 +270,10 @@ def chat_sync(user_text: str) -> str:
     return asyncio.run(chat(user_text))
 ```
 
-The kernel:
-
 1. **Recalls** episodic memory for the user message.
 2. **Streams** the reply (`event: message`).
-3. **Reflects** in parallel and may emit `event: msv_update` with updated HEXACO / `inner_monologue`.
+3. **Emits** `event: cognitive_state` telemetry (System 1 confidence vs System 2 loops).
+4. **Reflects** in parallel and may emit `event: msv_update` with updated HEXACO / `inner_monologue`.
 
 ---
 
