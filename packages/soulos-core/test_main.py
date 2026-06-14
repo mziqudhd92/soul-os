@@ -37,6 +37,12 @@ class MockConnection:
                 row = type("Row", (), {})()
                 row.id = self.row_id
                 row.content = "Mocked retrieved memory"
+                row.name = "Test Avatar"
+                row.role = "Tester"
+                row.description = "A test avatar for validation."
+                row.baseline_msv = VALID_SOUL["baseline_msv"]
+                row.current_msv = VALID_SOUL["baseline_msv"]
+                row.runtime_config = {}
                 return row
 
             def fetchall(self):
@@ -66,6 +72,12 @@ class MockEmbedder:
 
 
 class MockLLMService:
+    async def load_runtime_config(self, db, bot_id: str) -> dict:
+        return {}
+
+    async def load_current_msv(self, db, bot_id: str) -> dict:
+        return VALID_SOUL["baseline_msv"]
+
     async def generate_chat_stream(self, bot_id: str, message: str, context: list[str], db):
         yield "event: msv_update\ndata: {\"hexaco\": {\"H\": 0.8, \"E\": 0.5, \"X\": 0.6, \"A\": 0.9, \"C\": 0.5, \"O\": 0.7}}\n\n"
         yield "event: message\ndata: {\"text\": \"Mock response\"}\n\n"

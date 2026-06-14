@@ -8,7 +8,18 @@ SoulOS integrates into **any stack** (Docker, AWS, GCP, existing LiteLLM apps). 
 2. Register a soul: `POST /v1/avatars` or Soul Studio.
 3. Save `bot_id` in your app env (`SOULOS_BOT_ID`).
 4. Run preflight: `python scripts/soulos-doctor.py`.
-5. Wire SDK, REST, or `examples/hybrid-orchestrator/soul_client.py`.
+5. Wire SDK, `SoulHybridClient`, or `examples/hybrid-orchestrator/soul_client.py`.
+
+## Hybrid API v0.2 (sidecars)
+
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /ready` | Health for graceful `SOULOS_ENABLED` fallback |
+| `POST /hybrid/prepare` | One-call pre-turn context + `system_prompt` |
+| `POST /hybrid/complete` | Ingest + async reflect |
+| `POST /v1/avatars/ensure` | Idempotent register by `external_key` |
+
+Sidecar compose: [docker-compose.sidecar.yml](../../docker-compose.sidecar.yml)
 
 ## Integration modes
 

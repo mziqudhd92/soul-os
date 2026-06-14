@@ -38,16 +38,42 @@ def main() -> int:
     parser.add_argument("--kernel", default="http://localhost:8000")
     parser.add_argument("--inference", default="http://localhost:11434")
     parser.add_argument("--embedding-dimension", type=int, default=768)
+    parser.add_argument("--bot-id", default="", help="Optional bot_id for hybrid/prepare smoke")
     args = parser.parse_args()
 
     errors: list[str] = []
+    kernel = args.kernel.rstrip("/")
 
-    print(f"Checking kernel {args.kernel} ...")
-    status, body = fetch_json(f"{args.kernel.rstrip('/')}/health")
+    print(f"Checking kernel {kernel} ...")
+    status, body = fetch_json(f"{kernel}/health")
     if status != 200:
         errors.append(f"kernel health failed ({status}): {body}")
     else:
-        print("  kernel: ok")
+        print("  kernel health: ok")
+
+    status, body = fetch_json(f"{kernel}/ready")
+    if status not in (200, 503):
+        errors.append(f"kernel ready failed ({status}): {body}")
+    else:
+        print(f"  kernel ready: {body.get('status', body) if isinstance(body, dict) else body}")
+
+    if args.bot_id:
+        print(f"Checking hybrid/prepare for bot {args.bot_id} ...")
+        status, body = fetch_json(
+            f"{kernel}/hybrid/prepare",
+            method="POST",
+            payload={
+                "bot_id": args.bot_id,
+                "query": "soulos doctor smoke test",
+                "top_k": 1,
+            },
+        )
+        if status != 200:
+            errors.append(f"hybrid/prepare failed ({status}): {body}")
+        elif isinstance(body, dict) and "system_prompt" not in body:
+            errors.append("hybrid/prepare missing system_prompt")
+        else:
+            print("  hybrid/prepare: ok")
 
     print(f"Checking inference {args.inference} ...")
     status, body = fetch_json(args.inference.rstrip("/"))

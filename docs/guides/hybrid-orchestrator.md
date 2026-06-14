@@ -2,42 +2,40 @@
 
 Keep your **existing chat + tools + SSE**; use SoulOS for **soul + episodic memory**.
 
-## Pattern
+## Hybrid API v0.2 (sidecar)
 
-1. `GET /bot/{id}/identity` — persona + `current_msv`
-2. `POST /memory/retrieve` — RAG context for the user message
-3. Build system prompt (see `examples/hybrid-orchestrator/soul_client.py`)
-4. Your LiteLLM / OpenAI client streams with **your tools**
-5. `POST /memory/ingest` — persist turn summary
-6. `POST /state/reflect` — update HEXACO MSV after the turn
+| Step | Endpoint | Notes |
+|------|----------|-------|
+| Health | `GET /ready` | db + inference checks |
+| Bootstrap avatar | `POST /v1/avatars/ensure` | `external_key` + soul JSON |
+| Pre-turn | `POST /hybrid/prepare` | One call: identity, memories, `system_prompt`, `inner_monologue` |
+| Post-turn | `POST /hybrid/complete` | Ingest + `reflect_async` (non-blocking) |
 
-## APIs
-
-| Endpoint | Payload | Response |
-|----------|---------|----------|
-| `GET /bot/{bot_id}/identity` | — | name, role, description, current_msv |
-| `POST /memory/retrieve` | bot_id, query, top_k? | memories[] |
-| `POST /memory/ingest` | bot_id, content | status |
-| `POST /state/reflect` | bot_id, message | current_msv |
+Legacy flow (still supported): separate `GET /bot/{id}/identity`, `POST /memory/retrieve`, ingest, `POST /state/reflect`.
 
 ## Session memory
 
-Episodic rows are keyed by `bot_id`. For per-session isolation prefix content:
+Pass `session_id` on prepare, complete, ingest, and retrieve. Episodic rows are stored with a `session_id` column; retrieve also includes global memories (`session_id` null).
 
-```text
-[session:<uuid>] User asked about pricing for the enterprise plan
-```
+## Prompt templates
 
-Or use one `bot_id` per user.
+Set `runtime_config.hybrid_prompt_template` on the soul (via `POST /v1/avatars` or ensure) with placeholders:
+
+- `{name}`, `{role}`, `{description}`, `{inner_monologue}`, `{memories}`
+
+## Inference modes
+
+| `INFERENCE_MODE` | Behavior |
+|------------------|----------|
+| `full` (default) | Embeddings + LLM reflect |
+| `embeddings_only` | Embeddings only; reflect updates `inner_monologue` without chat model |
 
 ## Two databases
 
-Your domain KB (e.g. product catalog, verified facts) stays in **your** Postgres. SoulOS episodic memory lives in the **kernel** Postgres. Only your app's tools query your KB.
+Your domain KB stays in **your** Postgres. SoulOS episodic memory lives in the **kernel** Postgres.
 
-## Inference
+## Client
 
-Your app's LLM can call Bedrock/GCP/OpenAI directly. SoulOS kernel still needs an inference plug-in for **embeddings** (and reflect). See [inference.md](../deployment/inference.md).
+Python: `SoulHybridClient` from `soulos` package — see [examples/hybrid-orchestrator](../../examples/hybrid-orchestrator/).
 
-## Reference
-
-- [examples/hybrid-orchestrator](../../examples/hybrid-orchestrator/) — copy `soul_client.py` into your backend
+Sidecar compose: [docker-compose.sidecar.yml](../../docker-compose.sidecar.yml)

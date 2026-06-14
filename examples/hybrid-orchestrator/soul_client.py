@@ -1,4 +1,4 @@
-"""Thin SoulOS adapter for hybrid orchestrator integrations."""
+"""Thin SoulOS adapter — prefer SoulHybridClient from soulos-sdk for production."""
 
 from __future__ import annotations
 
@@ -9,73 +9,85 @@ import httpx
 
 
 class SoulClient:
-    """REST wrapper for identity + episodic memory + MSV reflect."""
+    """REST wrapper; use prepare_turn / complete_turn when available."""
 
     def __init__(
         self,
         base_url: str | None = None,
         timeout: float = 60.0,
+        enabled: bool | None = None,
     ) -> None:
-        self.base_url = (base_url or os.getenv("SOULOS_KERNEL_URL", "http://localhost:8000")).rstrip(
-            "/"
-        )
+        self.base_url = (
+            base_url or os.getenv("SOULOS_KERNEL_URL", "http://localhost:8000")
+        ).rstrip("/")
         self.timeout = timeout
-
-    async def get_identity(self, bot_id: str) -> dict[str, Any]:
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            resp = await client.get(f"{self.base_url}/bot/{bot_id}/identity")
-            resp.raise_for_status()
-            return resp.json()
-
-    async def retrieve_memory(
-        self, bot_id: str, query: str, top_k: int = 5
-    ) -> list[str]:
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            resp = await client.post(
-                f"{self.base_url}/memory/retrieve",
-                json={"bot_id": bot_id, "query": query, "top_k": top_k},
+        if enabled is None:
+            self.enabled = os.getenv("SOULOS_ENABLED", "1").lower() not in (
+                "0",
+                "false",
+                "no",
             )
-            resp.raise_for_status()
-            return resp.json().get("memories", [])
+        else:
+            self.enabled = enabled
+        self._client: httpx.AsyncClient | None = None
 
-    async def ingest_memory(self, bot_id: str, content: str) -> None:
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            resp = await client.post(
-                f"{self.base_url}/memory/ingest",
-                json={"bot_id": bot_id, "content": content},
-            )
-            resp.raise_for_status()
+    async def _client_get(self) -> httpx.AsyncClient:
+        if self._client is None:
+            self._client = httpx.AsyncClient(timeout=self.timeout)
+        return self._client
 
-    async def reflect(self, bot_id: str, message: str) -> dict[str, Any]:
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            resp = await client.post(
-                f"{self.base_url}/state/reflect",
-                json={"bot_id": bot_id, "message": message},
-            )
-            resp.raise_for_status()
-            return resp.json()
+    async def is_ready(self) -> bool:
+        if not self.enabled:
+            return False
+        try:
+            client = await self._client_get()
+            resp = await client.get(f"{self.base_url}/ready")
+            return resp.status_code == 200 and resp.json().get("status") == "ok"
+        except httpx.HTTPError:
+            return False
 
-    async def get_context(
-        self, bot_id: str, query: str, top_k: int = 5
-    ) -> dict[str, Any]:
-        identity = await self.get_identity(bot_id)
-        memories = await self.retrieve_memory(bot_id, query, top_k=top_k)
-        return {"identity": identity, "memories": memories}
-
-    def build_system_prompt(self, context: dict[str, Any]) -> str:
-        identity = context["identity"]
-        msv = identity.get("current_msv", {})
-        monologue = msv.get("inner_monologue", "")
-        memories = context.get("memories", [])
-        memory_block = "\n".join(f"- {m}" for m in memories) if memories else "(none)"
-        return (
-            f"You are {identity.get('name')}, {identity.get('role')}.\n"
-            f"{identity.get('description', '')}\n"
-            f"Inner state: {monologue}\n"
-            f"Recalled memories:\n{memory_block}"
+    async def prepare_turn(
+        self, bot_id: str, query: str, session_id: str | None = None, top_k: int = 5
+    ) -> dict[str, Any] | None:
+        if not self.enabled:
+            return None
+        client = await self._client_get()
+        resp = await client.post(
+            f"{self.base_url}/hybrid/prepare",
+            json={
+                "bot_id": bot_id,
+                "query": query,
+                "session_id": session_id,
+                "top_k": top_k,
+            },
         )
+        resp.raise_for_status()
+        return resp.json()
 
-    async def persist_turn(
-        self, bot_id: str, session_id: str, summary: str
-    ) -> None:
-        await self.ingest_memory(bot_id, f"[session:{session_id}] {summary}")
+    async def complete_turn(
+        self,
+        bot_id: str,
+        summary: str,
+        user_message: str | None = None,
+        session_id: str | None = None,
+        reflect_async: bool = True,
+    ) -> dict[str, Any] | None:
+        if not self.enabled:
+            return None
+        client = await self._client_get()
+        resp = await client.post(
+            f"{self.base_url}/hybrid/complete",
+            json={
+                "bot_id": bot_id,
+                "summary": summary,
+                "user_message": user_message,
+                "session_id": session_id,
+                "reflect": bool(user_message),
+                "reflect_async": reflect_async,
+            },
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+    def build_system_prompt(self, prepare_payload: dict[str, Any]) -> str:
+        return prepare_payload.get("system_prompt", "")

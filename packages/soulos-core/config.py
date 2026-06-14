@@ -20,6 +20,7 @@ INFERENCE_SKIP_PULL = os.getenv("INFERENCE_SKIP_PULL", "0").lower() in (
     "true",
     "yes",
 )
+INFERENCE_MODE = os.getenv("INFERENCE_MODE", "full").lower()
 
 # Cloud: gateway injects account id; kernel rejects direct public access when enabled.
 REQUIRE_AUTH = os.getenv("REQUIRE_AUTH", "0").lower() in ("1", "true", "yes")

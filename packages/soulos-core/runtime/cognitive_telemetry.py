@@ -29,6 +29,8 @@ def merge_runtime_config(raw: dict[str, Any] | None) -> dict[str, Any]:
         dual.update(raw["dual_process"])
     if isinstance(raw.get("engine"), dict):
         base["engine"] = raw["engine"]
+    if raw.get("hybrid_prompt_template"):
+        base["hybrid_prompt_template"] = raw["hybrid_prompt_template"]
     base["dual_process"] = dual
     return base
 

@@ -5,7 +5,7 @@ import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from mcp.server.sse import SseServerTransport
 from sqlalchemy import text
@@ -20,19 +20,31 @@ from auth import (
 )
 from config import (
     ACCOUNT_ID_HEADER,
+    EMBEDDING_DIMENSION,
     GATEWAY_SECRET_HEADER,
+    INFERENCE_MODE,
     validate_gateway_secret,
 )
 from dependencies import get_db, get_embedder, get_llm_service
 from mcp_server import mcp_server
 from runtime.boot_memory import sync_memory_on_boot
 from runtime.bootstrap import init_database, pull_model, wait_for_ollama
-from runtime.avatars import get_bot_identity, register_avatar_record
+from runtime.avatars import (
+    ensure_avatar_record,
+    fetch_bot_identity,
+    register_avatar_record,
+)
+from runtime.hybrid import build_hybrid_system_prompt, extract_inner_monologue
+from runtime.hybrid_tasks import run_reflect_background
 from runtime.memory import ingest_memory as ingest_memory_record
 from runtime.memory import list_memories, retrieve_memories
 from runtime.memory_sync import sync_memory_directory
+from runtime.readiness import build_ready_payload
 from schemas import (
     ChatRequest,
+    EnsureAvatarRequest,
+    HybridCompleteRequest,
+    HybridPrepareRequest,
     MemoryIngest,
     MemoryRetrieve,
     MemorySync,
@@ -76,10 +88,11 @@ async def lifespan(app: FastAPI):
 
     try:
         await wait_for_ollama()
-        from config import EMBED_MODEL_NAME, INFERENCE_SKIP_PULL, MODEL_NAME
+        from config import EMBED_MODEL_NAME, INFERENCE_MODE, INFERENCE_SKIP_PULL, MODEL_NAME
 
         if not INFERENCE_SKIP_PULL:
-            await pull_model(MODEL_NAME)
+            if INFERENCE_MODE != "embeddings_only":
+                await pull_model(MODEL_NAME)
             await pull_model(EMBED_MODEL_NAME)
         else:
             logger.info("INFERENCE_SKIP_PULL=1 — skipping model pull")
@@ -105,6 +118,13 @@ async def health_check():
     return {"status": "ok", "service": "soulos-kernel"}
 
 
+@app.get("/ready")
+async def ready_check(db: AsyncConnection = Depends(get_db)):
+    payload = await build_ready_payload(db)
+    status_code = 200 if payload["status"] == "ok" else 503
+    return JSONResponse(status_code=status_code, content=payload)
+
+
 @app.post("/v1/avatars")
 async def register_avatar(
     request: Request,
@@ -125,6 +145,24 @@ async def register_avatar(
         raise HTTPException(status_code=422, detail=str(e)) from e
 
 
+@app.post("/v1/avatars/ensure")
+async def ensure_avatar(
+    payload: EnsureAvatarRequest,
+    db: AsyncConnection = Depends(get_db),
+    account: AccountContext = Depends(get_account_context),
+):
+    try:
+        return await ensure_avatar_record(
+            db,
+            account.account_id,
+            payload.external_key,
+            payload.soul,
+            payload.runtime_config,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
+
+
 @app.post("/memory/ingest")
 async def ingest_memory(
     payload: MemoryIngest,
@@ -133,7 +171,9 @@ async def ingest_memory(
     account: AccountContext = Depends(get_account_context),
 ):
     await verify_bot_access(db, payload.bot_id, account)
-    await ingest_memory_record(db, embedder, payload.bot_id, payload.content)
+    await ingest_memory_record(
+        db, embedder, payload.bot_id, payload.content, payload.session_id
+    )
     return {"status": "success"}
 
 
@@ -146,9 +186,94 @@ async def retrieve_memory(
 ):
     await verify_bot_access(db, payload.bot_id, account)
     memories = await retrieve_memories(
-        db, embedder, payload.bot_id, payload.query, payload.top_k
+        db,
+        embedder,
+        payload.bot_id,
+        payload.query,
+        payload.top_k,
+        payload.session_id,
     )
     return {"memories": memories}
+
+
+@app.post("/hybrid/prepare")
+async def hybrid_prepare(
+    payload: HybridPrepareRequest,
+    db: AsyncConnection = Depends(get_db),
+    embedder=Depends(get_embedder),
+    pipeline=Depends(get_llm_service),
+    account: AccountContext = Depends(get_account_context),
+):
+    await verify_bot_access(db, payload.bot_id, account)
+    identity = await fetch_bot_identity(db, payload.bot_id)
+    if not identity:
+        raise HTTPException(status_code=404, detail="Bot not found")
+    memories = await retrieve_memories(
+        db,
+        embedder,
+        payload.bot_id,
+        payload.query,
+        payload.top_k,
+        payload.session_id,
+    )
+    runtime_config = await pipeline.load_runtime_config(db, payload.bot_id)
+    system_prompt = build_hybrid_system_prompt(identity, memories, runtime_config)
+    return {
+        "bot_id": payload.bot_id,
+        "identity": {
+            "name": identity["name"],
+            "role": identity["role"],
+            "description": identity["description"],
+            "current_msv": identity["current_msv"],
+        },
+        "memories": memories,
+        "system_prompt": system_prompt,
+        "inner_monologue": extract_inner_monologue(identity),
+    }
+
+
+@app.post("/hybrid/complete")
+async def hybrid_complete(
+    payload: HybridCompleteRequest,
+    background_tasks: BackgroundTasks,
+    db: AsyncConnection = Depends(get_db),
+    embedder=Depends(get_embedder),
+    pipeline=Depends(get_llm_service),
+    account: AccountContext = Depends(get_account_context),
+):
+    await verify_bot_access(db, payload.bot_id, account)
+    await ingest_memory_record(
+        db, embedder, payload.bot_id, payload.summary, payload.session_id
+    )
+    response: dict = {"status": "success", "ingested": True, "reflect": "skipped"}
+    if payload.reflect and payload.user_message:
+        current_msv = await pipeline.load_current_msv(db, payload.bot_id)
+        if payload.reflect_async:
+            background_tasks.add_task(
+                run_reflect_background,
+                payload.bot_id,
+                payload.user_message,
+                current_msv,
+            )
+            return JSONResponse(
+                status_code=202,
+                content={
+                    "status": "accepted",
+                    "ingested": True,
+                    "reflect": "async",
+                    "bot_id": payload.bot_id,
+                },
+            )
+        result = await run_system_2_reflector(
+            payload.bot_id,
+            payload.user_message,
+            current_msv,
+            active_mcp_tools=[],
+        )
+        response["reflect"] = "completed"
+        response["current_msv"] = result.msv
+        response["reflect_latency_ms"] = result.latency_ms
+    return response
 
 
 @app.post("/memory/sync")
@@ -210,6 +335,7 @@ async def update_state(
 @app.post("/state/reflect")
 async def reflect_state(
     payload: ReflectStateRequest,
+    background_tasks: BackgroundTasks,
     db: AsyncConnection = Depends(get_db),
     pipeline=Depends(get_llm_service),
     account: AccountContext = Depends(get_account_context),
@@ -217,6 +343,18 @@ async def reflect_state(
     """Run System 2 reflector for hybrid integrations that skip /chat/generate."""
     await verify_bot_access(db, payload.bot_id, account)
     current_msv = await pipeline.load_current_msv(db, payload.bot_id)
+    if payload.reflect_async:
+        background_tasks.add_task(
+            run_reflect_background, payload.bot_id, payload.message, current_msv
+        )
+        return JSONResponse(
+            status_code=202,
+            content={
+                "status": "accepted",
+                "bot_id": payload.bot_id,
+                "reflect": "async",
+            },
+        )
     result = await run_system_2_reflector(
         payload.bot_id, payload.message, current_msv, active_mcp_tools=[]
     )
@@ -229,13 +367,13 @@ async def reflect_state(
 
 
 @app.get("/bot/{bot_id}/identity")
-async def get_bot_identity(
+async def get_bot_identity_route(
     bot_id: str,
     db: AsyncConnection = Depends(get_db),
     account: AccountContext = Depends(get_account_context),
 ):
     await verify_bot_access(db, bot_id, account)
-    identity = await get_bot_identity(db, bot_id)
+    identity = await fetch_bot_identity(db, bot_id)
     if not identity:
         raise HTTPException(status_code=404, detail="Bot not found")
     return {
@@ -250,12 +388,13 @@ async def get_bot_identity(
 async def get_bot_memories(
     bot_id: str,
     limit: int = 50,
+    session_id: str | None = None,
     db: AsyncConnection = Depends(get_db),
     account: AccountContext = Depends(get_account_context),
 ):
     await verify_bot_access(db, bot_id, account)
-    memories = await list_memories(db, bot_id, limit)
-    return {"bot_id": bot_id, "memories": memories}
+    memories = await list_memories(db, bot_id, limit, session_id)
+    return {"bot_id": bot_id, "session_id": session_id, "memories": memories}
 
 
 @app.get("/mcp/sse")

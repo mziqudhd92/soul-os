@@ -1,0 +1,82 @@
+# SoulOS sidecar stack — kernel + Postgres + inference plug-in
+# Usage: docker compose -f docker-compose.sidecar.yml --profile bridge-mock up
+
+services:
+  soulos-kernel:
+    build:
+      context: .
+      dockerfile: packages/soulos-core/Dockerfile
+    container_name: soulos-sidecar-kernel
+    ports:
+      - "${SOULOS_KERNEL_PORT:-8001}:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql+asyncpg://postgres:changeme_local_dev@soulos-db:5432/senticore
+      - INFERENCE_API_URL=${INFERENCE_API_URL:-http://soulos-inference-bridge:11434}
+      - EMBEDDING_DIMENSION=${EMBEDDING_DIMENSION:-768}
+      - INFERENCE_SKIP_PULL=${INFERENCE_SKIP_PULL:-1}
+      - INFERENCE_MODE=${INFERENCE_MODE:-full}
+      - MODEL_NAME=${MODEL_NAME:-llama3}
+      - EMBED_MODEL_NAME=${EMBED_MODEL_NAME:-nomic-embed-text}
+    depends_on:
+      soulos-db:
+        condition: service_healthy
+    networks:
+      - soulos_sidecar_net
+
+  soulos-db:
+    image: pgvector/pgvector:pg16
+    container_name: soulos-sidecar-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_local_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-senticore}
+    ports:
+      - "${SOULOS_DB_PORT:-5433}:5432"
+    volumes:
+      - soulos_sidecar_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - soulos_sidecar_net
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: soulos-sidecar-ollama
+    profiles: ["ollama"]
+    ports:
+      - "11434:11434"
+    networks:
+      - soulos_sidecar_net
+    command: ["serve"]
+
+  soulos-inference-bridge:
+    build:
+      context: .
+      dockerfile: packages/soulos-inference-bridge/Dockerfile
+    container_name: soulos-sidecar-bridge
+    profiles: ["bridge-mock", "bridge-aws", "bridge-vertex"]
+    ports:
+      - "11434:11434"
+    environment:
+      - BRIDGE_MODE=${BRIDGE_MODE:-mock}
+      - EMBEDDING_DIMENSION=${EMBEDDING_DIMENSION:-768}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - BEDROCK_CHAT_MODEL_ID=${BEDROCK_CHAT_MODEL_ID:-amazon.nova-lite-v1:0}
+      - BEDROCK_EMBED_MODEL_ID=${BEDROCK_EMBED_MODEL_ID:-amazon.titan-embed-text-v2:0}
+      - VERTEX_PROJECT_ID=${VERTEX_PROJECT_ID:-}
+      - VERTEX_LOCATION=${VERTEX_LOCATION:-us-central1}
+      - VERTEX_CHAT_MODEL=${VERTEX_CHAT_MODEL:-gemini-2.0-flash-001}
+      - VERTEX_EMBED_MODEL=${VERTEX_EMBED_MODEL:-text-embedding-004}
+    networks:
+      - soulos_sidecar_net
+
+networks:
+  soulos_sidecar_net:
+    driver: bridge
+
+volumes:
+  soulos_sidecar_pg:

@@ -155,8 +155,38 @@ Hydrate pgvector from a workspace `.soul-memory/` directory (dedupes by content 
 
 Run System 2 reflector for hybrid integrations that skip `/chat/generate`.
 
-- **Payload:** `{"bot_id": "uuid", "message": "string"}`
+- **Payload:** `{"bot_id": "uuid", "message": "string", "reflect_async": false}`
 - **Response:** `{"status": "success", "bot_id": "...", "current_msv": { ... }, "latency_ms": N}`
+- **Async:** `reflect_async: true` → `202` with `{"status": "accepted", "reflect": "async"}`
+
+### `GET /ready`
+
+Sidecar readiness: database, inference API, `embedding_dimension`.
+
+### `POST /hybrid/prepare`
+
+Single call for hybrid orchestrator pre-turn context.
+
+- **Payload:** `{"bot_id", "query", "top_k?", "session_id?"}`
+- **Response:** `identity`, `memories`, `system_prompt`, `inner_monologue`
+
+### `POST /hybrid/complete`
+
+Post-turn ingest + optional reflect.
+
+- **Payload:** `{"bot_id", "summary", "user_message?", "session_id?", "reflect": true, "reflect_async": true}`
+- **Response:** `200` with reflect result, or `202` when `reflect_async` is true
+
+### `POST /v1/avatars/ensure`
+
+Idempotent avatar registration by `external_key`.
+
+- **Payload:** `{"external_key": "string", "soul": { ... }, "runtime_config?": { ... }}`
+- **Response:** same as `POST /v1/avatars`
+
+Memory ingest/retrieve accept optional `session_id`. `GET /bot/{bot_id}/memories?session_id=` filters by session.
+
+`runtime_config.hybrid_prompt_template` — optional string template with `{name}`, `{role}`, `{description}`, `{inner_monologue}`, `{memories}`.
 
 ### `GET /bot/{bot_id}/identity`
 

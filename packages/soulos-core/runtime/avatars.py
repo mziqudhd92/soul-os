@@ -46,6 +46,7 @@ async def register_avatar_record(
     owner_id: str | None,
     payload: dict[str, Any],
     runtime_config: dict[str, Any] | None = None,
+    external_key: str | None = None,
 ) -> dict[str, Any]:
     soul = validate_soul_payload(payload)
     msv_json = json.dumps(soul.baseline_msv.model_dump())
@@ -57,13 +58,14 @@ async def register_avatar_record(
             INSERT INTO bots (
                 owner_id, name, role, description, attachment_style,
                 baseline_msv, current_msv,
-                capabilities, hourly_rate, status, avatar_url, runtime_config
+                capabilities, hourly_rate, status, avatar_url, runtime_config,
+                external_key
             )
             VALUES (
                 CAST(:owner_id AS uuid), :name, :role, :description, :attachment_style,
                 CAST(:baseline_msv AS jsonb), CAST(:current_msv AS jsonb),
                 CAST(:capabilities AS jsonb), :hourly_rate, :status, :avatar_url,
-                CAST(:runtime_config AS jsonb)
+                CAST(:runtime_config AS jsonb), :external_key
             )
             RETURNING id
         """),
@@ -80,6 +82,7 @@ async def register_avatar_record(
             "status": soul.status or "available",
             "avatar_url": soul.avatar_url,
             "runtime_config": runtime_json,
+            "external_key": external_key,
         },
     )
     row = result.fetchone()
@@ -129,3 +132,57 @@ async def list_avatars(
         }
         for row in result.fetchall()
     ]
+
+
+async def find_avatar_by_external_key(
+    conn: AsyncConnection,
+    owner_id: str | None,
+    external_key: str,
+) -> dict[str, Any] | None:
+    if owner_id:
+        result = await conn.execute(
+            text(
+                "SELECT id, name, role, baseline_msv, current_msv "
+                "FROM bots WHERE external_key = :external_key "
+                "AND owner_id = CAST(:owner_id AS uuid)"
+            ),
+            {"external_key": external_key, "owner_id": owner_id},
+        )
+    else:
+        result = await conn.execute(
+            text(
+                "SELECT id, name, role, baseline_msv, current_msv "
+                "FROM bots WHERE external_key = :external_key AND owner_id IS NULL"
+            ),
+            {"external_key": external_key},
+        )
+    row = result.fetchone()
+    if not row:
+        return None
+    baseline = row.baseline_msv if row.baseline_msv else {}
+    current = row.current_msv if row.current_msv else {}
+    return {
+        "id": str(row.id),
+        "name": row.name,
+        "role": row.role,
+        "baseline_msv": baseline,
+        "current_msv": current,
+    }
+
+
+async def ensure_avatar_record(
+    conn: AsyncConnection,
+    owner_id: str | None,
+    external_key: str,
+    payload: dict[str, Any],
+    runtime_config: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    existing = await find_avatar_by_external_key(conn, owner_id, external_key)
+    if existing:
+        return existing
+    return await register_avatar_record(
+        conn, owner_id, payload, runtime_config, external_key=external_key
+    )
+
+
+fetch_bot_identity = get_bot_identity

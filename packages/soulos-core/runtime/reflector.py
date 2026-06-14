@@ -11,7 +11,7 @@ from sqlalchemy import text
 
 from runtime.boot_memory import sync_memory_on_boot
 from runtime.crystallization import apply_crystallization_if_needed
-from config import INFERENCE_API_URL, MODEL_NAME, engine
+from config import INFERENCE_API_URL, INFERENCE_MODE, MODEL_NAME, engine
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +31,30 @@ async def run_system_2_reflector(
     current_msv: dict,
     active_mcp_tools: list[str] | None = None,
 ) -> ReflectorResult:
+    started = time.monotonic()
+    tools = list(active_mcp_tools or [])
+
+    if INFERENCE_MODE == "embeddings_only":
+        new_msv = dict(current_msv)
+        snippet = message.replace("\n", " ")[:120]
+        new_msv["inner_monologue"] = (
+            f"Embeddings-only mode: noted user message without LLM reflect ({snippet})."
+        )
+        async with engine.begin() as conn:
+            await conn.execute(
+                text("UPDATE bots SET current_msv = :msv WHERE id = :id"),
+                {"msv": json.dumps(new_msv), "id": bot_id},
+            )
+        if "system_2_reflector" not in tools:
+            tools.append("system_2_reflector")
+        return ReflectorResult(
+            msv=new_msv,
+            latency_ms=int((time.monotonic() - started) * 1000),
+            reasoning_tokens=0,
+            loop_count=1,
+            active_mcp_tools=tools,
+        )
+
     prompt = f"""
     System: You are the subconscious metacognitive layer of an AI agent.
     Analyze the user's message: "{message}"
@@ -77,7 +101,7 @@ async def run_system_2_reflector(
                         conn, bot_id, baseline or current_msv, new_msv
                     )
                 tools = list(active_mcp_tools or [])
-                if "run_system_2_reflector" not in tools:
+                if "system_2_reflector" not in tools:
                     tools.append("system_2_reflector")
                 return ReflectorResult(
                     msv=new_msv,

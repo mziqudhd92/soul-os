@@ -70,6 +70,24 @@ async def init_database() -> None:
         await conn.execute(
             text("ALTER TABLE bots ADD COLUMN IF NOT EXISTS cognitive_meta JSONB;")
         )
+        await conn.execute(
+            text(
+                "ALTER TABLE episodic_memories "
+                "ADD COLUMN IF NOT EXISTS session_id VARCHAR(128);"
+            )
+        )
+        await conn.execute(
+            text(
+                "ALTER TABLE bots ADD COLUMN IF NOT EXISTS external_key VARCHAR(128);"
+            )
+        )
+        await conn.execute(
+            text(
+                "CREATE UNIQUE INDEX IF NOT EXISTS idx_bots_owner_external_key "
+                "ON bots (owner_id, external_key) "
+                "WHERE external_key IS NOT NULL;"
+            )
+        )
     await engine.dispose()
     logger.info("Database initialized successfully.")
 

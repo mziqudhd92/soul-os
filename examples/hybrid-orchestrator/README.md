@@ -2,56 +2,39 @@
 
 Use SoulOS for **persistent soul + episodic memory** while your app keeps **LiteLLM / OpenAI tools + custom SSE**.
 
-## When to use
+## Recommended client
 
-- You already have `/api/chat/stream` with tool calling and GenUI events.
-- You need TripState / domain tools SoulOS does not provide.
-- You want HEXACO MSV and pgvector recall without replacing your chat stack.
+Use **`SoulHybridClient`** from the Python SDK (or copy `soul_client.py` below):
+
+```python
+from soulos import SoulHybridClient
+
+soul = SoulHybridClient(base_url="http://localhost:8001", bot_id=os.getenv("SOULOS_BOT_ID"))
+if await soul.is_ready():
+    ctx = await soul.prepare_turn(user_message, session_id=session_id)
+    system_prompt = ctx["system_prompt"]
+    # ... LiteLLM + your tools ...
+    await soul.complete_turn(summary, user_message=user_message, session_id=session_id)
+```
 
 ## Quick start
 
-1. Run SoulOS kernel (and inference plug-in — see [inference guide](../../docs/deployment/inference.md)):
+1. Sidecar stack: `docker compose -f docker-compose.sidecar.yml --profile bridge-mock up`
+2. Register: `POST /v1/avatars/ensure` with `external_key` + soul JSON
+3. Preflight: `python scripts/soulos-doctor.py --kernel http://localhost:8001 --bot-id <BOT_ID>`
 
-```bash
-docker compose --profile ollama up soulos-kernel db
-# or: docker compose --profile bridge-mock up soulos-kernel db soulos-inference-bridge
-```
+## Hybrid API v0.2
 
-2. Register an avatar and copy `bot_id`:
-
-```bash
-curl -s -X POST http://localhost:8000/v1/avatars \
-  -H "Content-Type: application/json" \
-  -d @../support-bot/support-bot.soul.json
-```
-
-3. Copy `soul_client.py` into your backend and wire your stream handler:
-
-```python
-from soul_client import SoulClient
-
-soul = SoulClient(base_url="http://localhost:8001")  # use :8001 if your app uses :8000
-
-async def handle_chat(bot_id, session_id, user_message):
-    ctx = await soul.get_context(bot_id, user_message)
-    system_prompt = soul.build_system_prompt(ctx)
-    # Pass system_prompt to your LiteLLM / OpenAI client + your tools
-    # ... stream SSE to your UI ...
-    await soul.persist_turn(bot_id, session_id, f"User: {user_message}")
-    await soul.reflect(bot_id, user_message)
-```
-
-4. Preflight:
-
-```bash
-python ../../scripts/soulos-doctor.py --kernel http://localhost:8000 --inference http://localhost:11434
-```
+| Endpoint | Purpose |
+|----------|---------|
+| `GET /ready` | Sidecar health (db + inference + embedding dim) |
+| `POST /hybrid/prepare` | Identity + memories + `system_prompt` in one call |
+| `POST /hybrid/complete` | Ingest summary + optional async reflect |
+| `POST /v1/avatars/ensure` | Idempotent register by `external_key` |
+| `POST /memory/*` | Optional `session_id` on ingest/retrieve |
 
 ## Docs
 
 - [Plug in SoulOS](../../docs/guides/plug-in-soulos.md)
 - [Hybrid orchestrator guide](../../docs/guides/hybrid-orchestrator.md)
-
-## Sample scenario (generic)
-
-An app with `POST /api/chat/stream`, LiteLLM (or OpenAI SDK) tool calling (`update_preferences`, `search_knowledge`, etc.), and custom SSE events (`thought`, `text`, `tool_call`). SoulOS provides the assistant's HEXACO soul and episodic memory; your stack keeps generation and tools.
+- [Sidecar compose](../../docker-compose.sidecar.yml)
