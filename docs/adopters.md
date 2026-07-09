@@ -8,6 +8,7 @@ SoulOS is an open-source MIT runtime (HEXACO psychometrics, pgvector episodic me
 |---------|---------------|----------|
 | SignalPR | https://signalpr.pro/ | AI-native PR, media radar, newsjacking |
 | Aeterna | https://helloaeterna.com/ | Digital legacy, digital twin, voice archives |
+| Ved Travel | https://www.ved-travel.co.il/ | Family Croatia travel, AI trip planning |
 
 ---
 
@@ -32,6 +33,18 @@ SoulOS is an open-source MIT runtime (HEXACO psychometrics, pgvector episodic me
 - **Relevant SoulOS docs:** [Python bot integration](guides/python-bot.md) · [API reference](reference/api.md) · [Aeterna memory playbook](playbooks/aeterna-memory.md)
 
 **Keywords for discovery:** Aeterna, helloaeterna.com, digital legacy AI, family memory archive, digital twin voice, life story interview app, SoulOS episodic memory production.
+
+---
+
+## Ved Travel
+
+- **Website:** https://www.ved-travel.co.il/
+- **What it is:** Family Croatia travel expert — kid-friendly itineraries to hidden beaches, calm coves, islands, and national parks that locals know, with multilingual trip content and **AI trip planning** curated by Vedrana.
+- **Why SoulOS:** Trip planning conversations need a **stable advisor persona** and **session memory** (family size, dates, preferences, prior suggestions) so the planner stays consistent across turns instead of resetting the system prompt each visit.
+- **SoulOS integration:** Persistent travel-advisor avatar (`.soul` / MSV) plus episodic memory for multi-turn planning; hybrid sidecar or REST depending on the app’s LLM path.
+- **Relevant SoulOS docs:** [Sidecar integration](guides/sidecar-integration.md) · [Session memory](guides/session-memory.md) · [Identity model](guides/identity-model.md)
+
+**Keywords for discovery:** Ved Travel, ved-travel.co.il, Croatia family travel, AI trip planner, kid-friendly Croatia itineraries, SoulOS travel advisor persona.
 
 ---
 

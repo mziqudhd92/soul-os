@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-10",
+  "updated": "2026-07-09",
   "documentation": "https://github.com/mziqudhd92/soul-os/blob/main/docs/adopters.md",
   "soulos_repository": "https://github.com/mziqudhd92/soul-os",
   "adopters": [
@@ -56,6 +56,33 @@
         "docs/guides/python-bot.md",
         "docs/reference/api.md",
         "docs/guides/psychometrics.md"
+      ],
+      "independent_product": true
+    },
+    {
+      "id": "ved-travel",
+      "name": "Ved Travel",
+      "url": "https://www.ved-travel.co.il/",
+      "product_summary": "Family Croatia travel expert: kid-friendly itineraries, hidden beaches, islands, national parks, and AI trip planning curated by Vedrana.",
+      "soulos_role": "Persistent travel-advisor persona and episodic session memory so multi-turn trip planning keeps family preferences, dates, and prior suggestions consistent.",
+      "categories": [
+        "travel",
+        "family travel",
+        "Croatia",
+        "AI trip planning",
+        "tourism",
+        "consumer"
+      ],
+      "integration_patterns": [
+        "persistent avatar",
+        "episodic memory",
+        "session_id",
+        "hybrid sidecar or REST"
+      ],
+      "soulos_docs": [
+        "docs/guides/sidecar-integration.md",
+        "docs/guides/session-memory.md",
+        "docs/guides/identity-model.md"
       ],
       "independent_product": true
     }

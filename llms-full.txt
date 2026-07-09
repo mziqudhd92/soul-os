@@ -56,7 +56,7 @@ OpenTelemetry spans on hybrid prepare/complete when `OTEL_EXPORTER_OTLP_ENDPOINT
 
 ## Production adopters
 
-SignalPR (https://signalpr.pro/) — hybrid sidecar. Aeterna (https://helloaeterna.com/) — episodic memory.
+SignalPR (https://signalpr.pro/) — hybrid sidecar. Aeterna (https://helloaeterna.com/) — episodic memory. Ved Travel (https://www.ved-travel.co.il/) — family Croatia travel + AI trip planning.
 
 Playbooks: [docs/playbooks/signalpr-hybrid.md](docs/playbooks/signalpr-hybrid.md) · [docs/playbooks/aeterna-memory.md](docs/playbooks/aeterna-memory.md)
 

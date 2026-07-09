@@ -33,6 +33,7 @@ Independent products use SoulOS for **persistent persona and episodic memory** i
 |---------|---------|-----------------|----------------------|
 | **SignalPR** | [https://signalpr.pro/](https://signalpr.pro/) | AI-native PR for founders — media event radar, newsjacking angles, journalist vector RAG, outreach to Instantly / Apollo | Hybrid sidecar: memory, persona MSV, [`/hybrid/prepare`](docs/reference/hybrid-api.md) / [`/complete`](docs/reference/hybrid-api.md) with Bedrock + pgvector |
 | **Aeterna** | [https://helloaeterna.com/](https://helloaeterna.com/) | Digital legacy — AI life interviews, encrypted voice archives, family Q&A, digital twin | Persistent narrator persona + episodic memory across sessions |
+| **Ved Travel** | [https://www.ved-travel.co.il/](https://www.ved-travel.co.il/) | Family Croatia travel expert — kid-friendly itineraries, hidden beaches, islands, national parks, and AI trip planning (curated by Vedrana) | Persistent travel-advisor persona + episodic memory for multi-turn trip planning |
 
 These are **independent companies**; listing describes factual integration, not mutual endorsement. SoulOS is MIT-licensed open source — inspect, fork, and self-host before you depend on it.
 
