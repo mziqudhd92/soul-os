@@ -164,4 +164,39 @@ export class SoulHybridClient {
       return null;
     }
   }
+
+  async runTurn(
+    query: string,
+    generate: (systemPrompt: string, ctx: HybridPrepareResponse) => Promise<string>,
+    options: {
+      externalKey?: string;
+      soul?: Record<string, unknown>;
+      sessionId?: string;
+      topK?: number;
+      reflect?: boolean;
+    } = {}
+  ): Promise<{ reply: string; systemPrompt: string; prepare: HybridPrepareResponse; complete: HybridCompleteResponse | null }> {
+    if (options.externalKey && options.soul) {
+      await this.ensureAvatar(options.externalKey, options.soul);
+    }
+    const prepared = await this.prepareTurn(query, {
+      sessionId: options.sessionId,
+      topK: options.topK,
+    });
+    if (!prepared) {
+      throw new Error("prepare_turn returned no context");
+    }
+    const reply = await generate(prepared.system_prompt, prepared);
+    const completed = await this.completeTurn(reply.slice(0, 2000), {
+      userMessage: query,
+      sessionId: options.sessionId,
+      reflect: options.reflect ?? true,
+    });
+    return {
+      reply,
+      systemPrompt: prepared.system_prompt,
+      prepare: prepared,
+      complete: completed,
+    };
+  }
 }

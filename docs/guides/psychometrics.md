@@ -2,6 +2,32 @@
 
 You are not tuning abstract psychology — you are shaping **system prompt drift** and **reflector behavior**. Each trait in `baseline_msv` nudges how the avatar speaks and reacts over time.
 
+## Simple persona mode (no HEXACO literacy required)
+
+Set `persona_mode: "simple"` on the soul (or in Studio **Simple** tab) with three sliders (0–1):
+
+| Slider | Maps to | Effect |
+|--------|---------|--------|
+| **Warmth** | A, E, X | Friendlier, more expressive replies |
+| **Rigor** | C, H | More structured, policy-bound answers |
+| **Caution** | H, epistemic_uncertainty | Less speculative; admits uncertainty |
+
+Example soul fragment:
+
+```json
+{
+  "persona_mode": "simple",
+  "simple_persona": { "warmth": 0.8, "rigor": 0.7, "caution": 0.6 },
+  "name": "Support Bot",
+  "role": "Customer Support",
+  "description": "Helpful and policy-aware."
+}
+```
+
+Kernel derives `baseline_msv` from sliders at registration. ClawSouls imports open in **Advanced** mode with an inferred MSV banner in Studio.
+
+---
+
 ## HEXACO (-1.0 to 1.0)
 
 | Trait | Slider up | Slider down | Example message that shifts it |

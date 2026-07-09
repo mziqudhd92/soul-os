@@ -69,6 +69,18 @@
           </label>
 
           <header class="panel-head compact">
+            <h2 class="accent">Personality</h2>
+            <div class="view-toggle" role="tablist" aria-label="Persona mode">
+              <button type="button" class="view-toggle-btn active" id="tab-simple" data-persona="simple">Simple</button>
+              <button type="button" class="view-toggle-btn" id="tab-advanced" data-persona="advanced">Advanced</button>
+            </div>
+          </header>
+          <div id="simple-persona-panel">
+            <div id="simple-sliders" class="sliders"></div>
+            <p class="hint">Warmth, rigor, and caution map to HEXACO automatically.</p>
+          </div>
+          <div id="advanced-persona-panel" class="hidden">
+          <header class="panel-head compact">
             <h2 class="accent">HEXACO personality</h2>
           </header>
           <div id="hexaco-sliders" class="sliders"></div>
@@ -88,6 +100,7 @@
             <input id="epistemic_uncertainty" type="range" min="0" max="1" step="0.01" />
             <span id="uncertainty-val" class="mono val-readout">0.10</span>
           </label>
+          </div>
 
           <button type="button" id="btn-reset" class="btn ghost full">Reset defaults</button>
         </section>
@@ -151,6 +164,17 @@
               <button type="submit" class="btn primary sm" disabled id="chat-send">Send</button>
             </form>
             <p id="avatar-id" class="mono hint"></p>
+            <div id="turn-inspector" class="turn-inspector hidden">
+              <header class="panel-head compact">
+                <h2>Last turn inspector</h2>
+                <p>Export hybrid prepare payload for terminal or Postman. Production debugging: use OTel backends.</p>
+              </header>
+              <pre id="inspector-json" class="json-code mono"></pre>
+              <div class="btn-group">
+                <button type="button" id="btn-inspector-copy-json" class="btn ghost sm">Copy JSON</button>
+                <button type="button" id="btn-inspector-copy-curl" class="btn ghost sm">Copy curl</button>
+              </div>
+            </div>
             <div id="mcp-connect" class="mcp-connect hidden">
               <header class="panel-head compact">
                 <h2>Connect MCP</h2>

@@ -4,10 +4,11 @@ import secrets
 from contextvars import ContextVar
 from dataclasses import dataclass
 
-from fastapi import Header, HTTPException
+from fastapi import Header
 
 import config
 from config import ACCOUNT_ID_HEADER, GATEWAY_SECRET, GATEWAY_SECRET_HEADER
+from runtime.errors import ACCESS_DENIED, SoulOSProblem
 
 _mcp_account_context: ContextVar["AccountContext | None"] = ContextVar(
     "mcp_account_context", default=None
@@ -44,9 +45,10 @@ def resolve_account_context(
 
     if config.REQUIRE_AUTH:
         if not trusted:
-            raise HTTPException(
-                status_code=401,
-                detail="Cloud mode requires gateway authentication",
+            raise SoulOSProblem(
+                ACCESS_DENIED,
+                401,
+                "Cloud mode requires gateway authentication",
             )
         return AccountContext(account_id=account_id)
 

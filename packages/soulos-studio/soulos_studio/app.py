@@ -64,6 +64,13 @@ class ChatPayload(BaseModel):
     message: str
 
 
+class HybridPreparePayload(BaseModel):
+    avatar_id: str
+    query: str
+    session_id: str | None = None
+    top_k: int = 5
+
+
 class ClawSoulsImportPayload(BaseModel):
     owner: str
     name: str
@@ -260,6 +267,27 @@ async def clawsouls_import(body: ClawSoulsImportPayload):
             status_code=res.status_code,
             detail=data.get("detail", "import failed"),
         )
+    return data
+
+
+@app.post("/api/hybrid/prepare")
+async def hybrid_prepare_proxy(body: HybridPreparePayload):
+    payload = {
+        "bot_id": body.avatar_id,
+        "query": body.query,
+        "top_k": body.top_k,
+        "session_id": body.session_id,
+    }
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            res = await client.post(f"{KERNEL_URL}/hybrid/prepare", json=payload)
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=502, detail=f"Kernel unreachable: {e}") from e
+    data = res.json()
+    if res.status_code != 200:
+        detail = data.get("detail", data) if isinstance(data, dict) else str(data)
+        raise HTTPException(status_code=res.status_code, detail=detail)
+    data["query"] = body.query
     return data
 
 

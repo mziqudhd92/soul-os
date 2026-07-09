@@ -6,6 +6,8 @@ const state = {
   soul: null,
   avatarId: null,
   valid: true,
+  lastPrepare: null,
+  kernelUrl: "http://localhost:8000",
 };
 
 const wizard = {
@@ -90,6 +92,20 @@ function writeFormToDom() {
 }
 
 function buildSliders() {
+  const simple = $("simple-sliders");
+  if (simple && state.form.simple_persona) {
+    simple.innerHTML = "";
+    const labels = { warmth: "Warmth", rigor: "Rigor", caution: "Caution" };
+    for (const [key, label] of Object.entries(labels)) {
+      simple.appendChild(
+        sliderRow(key, label, state.form.simple_persona[key] ?? 0.5, (k, v) => {
+          state.form.simple_persona[k] = v;
+          refreshSoul();
+        }, "simp")
+      );
+    }
+  }
+
   const hex = $("hexaco-sliders");
   hex.innerHTML = "";
   for (const [key, label] of Object.entries(state.meta.hexaco_labels)) {
@@ -421,6 +437,17 @@ function updateCognitiveState(data) {
 async function sendChat(message) {
   if (!state.avatarId) return;
   logChat(message, "user");
+  try {
+    const prepRes = await fetch("/api/hybrid/prepare", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ avatar_id: state.avatarId, query: message }),
+    });
+    if (prepRes.ok) {
+      state.lastPrepare = await prepRes.json();
+      showTurnInspector(state.lastPrepare);
+    }
+  } catch (_) {}
   const res = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -460,6 +487,23 @@ async function sendChat(message) {
     }
     $("chat-log").scrollTop = $("chat-log").scrollHeight;
   }
+}
+
+function showTurnInspector(payload) {
+  const panel = $("turn-inspector");
+  const pre = $("inspector-json");
+  if (!panel || !pre || !payload) return;
+  panel.classList.remove("hidden");
+  pre.textContent = JSON.stringify(payload, null, 2);
+}
+
+function buildPrepareCurl(payload) {
+  const body = JSON.stringify({
+    bot_id: payload.bot_id,
+    query: payload.query || "user question",
+    top_k: 5,
+  });
+  return `curl -s -X POST ${state.kernelUrl}/hybrid/prepare \\\n  -H "Content-Type: application/json" \\\n  -d '${body.replace(/'/g, "'\\''")}'`;
 }
 
 function exportSoul() {
@@ -1087,6 +1131,7 @@ async function init() {
 
   writeFormToDom();
   buildSliders();
+  setPersonaMode(state.form.persona_mode || "simple");
 
   ["name", "role", "description", "inner_monologue"].forEach((id) => {
     $(id).addEventListener("input", () => refreshSoul());
@@ -1098,8 +1143,24 @@ async function init() {
   });
 
   $("btn-theme").addEventListener("click", toggleTheme);
-  document.querySelectorAll(".view-toggle-btn").forEach((btn) => {
+  document.querySelectorAll(".view-toggle-btn[data-preview]").forEach((btn) => {
     btn.addEventListener("click", () => setPreviewMode(btn.dataset.preview));
+  });
+  $("tab-simple")?.addEventListener("click", () => {
+    state.form.persona_mode = "simple";
+    setPersonaMode("simple");
+    refreshSoul();
+  });
+  $("tab-advanced")?.addEventListener("click", () => {
+    state.form.persona_mode = "advanced";
+    setPersonaMode("advanced");
+    refreshSoul();
+  });
+  $("btn-inspector-copy-json")?.addEventListener("click", async () => {
+    if (state.lastPrepare) await navigator.clipboard.writeText(JSON.stringify(state.lastPrepare, null, 2));
+  });
+  $("btn-inspector-copy-curl")?.addEventListener("click", async () => {
+    if (state.lastPrepare) await navigator.clipboard.writeText(buildPrepareCurl(state.lastPrepare));
   });
   $("btn-copy-json").addEventListener("click", copyJson);
   window.addEventListener("resize", onPreviewResize);
@@ -1141,6 +1202,19 @@ async function init() {
 
   switchView("studio");
   await refreshSoul();
+}
+
+function setPersonaMode(mode) {
+  const simplePanel = $("simple-persona-panel");
+  const advancedPanel = $("advanced-persona-panel");
+  const tabSimple = $("tab-simple");
+  const tabAdvanced = $("tab-advanced");
+  if (!simplePanel || !advancedPanel) return;
+  const isSimple = mode === "simple";
+  simplePanel.classList.toggle("hidden", !isSimple);
+  advancedPanel.classList.toggle("hidden", isSimple);
+  tabSimple?.classList.toggle("active", isSimple);
+  tabAdvanced?.classList.toggle("active", !isSimple);
 }
 
 init();

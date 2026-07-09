@@ -54,6 +54,11 @@ def main() -> int:
     status, body = fetch_json(f"{kernel}/ready")
     if status not in (200, 503):
         errors.append(f"kernel ready failed ({status}): {body}")
+    elif status == 503 and isinstance(body, dict):
+        code = body.get("code", "")
+        title = body.get("title", "")
+        print(f"  kernel ready: degraded (code={code}, title={title})")
+        errors.append(f"kernel ready degraded: {body.get('detail', body)}")
     else:
         print(f"  kernel ready: {body.get('status', body) if isinstance(body, dict) else body}")
 
@@ -69,7 +74,9 @@ def main() -> int:
             },
         )
         if status != 200:
-            errors.append(f"hybrid/prepare failed ({status}): {body}")
+            detail = body.get("detail", body) if isinstance(body, dict) else body
+            code = body.get("code", "") if isinstance(body, dict) else ""
+            errors.append(f"hybrid/prepare failed ({status}, code={code}): {detail}")
         elif isinstance(body, dict) and "system_prompt" not in body:
             errors.append("hybrid/prepare missing system_prompt")
         else:

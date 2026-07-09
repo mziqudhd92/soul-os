@@ -2,6 +2,12 @@
 
 REST endpoints, SSE multiplexing, and MCP tool exposure for SoulOS dual-process inference.
 
+**OpenAPI (SDK contract):** live at `GET /openapi.json` and Swagger UI at `GET /docs` on the kernel. Committed artifact: [openapi.kernel.json](openapi.kernel.json) — regenerate with `npm run openapi:export`.
+
+**Hybrid sidecar (primary):** [Hybrid API](hybrid-api.md) · [Identity model](../guides/identity-model.md)
+
+**Errors:** RFC 7807 Problem Details (`Content-Type: application/problem+json`) with fields `type`, `title`, `status`, `detail`, and extension `code` (e.g. `BOT_NOT_FOUND`, `INFERENCE_DOWN`, `READY_DEGRADED`).
+
 **Related:** [MCP guide](../guides/mcp.md) · [MCP tools](mcp-tools.md) · [Soul standard](soul-standard.md)
 
 ---

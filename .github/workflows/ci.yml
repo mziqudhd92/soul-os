@@ -30,3 +30,6 @@ jobs:
             -e "packages/soulos-inference-bridge[dev]"
 
       - run: npm run test:all
+
+      - name: Doc drift checks
+        run: npm run doc:check

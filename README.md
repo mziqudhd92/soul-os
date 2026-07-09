@@ -1,8 +1,8 @@
 # SoulOS
 
-**Open-source runtime for persistent AI avatars** — validated personality (HEXACO MSV), episodic memory (pgvector), dual-process chat with live telemetry, MCP for Cursor/Claude, and Soul Studio to build `.soul` files in the browser.
+**Identity + memory sidecar for agents you already run** — validated personality (HEXACO MSV), episodic memory (pgvector), and a hybrid API so your existing LLM (Bedrock, OpenAI, LiteLLM) keeps generation while SoulOS owns persona, recall, and MSV drift.
 
-Give your bot a **soul file** instead of a fragile system prompt. Same REST API, Python/TypeScript SDK, or MCP — self-host with Docker or use the cloud gateway.
+Give your bot a **soul file** instead of a fragile system prompt. Primary path: **`ensure_avatar → prepare → your LLM → complete`**. Full SSE chat, MCP, and Soul Studio remain supported.
 
 <p align="center">
   <a href="https://github.com/mziqudhd92/soul-os/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mziqudhd92/soul-os/ci.yml?branch=main&label=CI" alt="CI"/></a>
@@ -63,15 +63,38 @@ Wait until the kernel is up (first build can take several minutes).
 
 | I want to… | Start here | Time |
 |------------|------------|------|
-| **Wire SoulOS into my Python bot** (recommended) | [Interactive tutorial](https://mziqudhd92.github.io/soul-os/?tutorial=python-bot) or [Python bot guide](docs/guides/python-bot.md) | ~25 min |
+| **Add SoulOS to my existing LLM app** (recommended) | [Sidecar integration](docs/guides/sidecar-integration.md) · [Hybrid API](docs/reference/hybrid-api.md) | ~20 min |
+| **Wire SoulOS into my Python bot** | [Interactive tutorial](https://mziqudhd92.github.io/soul-os/?tutorial=python-bot) or [Python bot guide](docs/guides/python-bot.md) | ~25 min |
 | **Click around in a UI** | Open http://localhost:8765 → **Wizard** or **Tutorials** | ~15 min |
 | **Test the API with curl** (no code) | [Quickstart Path A](docs/getting-started/quickstart.md#path-a) | ~10 min |
 | **Use SoulOS from Cursor / Claude** | [MCP guide](docs/guides/mcp.md) → `http://localhost:8000/mcp/sse` | ~15 min |
 | **Deploy on my own servers** | [Plug in SoulOS](docs/guides/plug-in-soulos.md) · [Self-hosted](docs/deployment/self-hosted.md) | ~15 min |
-| **Add SoulOS to my existing LLM app** | [Sidecar integration](docs/guides/sidecar-integration.md) · [Hybrid orchestrator](docs/guides/hybrid-orchestrator.md) | ~20 min |
 | **Use a ClawSouls persona** | [ClawSouls import](docs/guides/clawsouls-import.md) · Studio **ClawSouls** tab | ~10 min |
 
-### 3. Register a soul and chat (minimal API smoke test)
+### 3. Five-minute sidecar (hybrid)
+
+```bash
+docker compose -f docker-compose.sidecar.yml --profile bridge-mock up -d
+npm run smoke:hybrid   # ensure → doctor → prepare → print system_prompt
+```
+
+Or manually:
+
+```bash
+# Idempotent avatar bootstrap
+curl -s -X POST http://localhost:8001/v1/avatars/ensure \
+  -H "Content-Type: application/json" \
+  -d '{"external_key":"demo-bot","soul":'"$(cat examples/support-bot/support-bot.soul.json)"'}'
+
+# Prepare (returns system_prompt for your LLM)
+curl -s -X POST http://localhost:8001/hybrid/prepare \
+  -H "Content-Type: application/json" \
+  -d '{"bot_id":"<BOT_ID>","query":"What is the refund policy?"}'
+```
+
+Set `INFERENCE_MODE=embeddings_only` when SoulOS should never call chat models. See [Identity model](docs/guides/identity-model.md).
+
+### 4. Full-chat smoke test (secondary path)
 
 ```bash
 # Register example support bot (JSON)

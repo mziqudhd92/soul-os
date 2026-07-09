@@ -23,6 +23,11 @@ class MemorySync(BaseModel):
     workspace_path: str
 
 
+class MemoryForget(BaseModel):
+    bot_id: str
+    content_match: str
+
+
 class ChatRequest(BaseModel):
     bot_id: str
     message: str

@@ -25,26 +25,44 @@ Boot: `docker compose up --build` (kernel :8000, studio :8765, Postgres, Ollama)
 
 | Use case | Use |
 |----------|-----|
-| Cursor / Claude IDE agent (memory, FAQ, identity) | **MCP** at `/mcp/sse` |
-| App, site, Discord bot | **REST** or `@soulos/sdk` / `soulos-sdk` |
+| **Existing LLM app (recommended)** | Hybrid sidecar: `ensure_avatar → prepare → your LLM → complete` |
+| Cursor / Claude IDE agent | **MCP** at `/mcp/sse` |
+| App with SoulOS-owned chat stream | **REST** `POST /chat/generate` or SDK |
 | Hand-tune `.soul.json` | **Soul Studio** (`pip install soulos-studio`) |
 
-MCP does **not** expose chat streaming — use REST/SDK for `POST /chat/generate`.
+Identity model: [guides/identity-model.md](guides/identity-model.md)
 
 ---
 
-## Production adopters
+## Hybrid sidecar workflow (primary)
 
-| Product | URL | SoulOS role |
-|---------|-----|-------------|
-| SignalPR | https://signalpr.pro/ | Hybrid sidecar: episodic memory, MSV, `/hybrid/*` with Bedrock + pgvector |
-| Aeterna | https://helloaeterna.com/ | Persistent persona + episodic memory for digital legacy / digital twin |
+```bash
+# 1. Idempotent bootstrap (returns bot_id)
+curl -X POST http://localhost:8000/v1/avatars/ensure \
+  -H "Content-Type: application/json" \
+  -d '{"external_key":"my-app:user-1","soul":{...}}'
 
-Full profiles: `docs/adopters.md` · `docs/adopters.json`
+# 2. Prepare — use system_prompt with YOUR LLM
+curl -X POST http://localhost:8000/hybrid/prepare \
+  -d '{"bot_id":"<id>","query":"user question","session_id":"sess-1"}'
+
+# 3. Your LLM generates the reply (Bedrock, OpenAI, LiteLLM, etc.)
+
+# 4. Complete — ingest + optional async MSV reflect
+curl -X POST http://localhost:8000/hybrid/complete \
+  -d '{"bot_id":"<id>","summary":"...","user_message":"...","session_id":"sess-1"}'
+```
+
+Python SDK: `SoulHybridClient.run_turn(query, generate_fn, external_key=..., soul=...)`
+
+Sidecar compose: `docker compose -f docker-compose.sidecar.yml --profile bridge-mock up`  
+Smoke: `npm run smoke:hybrid`
+
+OpenAPI: `http://localhost:8000/openapi.json` · artifact: `docs/reference/openapi.kernel.json`
 
 ---
 
-## Quick workflow
+## Full-chat workflow (secondary)
 
 ```bash
 # 1. Register soul (returns id = bot_id)
@@ -128,13 +146,14 @@ Example souls: `examples/support-bot/`, `examples/dev-twin/`, `examples/companio
 | `POST` | `/hybrid/prepare` | `{ bot_id, query, session_id?, top_k? }` → `system_prompt` |
 | `POST` | `/hybrid/complete` | ingest + async reflect |
 | `POST` | `/v1/avatars/ensure` | `{ external_key, soul, runtime_config? }` |
-| `POST` | `/v1/avatars/import-clawsouls` | `{ owner, name, persist?, msv_preset? }` — [ClawSouls](https://clawsouls.ai) import |
-| `GET` | `/bot/{bot_id}/identity` | name, role, description, current_msv |
-| `GET` | `/bot/{bot_id}/memories` | `?limit=50&session_id=` episodic log |
+| `POST` | `/memory/forget` | `{ bot_id, content_match }` |
+| `DELETE` | `/memory/session/{bot_id}/{session_id}` | Delete session-scoped memories |
+| `GET` | `/openapi.json` | OpenAPI 3 schema (SDK contract) |
+| `GET` | `/docs` | Swagger UI |
 
-**Sidecar integrators:** [guides/sidecar-integration.md](guides/sidecar-integration.md) · [reference/hybrid-api.md](reference/hybrid-api.md)
+**Sidecar integrators:** [guides/sidecar-integration.md](guides/sidecar-integration.md) · [reference/hybrid-api.md](reference/hybrid-api.md) · [guides/identity-model.md](guides/identity-model.md)
 
-Validation errors on register: `422` with trait-level detail.
+Errors: RFC 7807 `application/problem+json` with `code` (e.g. `BOT_NOT_FOUND`, `INFERENCE_DOWN`).
 
 ---
 

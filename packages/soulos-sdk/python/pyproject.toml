@@ -1,6 +1,6 @@
 [project]
 name = "soulos-sdk"
-version = "0.1.0"
+version = "0.2.0"
 description = "Thin Python client for the SoulOS kernel API"
 requires-python = ">=3.12"
 dependencies = ["httpx>=0.27.0"]

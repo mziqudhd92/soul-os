@@ -44,6 +44,8 @@ def _load_schema() -> dict[str, Any]:
 
 def default_form() -> dict[str, Any]:
     return {
+        "persona_mode": "advanced",
+        "simple_persona": {"warmth": 0.7, "rigor": 0.7, "caution": 0.6},
         "name": "My Avatar",
         "role": "Assistant",
         "description": (
@@ -69,7 +71,7 @@ def default_form() -> dict[str, Any]:
 
 
 def build_soul_payload(form: dict[str, Any]) -> dict[str, Any]:
-    return {
+    payload: dict[str, Any] = {
         "name": (form.get("name") or "My Avatar").strip(),
         "role": (form.get("role") or "Assistant").strip(),
         "description": (form.get("description") or "Assistant avatar.").strip(),
@@ -83,6 +85,10 @@ def build_soul_payload(form: dict[str, Any]) -> dict[str, Any]:
         },
         "status": "available",
     }
+    if form.get("persona_mode") == "simple":
+        payload["persona_mode"] = "simple"
+        payload["simple_persona"] = dict(form.get("simple_persona") or {})
+    return payload
 
 
 def parse_soul_file(data: dict[str, Any]) -> dict[str, Any]:

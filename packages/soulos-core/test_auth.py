@@ -1,11 +1,11 @@
 import secrets
 
 import pytest
-from fastapi import HTTPException
 from httpx import AsyncClient, ASGITransport
 
 from auth import resolve_account_context
 from config import GATEWAY_SECRET, validate_gateway_secret
+from runtime.errors import ACCESS_DENIED, SoulOSProblem
 
 
 def test_resolve_account_open_mode_without_headers():
@@ -49,9 +49,10 @@ def test_validate_gateway_secret_allows_strong_value_in_cloud_mode(monkeypatch):
 
 def test_resolve_account_cloud_mode_requires_gateway(monkeypatch):
     monkeypatch.setattr("config.REQUIRE_AUTH", True)
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(SoulOSProblem) as exc:
         resolve_account_context(None, None)
     assert exc.value.status_code == 401
+    assert exc.value.code == ACCESS_DENIED
 
 
 @pytest.mark.asyncio

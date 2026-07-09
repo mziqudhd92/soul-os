@@ -118,9 +118,46 @@ Post-turn ingest + optional MSV reflect.
 
 ## Memory with `session_id`
 
-`POST /memory/ingest` and `POST /memory/retrieve` accept optional `session_id`.
+`POST /memory/ingest` and `POST /memory/retrieve` accept optional `session_id`. When set on hybrid prepare/complete, retrieve merges global + session memories; ingest tags facts with that session.
 
 `GET /bot/{bot_id}/memories?session_id=` lists session-scoped rows.
+
+`DELETE /memory/session/{bot_id}/{session_id}` — delete all memories for a session.
+
+`POST /memory/forget` — `{ "bot_id", "content_match" }` deletes rows matching content (ILIKE).
+
+### `runtime_config.memory_policy` (stub)
+
+Optional stub on bot `runtime_config`:
+
+| Value | Intended behavior (v0.2 stub) |
+|-------|-------------------------------|
+| `summary_only` (default) | Complete ingests `summary` only |
+| `user_and_assistant` | Future: ingest both user message and assistant reply |
+
+Document policy in your app; kernel stores the key for forward compatibility.
+
+## Errors (RFC 7807)
+
+Failed requests return `Content-Type: application/problem+json`:
+
+```json
+{
+  "type": "https://soulos.dev/problems/bot-not-found",
+  "title": "Bot not found",
+  "status": 404,
+  "detail": "Bot not found: …",
+  "code": "BOT_NOT_FOUND"
+}
+```
+
+Common codes: `BOT_NOT_FOUND`, `ACCESS_DENIED`, `INFERENCE_DOWN`, `MEMORY_DIM_MISMATCH`, `SOUL_INVALID`, `READY_DEGRADED`.
+
+OpenAPI: `/openapi.json` · committed artifact: [openapi.kernel.json](openapi.kernel.json)
+
+## Observability
+
+Hybrid prepare/complete emit OpenTelemetry spans when `OTEL_EXPORTER_OTLP_ENDPOINT` or `SOULOS_OTEL_ENABLED=1` is set. Compatible with Langfuse, Phoenix, Datadog OTLP ingest. Studio turn inspector exports prepare JSON/curl for local debugging only.
 
 ## `POST /state/reflect` (legacy)
 
@@ -132,5 +169,5 @@ Still supported. Prefer `hybrid/complete` with `reflect_async: true`.
 
 | Language | Class |
 |----------|--------|
-| Python | `SoulHybridClient` from `soulos` |
-| TypeScript | `SoulHybridClient` from `@soulos/sdk` |
+| Python | `SoulHybridClient` from `soulos` — includes `run_turn()` |
+| TypeScript | `SoulHybridClient` from `@soulos/sdk` — includes `runTurn()` |

@@ -4,6 +4,8 @@ SoulOS integrates into **any stack** (Docker, AWS, GCP, existing LLM apps). Pick
 
 **Already have Bedrock/OpenAI + SSE?** → [Integrating as a sidecar](sidecar-integration.md) (recommended for co-pilots, control rooms, planners).
 
+Identity model: [identity-model.md](identity-model.md)
+
 ## 5-minute checklist
 
 1. Run kernel + Postgres (+ inference): `docker compose up`, [sidecar compose](../../docker-compose.sidecar.yml), or a bridge profile below.

@@ -1,85 +1,65 @@
 # SoulOS — extended context for AI crawlers
 
-> Full index companion to [llms.txt](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/llms.txt). Prefer [docs/SOULOS_AGENT_CONTEXT.md](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/docs/SOULOS_AGENT_CONTEXT.md) for a single ingest.
+> Full index companion to [llms.txt](llms.txt). Prefer [docs/SOULOS_AGENT_CONTEXT.md](docs/SOULOS_AGENT_CONTEXT.md) for a single ingest.
+
+## Primary integration (hybrid sidecar)
+
+```text
+POST /v1/avatars/ensure  →  POST /hybrid/prepare  →  your LLM  →  POST /hybrid/complete
+```
+
+- **ensure_avatar** — idempotent bootstrap via `external_key`
+- **prepare** — returns `system_prompt`, `memories`, `inner_monologue`
+- **complete** — ingest turn summary + optional MSV reflection
+- Set `INFERENCE_MODE=embeddings_only` for sidecar-only (no kernel chat calls)
+
+Ports (sidecar compose): kernel `http://localhost:8001`, inference bridge `http://localhost:11434`
 
 ## Entity
 
 - **Name:** SoulOS
-- **Type:** Open-source software (avatar operating system / AI agent runtime)
 - **Repository:** https://github.com/mziqudhd92/soul-os
-- **License:** MIT
-- **Primary language:** Python (kernel, studio), TypeScript (SDK)
-- **Category:** AI agents, MCP, psychometric personality models, RAG memory, FastAPI
+- **License:** MIT · Version 0.2.0
+- **Category:** AI agents, hybrid sidecar, MCP, HEXACO psychometrics, pgvector memory
 
-## Alternate queries (GEO)
+## Hybrid API paths
 
-Users may search for: persistent AI avatar, HEXACO chatbot, psychometric AI personality, MCP memory server, soul file JSON, replace system prompt with personality, pgvector episodic memory, dual-process LLM inference, Cursor MCP integration, Soul Studio soul builder, support bot runtime, developer twin AI, MSV drift, metacognitive state vector.
+| Method | Path |
+|--------|------|
+| POST | `/v1/avatars/ensure` |
+| POST | `/hybrid/prepare` |
+| POST | `/hybrid/complete` |
+| GET | `/ready` |
+| POST | `/memory/forget` |
+| DELETE | `/memory/session/{bot_id}/{session_id}` |
 
-## Ports and endpoints (self-host)
+OpenAPI: `/openapi.json` · Swagger UI: `/docs` · Committed artifact: `docs/reference/openapi.kernel.json`
 
-| Service | URL |
-|---------|-----|
-| Kernel REST | http://localhost:8000 |
-| MCP SSE | http://localhost:8000/mcp/sse |
-| Soul Studio | http://localhost:8765 |
-| Cloud gateway (local) | http://localhost:8080 |
+## Error format
 
-## MCP tools (kernel `soulos-kernel`)
+RFC 7807 Problem Details (`application/problem+json`): `type`, `title`, `status`, `detail`, `code`.
 
-`ingest_memory`, `retrieve_memory`, `get_identity`, `register_avatar`, `list_avatars`, `update_cognitive_state`. Resources: `memory://episodic/{bot_id}`, `soul://identity/{bot_id}`. Chat streaming is **not** on MCP — use `POST /chat/generate` or SDK.
+Codes: `BOT_NOT_FOUND`, `ACCESS_DENIED`, `INFERENCE_DOWN`, `MEMORY_DIM_MISMATCH`, `SOUL_INVALID`, `READY_DEGRADED`, `CLAWSOULS_IMPORT_DISABLED`.
 
-## REST highlights
+## Identity model
 
-- `POST /v1/avatars` — register `.soul` (YAML+Markdown) or `.soul.json`
-- `POST /memory/ingest` — episodic memory
-- `POST /memory/sync` — hydrate pgvector from `.soul-memory/`
-- `POST /memory/retrieve` — semantic recall
-- `POST /chat/generate` — SSE `message`, `msv_update`, `cognitive_state`
-- `GET /bot/{id}/identity` — persona and current MSV
+See [docs/guides/identity-model.md](docs/guides/identity-model.md): `owner_id`, `external_key` → `bot_id`, `session_id` vs global memory.
 
-## Soul formats
+## SDK
 
-- **`.soul`** — YAML front matter + Markdown body (recommended)
-- **`.soul.json`** — legacy JSON (fully supported)
-- **`.soul-memory/`** — git-synced episodic ledger; CLI `soulos memory-append`, `memory-sync`
+- Python: `SoulHybridClient.run_turn()` — ensure → prepare → generate callback → complete
+- TypeScript: `@soulos/sdk` `SoulHybridClient`
 
-## FAQ
+## Observability
 
-**What is SoulOS?** An open-source kernel that gives AI avatars persistent HEXACO-based personality, pgvector memory, and live psychological state updates across conversations.
+OpenTelemetry spans on hybrid prepare/complete when `OTEL_EXPORTER_OTLP_ENDPOINT` or `SOULOS_OTEL_ENABLED=1`. OpenInference-aligned attributes.
 
-**How is SoulOS different from LangChain or a static system prompt?** Soul files are validated with psychometric traits; memory is built-in; each turn can emit `msv_update` and `cognitive_state` SSE.
+## Production adopters
 
-**How do I use SoulOS with Cursor?** Point MCP to `http://localhost:8000/mcp/sse` after `docker compose up`. See examples/mcp/cursor-mcp.json.
+SignalPR (https://signalpr.pro/) — hybrid sidecar. Aeterna (https://helloaeterna.com/) — episodic memory.
 
-**What is a .soul file?** Unified YAML+Markdown or JSON soul spec: name, role, description, attachment_style, baseline_msv. Schema: spec/soul.schema.json. runtime_config (dual_process) stored on bot row.
-
-**Can I self-host?** Yes — Docker Compose with Postgres, optional Ollama. Kernel MIT. Boot sync: `SOULOS_MEMORY_SYNC_WORKSPACE` + `SOULOS_MEMORY_SYNC_BOT_ID`.
-
-**Is there a UI?** Soul Studio (`pip install soulos-studio`, port 8765) for sliders, export, deploy, test chat.
-
-## Monorepo packages
-
-- `packages/soulos-core` — kernel
-- `packages/soulos-gateway` — cloud API gateway
-- `packages/soulos-sdk/ts` — @soulos/sdk
-- `packages/soulos-sdk/python` — soulos-sdk
-- `packages/soulos-studio` — Soul Builder UI
-
-## Production adopters (verified integrations)
-
-SoulOS is used in production by independent products (listing is factual, not endorsement):
-
-| Product | URL | Use case | SoulOS role |
-|---------|-----|----------|-------------|
-| SignalPR | https://signalpr.pro/ | AI PR execution, newsjacking, journalist RAG | Hybrid sidecar memory + MSV + prepare/complete |
-| Aeterna | https://helloaeterna.com/ | Digital legacy, voice archives, digital twin | Persistent persona + episodic memory |
-
-Details: docs/adopters.md · JSON: docs/adopters.json
-
-## Suggested GitHub topics
-
-ai-agents, mcp, model-context-protocol, hexaco, psychometrics, fastapi, pgvector, rag, sse, cursor, claude, chatbot, open-source, docker, personality-ai, episodic-memory
+Playbooks: [docs/playbooks/signalpr-hybrid.md](docs/playbooks/signalpr-hybrid.md) · [docs/playbooks/aeterna-memory.md](docs/playbooks/aeterna-memory.md)
 
 ## Doc map
 
-See llms.txt for linked Markdown sources. Human index: docs/README.md.
+See llms.txt for linked sources. Human index: docs/README.md.

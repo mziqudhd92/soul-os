@@ -6,11 +6,34 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable, Awaitable
 
 import httpx
 
 logger = logging.getLogger(__name__)
+
+PROBLEM_CONTENT_TYPE = "application/problem+json"
+
+
+class SoulOSError(Exception):
+    """Raised when kernel returns RFC 7807 Problem Details."""
+
+    def __init__(self, code: str, status: int, detail: str, body: dict[str, Any]):
+        self.code = code
+        self.status = status
+        self.detail = detail
+        self.body = body
+        super().__init__(f"{code}: {detail}")
+
+
+def _parse_problem(resp: httpx.Response) -> SoulOSError:
+    try:
+        body = resp.json()
+    except json.JSONDecodeError:
+        body = {"detail": resp.text}
+    code = body.get("code", "UNKNOWN")
+    detail = body.get("detail") or body.get("title") or resp.text
+    return SoulOSError(code, resp.status_code, detail, body)
 
 
 class SoulHybridClient:
@@ -24,6 +47,7 @@ class SoulHybridClient:
         timeout: float = 60.0,
         gateway_secret: str | None = None,
         account_id: str | None = None,
+        max_retries: int = 2,
     ) -> None:
         self.base_url = (
             base_url or os.getenv("SOULOS_KERNEL_URL", "http://localhost:8000")
@@ -40,6 +64,7 @@ class SoulHybridClient:
         else:
             self.enabled = enabled
         self.timeout = timeout
+        self.max_retries = max_retries
         self._client: httpx.AsyncClient | None = None
 
     def _request_headers(self) -> dict[str, str]:
@@ -60,17 +85,44 @@ class SoulHybridClient:
             await self._client.aclose()
             self._client = None
 
+    async def _request(
+        self,
+        method: str,
+        path: str,
+        *,
+        json_body: dict[str, Any] | None = None,
+    ) -> httpx.Response:
+        client = await self._get_client()
+        url = f"{self.base_url}{path}"
+        last_exc: Exception | None = None
+        for attempt in range(self.max_retries + 1):
+            try:
+                resp = await client.request(method, url, json=json_body)
+                if resp.status_code >= 500 and attempt < self.max_retries:
+                    continue
+                if not resp.is_success:
+                    ct = resp.headers.get("content-type", "")
+                    if PROBLEM_CONTENT_TYPE in ct or resp.status_code >= 400:
+                        raise _parse_problem(resp)
+                return resp
+            except httpx.HTTPError as e:
+                last_exc = e
+                if attempt >= self.max_retries:
+                    raise
+        if last_exc:
+            raise last_exc
+        raise RuntimeError("request failed")
+
     async def is_ready(self) -> bool:
         if not self.enabled:
             return False
         try:
-            client = await self._get_client()
-            resp = await client.get(f"{self.base_url}/ready")
+            resp = await self._request("GET", "/ready")
             if resp.status_code != 200:
                 return False
             data = resp.json()
             return data.get("status") == "ok"
-        except httpx.HTTPError:
+        except (httpx.HTTPError, SoulOSError):
             return False
 
     async def ensure_avatar(
@@ -84,16 +136,15 @@ class SoulHybridClient:
             soul = json.loads(path.read_text(encoding="utf-8"))
         else:
             soul = soul_path_or_dict
-        client = await self._get_client()
-        resp = await client.post(
-            f"{self.base_url}/v1/avatars/ensure",
-            json={
+        resp = await self._request(
+            "POST",
+            "/v1/avatars/ensure",
+            json_body={
                 "external_key": external_key,
                 "soul": soul,
                 "runtime_config": runtime_config,
             },
         )
-        resp.raise_for_status()
         record = resp.json()
         self.bot_id = record.get("id") or record.get("bot_id") or self.bot_id
         return record
@@ -111,19 +162,18 @@ class SoulHybridClient:
         if not bid:
             return None
         try:
-            client = await self._get_client()
-            resp = await client.post(
-                f"{self.base_url}/hybrid/prepare",
-                json={
+            resp = await self._request(
+                "POST",
+                "/hybrid/prepare",
+                json_body={
                     "bot_id": bid,
                     "query": query,
                     "top_k": top_k,
                     "session_id": session_id,
                 },
             )
-            resp.raise_for_status()
             return resp.json()
-        except httpx.HTTPError as e:
+        except (httpx.HTTPError, SoulOSError) as e:
             logger.warning("SoulOS prepare_turn failed: %s", e)
             return None
 
@@ -142,10 +192,10 @@ class SoulHybridClient:
         if not bid:
             return None
         try:
-            client = await self._get_client()
-            resp = await client.post(
-                f"{self.base_url}/hybrid/complete",
-                json={
+            resp = await self._request(
+                "POST",
+                "/hybrid/complete",
+                json_body={
                     "bot_id": bid,
                     "summary": summary,
                     "user_message": user_message,
@@ -154,8 +204,40 @@ class SoulHybridClient:
                     "reflect_async": reflect_async,
                 },
             )
-            resp.raise_for_status()
             return resp.json()
-        except httpx.HTTPError as e:
+        except (httpx.HTTPError, SoulOSError) as e:
             logger.warning("SoulOS complete_turn failed: %s", e)
             return None
+
+    async def run_turn(
+        self,
+        query: str,
+        generate: Callable[[str, dict[str, Any]], Awaitable[str]],
+        *,
+        external_key: str | None = None,
+        soul: str | Path | dict[str, Any] | None = None,
+        session_id: str | None = None,
+        top_k: int = 5,
+        reflect: bool = True,
+    ) -> dict[str, Any]:
+        """Optional ensure → prepare → caller generate → complete."""
+        if external_key and soul is not None:
+            await self.ensure_avatar(external_key, soul)
+        prepared = await self.prepare_turn(query, session_id=session_id, top_k=top_k)
+        if not prepared:
+            raise SoulOSError("PREPARE_FAILED", 0, "prepare_turn returned no context", {})
+        system_prompt = prepared["system_prompt"]
+        reply = await generate(system_prompt, prepared)
+        completed = await self.complete_turn(
+            summary=reply[:2000],
+            user_message=query,
+            session_id=session_id,
+            reflect=reflect,
+        )
+        return {
+            "query": query,
+            "system_prompt": system_prompt,
+            "reply": reply,
+            "prepare": prepared,
+            "complete": completed,
+        }

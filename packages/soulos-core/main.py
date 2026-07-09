@@ -5,7 +5,7 @@ import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request
+from fastapi import BackgroundTasks, Depends, FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from mcp.server.sse import SseServerTransport
 from sqlalchemy import text
@@ -41,8 +41,18 @@ from runtime.clawsouls_import import (
 )
 from runtime.hybrid import build_hybrid_system_prompt, extract_inner_monologue
 from runtime.hybrid_tasks import run_reflect_background
+from runtime.telemetry import hybrid_complete_span, hybrid_prepare_span
+from runtime.errors import (
+    BOT_NOT_FOUND,
+    CLAWSOULS_IMPORT_DISABLED,
+    READY_DEGRADED,
+    SOUL_INVALID,
+    SoulOSProblem,
+    problem_response,
+    register_exception_handlers,
+)
 from runtime.memory import ingest_memory as ingest_memory_record
-from runtime.memory import list_memories, retrieve_memories
+from runtime.memory import delete_session_memories, forget_memory, list_memories, retrieve_memories
 from runtime.memory_sync import sync_memory_directory
 from runtime.readiness import build_ready_payload
 from schemas import (
@@ -51,6 +61,7 @@ from schemas import (
     HybridCompleteRequest,
     HybridPrepareRequest,
     ImportClawSoulsRequest,
+    MemoryForget,
     MemoryIngest,
     MemoryRetrieve,
     MemorySync,
@@ -75,10 +86,8 @@ class McpAuthMiddleware(BaseHTTPMiddleware):
             gateway_secret = request.headers.get(GATEWAY_SECRET_HEADER)
             try:
                 ctx = resolve_account_context(account_id, gateway_secret)
-            except HTTPException as exc:
-                return JSONResponse(
-                    status_code=exc.status_code, content={"detail": exc.detail}
-                )
+            except SoulOSProblem as exc:
+                return problem_response(exc.code, exc.status, exc.detail)
             set_mcp_account_context(ctx)
         return await call_next(request)
 
@@ -115,6 +124,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan, title="SoulOS Kernel")
+register_exception_handlers(app)
 app.add_middleware(McpAuthMiddleware)
 sse_transport = SseServerTransport("/mcp/messages")
 
@@ -127,8 +137,19 @@ async def health_check():
 @app.get("/ready")
 async def ready_check(db: AsyncConnection = Depends(get_db)):
     payload = await build_ready_payload(db)
-    status_code = 200 if payload["status"] == "ok" else 503
-    return JSONResponse(status_code=status_code, content=payload)
+    if payload["status"] == "ok":
+        return JSONResponse(status_code=200, content=payload)
+    checks = payload.get("checks", {})
+    detail = (
+        f"Kernel degraded: database={checks.get('database')}, "
+        f"inference={checks.get('inference')}"
+    )
+    return problem_response(
+        READY_DEGRADED,
+        503,
+        detail,
+        extra={k: v for k, v in payload.items() if k not in ("status",)},
+    )
 
 
 @app.post("/v1/avatars")
@@ -148,7 +169,7 @@ async def register_avatar(
             db, account.account_id, payload, runtime_config
         )
     except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e)) from e
+        raise SoulOSProblem(SOUL_INVALID, 422, str(e)) from e
 
 
 @app.post("/v1/avatars/ensure")
@@ -166,7 +187,7 @@ async def ensure_avatar(
             payload.runtime_config,
         )
     except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e)) from e
+        raise SoulOSProblem(SOUL_INVALID, 422, str(e)) from e
 
 
 @app.post("/v1/avatars/import-clawsouls")
@@ -176,9 +197,10 @@ async def import_clawsouls_avatar(
     account: AccountContext = Depends(get_account_context),
 ):
     if not import_enabled():
-        raise HTTPException(
-            status_code=403,
-            detail="ClawSouls import is disabled (set CLAWSOULS_IMPORT_ENABLED=1)",
+        raise SoulOSProblem(
+            CLAWSOULS_IMPORT_DISABLED,
+            403,
+            "ClawSouls import is disabled (set CLAWSOULS_IMPORT_ENABLED=1)",
         )
     try:
         soul, runtime_config, warnings = await import_clawsouls_soul(
@@ -188,7 +210,7 @@ async def import_clawsouls_avatar(
             msv_preset=payload.msv_preset,
         )
     except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e)) from e
+        raise SoulOSProblem(SOUL_INVALID, 422, str(e)) from e
 
     merged_runtime = dict(runtime_config)
     if payload.runtime_config:
@@ -216,7 +238,7 @@ async def import_clawsouls_avatar(
             merged_runtime,
         )
     except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e)) from e
+        raise SoulOSProblem(SOUL_INVALID, 422, str(e)) from e
 
     return {
         **record,
@@ -259,6 +281,29 @@ async def retrieve_memory(
     return {"memories": memories}
 
 
+@app.post("/memory/forget")
+async def forget_memory_route(
+    payload: MemoryForget,
+    db: AsyncConnection = Depends(get_db),
+    account: AccountContext = Depends(get_account_context),
+):
+    await verify_bot_access(db, payload.bot_id, account)
+    deleted = await forget_memory(db, payload.bot_id, payload.content_match)
+    return {"status": "success", "deleted": deleted}
+
+
+@app.delete("/memory/session/{bot_id}/{session_id}")
+async def delete_session_memories_route(
+    bot_id: str,
+    session_id: str,
+    db: AsyncConnection = Depends(get_db),
+    account: AccountContext = Depends(get_account_context),
+):
+    await verify_bot_access(db, bot_id, account)
+    deleted = await delete_session_memories(db, bot_id, session_id)
+    return {"status": "success", "deleted": deleted, "bot_id": bot_id, "session_id": session_id}
+
+
 @app.post("/hybrid/prepare")
 async def hybrid_prepare(
     payload: HybridPrepareRequest,
@@ -270,17 +315,21 @@ async def hybrid_prepare(
     await verify_bot_access(db, payload.bot_id, account)
     identity = await fetch_bot_identity(db, payload.bot_id)
     if not identity:
-        raise HTTPException(status_code=404, detail="Bot not found")
-    memories = await retrieve_memories(
-        db,
-        embedder,
-        payload.bot_id,
-        payload.query,
-        payload.top_k,
-        payload.session_id,
-    )
-    runtime_config = await pipeline.load_runtime_config(db, payload.bot_id)
-    system_prompt = build_hybrid_system_prompt(identity, memories, runtime_config)
+        raise SoulOSProblem(BOT_NOT_FOUND, 404, f"Bot not found: {payload.bot_id}")
+    with hybrid_prepare_span(payload.bot_id, payload.session_id, payload.query) as span:
+        memories = await retrieve_memories(
+            db,
+            embedder,
+            payload.bot_id,
+            payload.query,
+            payload.top_k,
+            payload.session_id,
+        )
+        runtime_config = await pipeline.load_runtime_config(db, payload.bot_id)
+        system_prompt = build_hybrid_system_prompt(identity, memories, runtime_config)
+        if span is not None:
+            span.set_attribute("retrieval.documents.count", len(memories))
+            span.set_attribute("output.value", system_prompt[:500])
     return {
         "bot_id": payload.bot_id,
         "identity": {
@@ -305,9 +354,12 @@ async def hybrid_complete(
     account: AccountContext = Depends(get_account_context),
 ):
     await verify_bot_access(db, payload.bot_id, account)
-    await ingest_memory_record(
-        db, embedder, payload.bot_id, payload.summary, payload.session_id
-    )
+    with hybrid_complete_span(payload.bot_id, payload.session_id, payload.summary) as span:
+        await ingest_memory_record(
+            db, embedder, payload.bot_id, payload.summary, payload.session_id
+        )
+        if span is not None:
+            span.set_attribute("input.value", (payload.user_message or payload.summary)[:500])
     response: dict = {"status": "success", "ingested": True, "reflect": "skipped"}
     if payload.reflect and payload.user_message:
         current_msv = await pipeline.load_current_msv(db, payload.bot_id)
@@ -349,11 +401,11 @@ async def sync_memory(
     await verify_bot_access(db, payload.bot_id, account)
     workspace = Path(payload.workspace_path).resolve()
     if not workspace.is_dir():
-        raise HTTPException(status_code=422, detail="workspace_path is not a directory")
+        raise SoulOSProblem(SOUL_INVALID, 422, "workspace_path is not a directory")
     try:
         stats = await sync_memory_directory(db, embedder, payload.bot_id, workspace)
     except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e)) from e
+        raise SoulOSProblem(SOUL_INVALID, 422, str(e)) from e
     return {"status": "success", **stats}
 
 
@@ -383,7 +435,7 @@ async def update_state(
     try:
         validated_msv = validate_msv_payload(payload.new_msv)
     except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e))
+        raise SoulOSProblem(SOUL_INVALID, 422, str(e))
 
     await db.execute(
         text("UPDATE bots SET current_msv = :msv WHERE id = :id"),
@@ -438,7 +490,7 @@ async def get_bot_identity_route(
     await verify_bot_access(db, bot_id, account)
     identity = await fetch_bot_identity(db, bot_id)
     if not identity:
-        raise HTTPException(status_code=404, detail="Bot not found")
+        raise SoulOSProblem(BOT_NOT_FOUND, 404, f"Bot not found: {bot_id}")
     return {
         "name": identity["name"],
         "role": identity["role"],

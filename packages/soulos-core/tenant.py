@@ -1,10 +1,10 @@
 """Tenant isolation: scope avatar operations to owner_id."""
 
-from fastapi import HTTPException
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from auth import AccountContext
+from runtime.errors import ACCESS_DENIED, BOT_NOT_FOUND, SoulOSProblem
 
 
 async def verify_bot_access(
@@ -19,6 +19,6 @@ async def verify_bot_access(
     )
     row = result.fetchone()
     if not row:
-        raise HTTPException(status_code=404, detail="Bot not found")
+        raise SoulOSProblem(BOT_NOT_FOUND, 404, f"Bot not found: {bot_id}")
     if row.owner_id is None or str(row.owner_id) != account.account_id:
-        raise HTTPException(status_code=403, detail="Access denied")
+        raise SoulOSProblem(ACCESS_DENIED, 403, "Access denied for this bot")

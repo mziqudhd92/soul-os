@@ -1,6 +1,6 @@
 {
   "name": "soulos-monorepo",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "SoulOS — open-source runtime for persistent AI avatars (HEXACO MSV, episodic memory, MCP, Soul Studio)",
   "private": true,
   "license": "MIT",
@@ -42,7 +42,10 @@
     "studio": "soulos-studio",
     "build:sdk": "npm run build -w @soulos/sdk",
     "seed": "python3 scripts/seed.py",
+    "smoke:hybrid": "bash scripts/hybrid-smoke.sh",
     "doc:gen": "python3 scripts/doc-gen/generate_docs.py",
+    "doc:check": "python3 scripts/doc-gen/check_hybrid_docs.py && (test -x packages/soulos-core/.venv/bin/python && packages/soulos-core/.venv/bin/python scripts/doc-gen/check_openapi_drift.py || python3 scripts/doc-gen/check_openapi_drift.py)",
+    "openapi:export": "(test -x packages/soulos-core/.venv/bin/python && packages/soulos-core/.venv/bin/python scripts/export-openapi.py || python3 scripts/export-openapi.py)",
     "build:tutorials-site": "python3 scripts/build-studio-tutorials-site.py --out site --base /soul-os/"
   }
 }

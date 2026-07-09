@@ -65,6 +65,10 @@ python scripts/soulos-doctor.py \
   --bot-id <BOT_ID>
 ```
 
+Kernel OpenAPI: `http://localhost:8001/docs` · `http://localhost:8001/openapi.json`
+
+Identity model: [identity-model.md](identity-model.md)
+
 4. **Fallback** — `await soul.is_ready()` or `GET /ready` before enabling soul-aware mode.
 
 ## Port layout (common confusion)

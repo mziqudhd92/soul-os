@@ -1,5 +1,5 @@
 import pytest
-from fastapi import HTTPException
+from runtime.errors import ACCESS_DENIED, BOT_NOT_FOUND, SoulOSProblem
 
 from auth import AccountContext
 from tenant import verify_bot_access
@@ -42,11 +42,12 @@ async def test_verify_bot_access_allows_owner():
 @pytest.mark.asyncio
 async def test_verify_bot_access_denies_other_account():
     db = MockConnection(owner_id="aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(SoulOSProblem) as exc:
         await verify_bot_access(
             db, "bot-1", AccountContext(account_id="bbbbbbbb-cccc-dddd-eeee-ffffffffffff")
         )
     assert exc.value.status_code == 403
+    assert exc.value.code == ACCESS_DENIED
 
 
 @pytest.mark.asyncio
@@ -55,8 +56,9 @@ async def test_verify_bot_access_not_found():
         async def execute(self, query, params=None):
             return MockResult(None)
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(SoulOSProblem) as exc:
         await verify_bot_access(
             EmptyConnection(), "missing-bot", AccountContext(account_id="acct-1")
         )
     assert exc.value.status_code == 404
+    assert exc.value.code == BOT_NOT_FOUND

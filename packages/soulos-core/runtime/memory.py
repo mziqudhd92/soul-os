@@ -88,3 +88,33 @@ async def list_memories(
             {"bot_id": bot_id, "limit": limit},
         )
     return [row.content for row in result.fetchall()]
+
+
+async def forget_memory(
+    db: AsyncConnection,
+    bot_id: str,
+    content_match: str,
+) -> int:
+    result = await db.execute(
+        text(
+            "DELETE FROM episodic_memories "
+            "WHERE bot_id = :bot_id AND content ILIKE :pattern"
+        ),
+        {"bot_id": bot_id, "pattern": f"%{content_match}%"},
+    )
+    return result.rowcount or 0
+
+
+async def delete_session_memories(
+    db: AsyncConnection,
+    bot_id: str,
+    session_id: str,
+) -> int:
+    result = await db.execute(
+        text(
+            "DELETE FROM episodic_memories "
+            "WHERE bot_id = :bot_id AND session_id = :session_id"
+        ),
+        {"bot_id": bot_id, "session_id": session_id},
+    )
+    return result.rowcount or 0
