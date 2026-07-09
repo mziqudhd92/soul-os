@@ -19,7 +19,7 @@ Open **http://localhost:8765**
 | Step | Action |
 |------|--------|
 | 1 | Set **name**, **role**, **description**, attachment style |
-| 2 | Tune **HEXACO**, moral foundations, and drives |
+| 2 | Tune personality: **Simple** tab (warmth / rigor / caution) or **Advanced** HEXACO |
 | 3 | **Export JSON** or **Export .soul** → downloads soul file |
 | 4 | (Optional) **Deploy to kernel** → register with kernel and test in chat (watch **cognitive_state** rails) |
 | 5 | (Optional) **Import** → load `.soul`, `.soul.json`, or JSON from disk |
@@ -56,7 +56,7 @@ The exported file matches `spec/soul.schema.json` and works with:
 ## Import / export
 
 - **Import** — `.soul`, `.soul.json`, or JSON from disk (e.g. `examples/support-bot/support-bot.soul`)
-- **Export JSON** / **Export .soul** — current form state
+- **Export JSON** / **Export .soul** — current form state (after deploy/save, Simple authoring fields `persona_mode` / `simple_persona` may be omitted — the kernel already derived `baseline_msv`)
 - **Deploy to kernel** — `POST /v1/avatars` (requires kernel on :8000); chat panel shows dual-process rails on `cognitive_state` SSE
 
 You can **export without deploying** — useful when building a soul for a Python bot on another machine.

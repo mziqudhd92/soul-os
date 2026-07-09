@@ -1,5 +1,9 @@
 # ClawSouls → SoulOS examples
 
+> **Shows:** ClawSouls → SoulOS import metadata and helpers
+> **Time:** ~10 min
+> **Prerequisites:** kernel on `:8000` or `:8001`; network for ClawSouls fetch
+
 Metadata and import helpers for [ClawSouls](https://clawsouls.ai) personas. SoulOS is **not affiliated with or endorsed by ClawSouls**.
 
 This directory does **not** ship full persona text (upstream-licensed prose). Import at runtime or generate locally:

@@ -1,5 +1,9 @@
 # Sidecar + your API (compose example)
 
+> **Shows:** wire SoulOS beside your API on a shared Docker network
+> **Time:** ~15 min
+> **Prerequisites:** Docker Compose; optional git submodule of soul-os
+
 Wire SoulOS next to your existing backend on a shared Docker network.
 
 ## Option A — submodule + sidecar file

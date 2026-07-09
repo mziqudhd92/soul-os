@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+"""CI check: required documentation strings must appear in key files."""
+
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def package_version() -> str:
+    data = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+    return str(data.get("version", "")).strip()
+
+
+def main() -> int:
+    version = package_version()
+    checks: list[tuple[Path, str, str]] = [
+        (ROOT / "docs" / "reference" / "api.md", "/memory/forget", "api.md"),
+        (ROOT / "CONTRIBUTING.md", "test:sdk", "CONTRIBUTING.md"),
+        (ROOT / "README.md", "CODE_OF_CONDUCT", "README.md"),
+    ]
+
+    errors: list[str] = []
+    for path, needle, label in checks:
+        if not path.is_file():
+            errors.append(f"missing file: {path.relative_to(ROOT)}")
+            continue
+        text = path.read_text(encoding="utf-8")
+        if needle not in text:
+            errors.append(f"{label}: missing required string {needle!r}")
+
+    changelog = ROOT / "CHANGELOG.md"
+    if not changelog.is_file():
+        errors.append("missing file: CHANGELOG.md")
+    else:
+        text = changelog.read_text(encoding="utf-8")
+        # Accept explicit 0.2.0 header or current package.json version
+        ok = "0.2.0" in text or (version and version in text)
+        if not ok:
+            errors.append(
+                f"CHANGELOG.md: missing version header matching 0.2.0 or package.json ({version!r})"
+            )
+
+    if errors:
+        for err in errors:
+            print(f"ERROR: {err}", file=sys.stderr)
+        return 1
+    print("Doc completeness check: OK")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

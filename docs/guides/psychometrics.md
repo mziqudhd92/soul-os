@@ -4,7 +4,9 @@ You are not tuning abstract psychology — you are shaping **system prompt drift
 
 ## Simple persona mode (no HEXACO literacy required)
 
-Set `persona_mode: "simple"` on the soul (or in Studio **Simple** tab) with three sliders (0–1):
+`persona_mode` and `simple_persona` are **registration-time authoring fields** — not part of [spec/soul.schema.json](../../spec/soul.schema.json) and not persisted on the bot row. At register/ensure, the kernel derives `baseline_msv` from the sliders and **strips** these fields before write ([`runtime/persona_simple.py`](../../packages/soulos-core/runtime/persona_simple.py)).
+
+Set `persona_mode: "simple"` on the soul payload (or use Studio **Simple** tab) with three sliders (0–1):
 
 | Slider | Maps to | Effect |
 |--------|---------|--------|
@@ -12,7 +14,7 @@ Set `persona_mode: "simple"` on the soul (or in Studio **Simple** tab) with thre
 | **Rigor** | C, H | More structured, policy-bound answers |
 | **Caution** | H, epistemic_uncertainty | Less speculative; admits uncertainty |
 
-Example soul fragment:
+Example soul fragment (authoring / register payload):
 
 ```json
 {
@@ -24,7 +26,7 @@ Example soul fragment:
 }
 ```
 
-Kernel derives `baseline_msv` from sliders at registration. ClawSouls imports open in **Advanced** mode with an inferred MSV banner in Studio.
+After save, exported `.soul.json` from Studio may contain only the derived `baseline_msv` (Simple tab fields are authoring UX). ClawSouls imports open in **Advanced** mode with an inferred MSV banner in Studio.
 
 ---
 

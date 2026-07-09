@@ -1,0 +1,43 @@
+name: Feature request
+description: Propose an enhancement to SoulOS
+title: "[feat] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the problem first, then the proposed solution. Small docs fixes are welcome as PRs labeled `good first issue`.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is hard or missing today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Hybrid / sidecar API
+        - Full-chat / SSE
+        - Memory / sessions
+        - Soul schema / Studio
+        - MCP
+        - SDK (Python / TypeScript)
+        - Docs / examples
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false

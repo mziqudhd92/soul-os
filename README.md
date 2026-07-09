@@ -21,7 +21,8 @@ SoulOS is maintained in the open so you can inspect, fork, and self-host before 
 | **License** | [MIT](LICENSE) — kernel, SDK, Studio, examples |
 | **CI** | Tests on every push to `main` ([workflow](https://github.com/mziqudhd92/soul-os/actions/workflows/ci.yml)) |
 | **Security** | Report vulnerabilities privately — [SECURITY.md](SECURITY.md) |
-| **Contributing** | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| **Code of Conduct** | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) |
+| **Contributing** | [CONTRIBUTING.md](CONTRIBUTING.md) · [SUPPORT.md](SUPPORT.md) |
 | **Third-party** | Upstream licenses (e.g. ClawSouls personas) — [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) |
 
 ### Production adopters
@@ -261,13 +262,19 @@ docs/                      Guides, reference, deployment
 
 | Folder | Role |
 |--------|------|
+| [examples/fastapi-hybrid](examples/fastapi-hybrid/) | FastAPI sidecar: ensure → prepare → LLM → complete |
+| [examples/sidecar-compose](examples/sidecar-compose/) | Compose wiring for SoulOS beside your API |
+| [examples/hybrid-orchestrator](examples/hybrid-orchestrator/) | Hybrid client pattern (LiteLLM / custom SSE) |
 | [examples/support-bot](examples/support-bot/) | Customer support + `.soul-memory/` |
 | [examples/dev-twin](examples/dev-twin/) | Developer assistant |
 | [examples/companion](examples/companion/) | Personal companion |
+| [examples/clawsouls](examples/clawsouls/) | ClawSouls import metadata + helpers |
+| [examples/clawsouls-sidecar](examples/clawsouls-sidecar/) | ClawSouls persona on sidecar stack |
+| [examples/mcp](examples/mcp/) | Cursor MCP workflow |
 
 ```bash
 npm run seed          # optional demo data
-npm run test:all      # kernel + gateway + studio tests
+npm run test:all      # kernel + bridge + gateway + studio + sdk
 ```
 
 ---
@@ -278,12 +285,14 @@ npm run test:all      # kernel + gateway + studio tests
 |-------|------|
 | Doc index | [docs/README.md](docs/README.md) |
 | Tutorials index | [docs/tutorials/README.md](docs/tutorials/README.md) |
+| Changelog | [CHANGELOG.md](CHANGELOG.md) |
+| Testing | [docs/testing.md](docs/testing.md) |
 | Quickstart (two avatars) | [docs/getting-started/quickstart.md](docs/getting-started/quickstart.md) |
 | Soul file format | [docs/reference/soul-standard.md](docs/reference/soul-standard.md) |
 | Deployment | [docs/deployment/README.md](docs/deployment/README.md) |
 | For AI agents | [llms.txt](llms.txt) · [AGENTS.md](AGENTS.md) |
 
-Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
+Contributing: [CONTRIBUTING.md](CONTRIBUTING.md) · Code of Conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 
 ---
 

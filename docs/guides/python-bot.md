@@ -3,9 +3,14 @@
 > **Interactive tutorial (recommended):** [browse online](https://mziqudhd92.github.io/soul-os/?tutorial=python-bot) or open Soul Studio → **Tutorials** → **Python bot integration** for step-by-step animations, kernel health check, and SSE playground.  
 > **Local Studio:** http://localhost:8765 → Tutorials tab
 
-> **Start here** — recommended first tutorial for human developers building real bots.
+## Choose your path
 
-You already have a Python bot — a script, Discord/Telegram handler, or FastAPI app that calls an LLM with a fixed `system` prompt. This guide plugs in **SoulOS** for **persistent personality** and **stable behavior** without rewriting your transport layer.
+| Path | When to use | Start here |
+|------|-------------|------------|
+| **A — Sidecar hybrid** | You already call OpenAI / Bedrock / LiteLLM and want SoulOS for persona + memory only | [My first sidecar](../tutorials/my-first-sidecar.md) · `SoulHybridClient.run_turn()` |
+| **B — Full-chat (this guide)** | SoulOS should stream replies via `/chat/generate` / `send_message` | Continue below |
+
+You already have a Python bot — a script, Discord/Telegram handler, or FastAPI app that calls an LLM with a fixed `system` prompt. This guide (Path B) plugs in **SoulOS** for **persistent personality** and **stable behavior** without rewriting your transport layer.
 
 SoulOS does **not** replace webhooks, CLI, or Slack SDK. It replaces the fragile part: *one big system prompt + hope the model remembers.*
 

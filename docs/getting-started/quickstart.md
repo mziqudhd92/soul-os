@@ -4,7 +4,9 @@
 
 SoulOS uses **one kernel** for every avatar type. Same Postgres, same inference, same API — different **`.soul`** / `.soul.json` + different ingested facts or **`.soul-memory/`** ledger.
 
-**Recommended if you write Python bots:** start with [Python bot integration](../guides/python-bot.md) instead — this quickstart is ideal for **curl / API exploration**.
+> **Existing LLM app?** Start with [sidecar integration](../guides/sidecar-integration.md) or **[Path C](#path-c)** below — keep your LLM, add SoulOS as a sidecar. Full tutorial: [My first sidecar](../tutorials/my-first-sidecar.md).
+
+**Full-chat Python bots:** [Python bot integration](../guides/python-bot.md). This quickstart is ideal for **curl / API exploration**.
 
 > **Interactive terminal (recommended):** [Browse online](https://mziqudhd92.github.io/soul-os/?tutorial=quickstart) — simulated shell with typing animation, Path A + Path B.
 
@@ -210,12 +212,65 @@ http://localhost:8765 — Wizard, sliders, **Deploy to kernel**, live chat. See 
 | Empty / generic answers | Ingest memory; check Ollama (`llama3`) |
 | No SSE output | Use `curl -N`; check `bot_id` |
 | Slow first reply | Ollama model pull on first run |
+| RFC 7807 `code` | [Troubleshooting by code](../guides/troubleshooting.md) |
+
+---
+
+<a id="path-c"></a>
+
+## Path C — Sidecar hybrid (~15 minutes)
+
+**Goal:** keep **your** LLM for generation; SoulOS provides identity + memory via `ensure → prepare → complete`.
+
+Kernel on **`:8001`** (not `:8000`):
+
+```bash
+docker compose -f docker-compose.sidecar.yml --profile bridge-mock up --build
+export KERNEL=http://localhost:8001
+```
+
+### C1 — Ensure avatar
+
+```bash
+curl -s -X POST "$KERNEL/v1/avatars/ensure" \
+  -H "Content-Type: application/json" \
+  -d '{"external_key":"quickstart-sidecar","soul":'"$(cat examples/support-bot/support-bot.soul.json)"'}' \
+  | tee /tmp/ensure.json
+
+export BOT_ID=$(python3 -c "import json; print(json.load(open('/tmp/ensure.json'))['id'])")
+```
+
+### C2 — Prepare
+
+```bash
+curl -s -X POST "$KERNEL/hybrid/prepare" \
+  -H "Content-Type: application/json" \
+  -d "{\"bot_id\":\"$BOT_ID\",\"query\":\"What is the refund policy?\",\"top_k\":3}" \
+  | tee /tmp/prepare.json
+
+python3 -c "import json; print(json.load(open('/tmp/prepare.json'))['system_prompt'][:500])"
+```
+
+Paste `system_prompt` into your OpenAI/Bedrock call (or use a mock reply for smoke testing).
+
+### C3 — Complete
+
+```bash
+curl -s -X POST "$KERNEL/hybrid/complete" \
+  -H "Content-Type: application/json" \
+  -d "{\"bot_id\":\"$BOT_ID\",\"summary\":\"User asked about refunds; answered 30-day policy.\",\"user_message\":\"What is the refund policy?\",\"reflect\":true,\"reflect_async\":true}"
+```
+
+Or run the repo smoke script: `npm run smoke:hybrid`.
+
+**Full walkthrough:** [My first sidecar](../tutorials/my-first-sidecar.md) · [Sidecar integration](../guides/sidecar-integration.md) · [Hybrid API](../reference/hybrid-api.md)
 
 ---
 
 ## Next steps
 
-- **[Python bot integration](../guides/python-bot.md)** — recommended for real bots
+- **[My first sidecar](../tutorials/my-first-sidecar.md)** — recommended for existing LLM apps
+- **[Python bot integration](../guides/python-bot.md)** — full-chat bots
 - [Soul standard](../reference/soul-standard.md) — `.soul.json` fields
 - [API reference](../reference/api.md) — REST + SSE
 - [Deployment](../deployment/README.md) — self-host vs Cloud

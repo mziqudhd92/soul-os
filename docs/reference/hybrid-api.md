@@ -167,7 +167,7 @@ Still supported. Prefer `hybrid/complete` with `reflect_async: true`.
 
 ## Client libraries
 
-| Language | Class |
-|----------|--------|
-| Python | `SoulHybridClient` from `soulos` — includes `run_turn()` |
-| TypeScript | `SoulHybridClient` from `@soulos/sdk` — includes `runTurn()` |
+| Language | Class | Testing |
+|----------|--------|---------|
+| Python | `SoulHybridClient` from `soulos` — includes `run_turn()` | Covered in CI (`packages/soulos-sdk/python/tests/`) |
+| TypeScript | `SoulHybridClient` from `@soulos/sdk` — includes `runTurn()` | API parity documented; dedicated test suite tracked as a follow-up |

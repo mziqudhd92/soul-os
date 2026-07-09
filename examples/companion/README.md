@@ -1,5 +1,9 @@
 # Companion Example
 
+> **Shows:** personal companion soul + sample conversation history
+> **Time:** ~5 min
+> **Prerequisites:** full-stack kernel on `:8000` (`docker compose up --build`)
+
 Personal companion avatar with sample conversation history in [sample-history.json](sample-history.json).
 
 **Prerequisites:** kernel on `http://localhost:8000` — `docker compose up --build` ([Quickstart](../../docs/getting-started/quickstart.md)).

@@ -1,5 +1,9 @@
 # Support Bot Example
 
+> **Shows:** customer-support soul + FAQ memory ingest
+> **Time:** ~5 min
+> **Prerequisites:** full-stack kernel on `:8000` (`docker compose up --build`)
+
 Customer-support avatar with bundled [faq.md](faq.md).
 
 **Prerequisites:** kernel on `http://localhost:8000` — `docker compose up --build` ([Quickstart](../../docs/getting-started/quickstart.md)).

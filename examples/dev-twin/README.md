@@ -1,5 +1,9 @@
 # Dev Twin Example
 
+> **Shows:** developer-assistant soul + repo-context memory
+> **Time:** ~5 min
+> **Prerequisites:** full-stack kernel on `:8000` (`docker compose up --build`)
+
 Developer-assistant avatar — ingest repo context as episodic memory.
 
 **Prerequisites:** kernel on `http://localhost:8000` — `docker compose up --build` ([Quickstart](../../docs/getting-started/quickstart.md)).

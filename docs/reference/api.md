@@ -6,7 +6,9 @@ REST endpoints, SSE multiplexing, and MCP tool exposure for SoulOS dual-process 
 
 **Hybrid sidecar (primary):** [Hybrid API](hybrid-api.md) · [Identity model](../guides/identity-model.md)
 
-**Errors:** RFC 7807 Problem Details (`Content-Type: application/problem+json`) with fields `type`, `title`, `status`, `detail`, and extension `code` (e.g. `BOT_NOT_FOUND`, `INFERENCE_DOWN`, `READY_DEGRADED`).
+**Errors:** All `4xx`/`5xx` responses use RFC 7807 Problem Details (`Content-Type: application/problem+json`) with fields `type`, `title`, `status`, `detail`, and extension `code` (e.g. `BOT_NOT_FOUND`, `INFERENCE_DOWN`, `READY_DEGRADED`, `SOUL_INVALID`, `MEMORY_DIM_MISMATCH`). Clients should key off `code`, not plain `detail` strings. Full hybrid examples: [hybrid-api.md](hybrid-api.md#errors-rfc-7807).
+
+**Hybrid detail →** [hybrid-api.md](hybrid-api.md) (request/response JSON for `/hybrid/*`, `/ready`, `/v1/avatars/ensure`).
 
 **Related:** [MCP guide](../guides/mcp.md) · [MCP tools](mcp-tools.md) · [Soul standard](soul-standard.md)
 
@@ -120,6 +122,8 @@ Resources: `memory://episodic/{bot_id}`, `soul://identity/{bot_id}`. Prompt: `id
 
 **Not exposed via MCP:** `chat/generate` streaming — use REST or `@soulos/sdk`.
 
+**REST-only in v0.2 (no MCP tool):** `POST /memory/forget` and `DELETE /memory/session/{bot_id}/{session_id}` — use REST or the SDK HTTP client.
+
 ---
 
 ## 4. REST Endpoints
@@ -133,12 +137,13 @@ Register a new avatar from a **`.soul.json` object** or a raw **`.soul`** file b
 - **JSON payload:** Full soul file (`name`, `role`, `description`, `attachment_style`, `baseline_msv`, optional marketplace fields). Optional `runtime_config` for `dual_process` thresholds.
 - **`.soul` body:** `Content-Type: text/markdown` (or `application/octet-stream`) with `X-Filename: my-bot.soul` header; YAML front matter + Markdown body compiled server-side.
 - **Success:** `200` with `{ "id", "name", "role", "baseline_msv", "current_msv" }` — `current_msv` is initialized from `baseline_msv`.
-- **Validation error:** `422` with a human-readable detail string listing each invalid trait.
+- **Validation error:** `422` RFC 7807 with `code: SOUL_INVALID` (and `detail` listing invalid traits).
 
 ### `POST /memory/ingest`
 
-- **Payload:** `{"bot_id": "uuid", "content": "string"}`
+- **Payload:** `{"bot_id": "uuid", "content": "string", "session_id?": "string"}`
 - **Response:** `{"status": "success"}`
+- When `session_id` is set, the row is tagged for that session (see [session memory](../guides/session-memory.md)).
 
 ### `POST /memory/sync`
 
@@ -149,8 +154,22 @@ Hydrate pgvector from a workspace `.soul-memory/` directory (dedupes by content 
 
 ### `POST /memory/retrieve`
 
-- **Payload:** `{"bot_id": "uuid", "query": "string", "top_k": 5}`
+- **Payload:** `{"bot_id": "uuid", "query": "string", "top_k?": 5, "session_id?": "string"}`
 - **Response:** `{"memories": ["string"]}`
+- With `session_id`, retrieve merges global (`session_id IS NULL`) and session-scoped rows.
+
+### `POST /memory/forget`
+
+Content-match delete (ILIKE). **REST-only** — not exposed via MCP in v0.2.
+
+- **Payload:** `{"bot_id": "uuid", "content_match": "string"}`
+- **Response:** `{"status": "success", "deleted": N}`
+
+### `DELETE /memory/session/{bot_id}/{session_id}`
+
+Delete all memories for a session (GDPR / conversation teardown). **REST-only** — not exposed via MCP in v0.2.
+
+- **Response:** `{"status": "success", "deleted": N, "bot_id": "...", "session_id": "..."}`
 
 ### `POST /state/update`
 
@@ -167,7 +186,12 @@ Run System 2 reflector for hybrid integrations that skip `/chat/generate`.
 
 ### `GET /ready`
 
-Sidecar readiness: database, inference API, `embedding_dimension`.
+Sidecar readiness probe (prefer over `/health` alone for `SOULOS_ENABLED` fallback).
+
+- **200** — healthy JSON: `{ "status": "ok", "service": "soulos-kernel", "checks": { "database", "inference" }, "embedding_dimension", "inference_api_url" }`
+- **503** — RFC 7807 `application/problem+json` with `code: "READY_DEGRADED"` when database or inference is unhealthy
+
+Request/response detail: [hybrid-api.md](hybrid-api.md#get-ready).
 
 ### `POST /hybrid/prepare`
 
@@ -190,9 +214,9 @@ Idempotent avatar registration by `external_key`.
 - **Payload:** `{"external_key": "string", "soul": { ... }, "runtime_config?": { ... }}`
 - **Response:** same as `POST /v1/avatars`
 
-Memory ingest/retrieve accept optional `session_id`. `GET /bot/{bot_id}/memories?session_id=` filters by session.
-
 `runtime_config.hybrid_prompt_template` — optional string template with `{name}`, `{role}`, `{description}`, `{inner_monologue}`, `{memories}`.
+
+Hybrid prepare/complete JSON shapes: [hybrid-api.md](hybrid-api.md).
 
 ### `GET /bot/{bot_id}/identity`
 
@@ -200,5 +224,32 @@ Memory ingest/retrieve accept optional `session_id`. `GET /bot/{bot_id}/memories
 
 ### `GET /bot/{bot_id}/memories`
 
-- **Query:** `?limit=50`
-- **Response:** Chronological array of episodic text chunks.
+- **Query:** `?limit=50&session_id=` (optional session filter)
+- **Response:** `{ "bot_id", "session_id", "memories": [...] }` — chronological episodic text chunks.
+
+---
+
+## 5. Errors (RFC 7807)
+
+Every failed kernel response uses `Content-Type: application/problem+json`:
+
+```json
+{
+  "type": "https://soulos.dev/problems/bot-not-found",
+  "title": "Bot not found",
+  "status": 404,
+  "detail": "Bot not found: …",
+  "code": "BOT_NOT_FOUND"
+}
+```
+
+| `code` | Typical status | Meaning |
+|--------|----------------|---------|
+| `BOT_NOT_FOUND` | 404 | Unknown `bot_id` |
+| `ACCESS_DENIED` | 403 | Tenant / auth gate |
+| `SOUL_INVALID` | 422 | Soul schema validation failed |
+| `INFERENCE_DOWN` | 503 | Inference / embedder unreachable |
+| `MEMORY_DIM_MISMATCH` | 500 | Embedding dimension mismatch |
+| `READY_DEGRADED` | 503 | `GET /ready` when checks fail |
+
+Troubleshooting by `code`: [troubleshooting.md](../guides/troubleshooting.md).

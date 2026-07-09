@@ -1,5 +1,9 @@
 # MCP workflow (~10 minutes)
 
+> **Shows:** Cursor MCP over HTTP SSE (ingest → retrieve)
+> **Time:** ~10 min
+> **Prerequisites:** full-stack kernel on `:8000` (`docker compose up --build`)
+
 Connect **Cursor** to SoulOS and run ingest → retrieve against a live avatar.
 
 **Prerequisite tutorial:** [Python bot](../docs/guides/python-bot.md) or [Quickstart Path A](../docs/getting-started/quickstart.md#path-a) — you need a running kernel and a `bot_id`.

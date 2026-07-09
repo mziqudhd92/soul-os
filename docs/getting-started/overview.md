@@ -8,10 +8,13 @@ SoulOS is an open-source runtime for persistent AI avatars — HEXACO psychometr
 
 | Goal | Time | Start here |
 |------|------|------------|
+| **Sidecar hybrid (existing LLM app)** | 15 min | [My first sidecar](../tutorials/my-first-sidecar.md) · [Quickstart Path C](quickstart.md#path-c) |
 | Kernel smoke test (curl) | 5 min | [Quickstart — Path A](quickstart.md#path-a) |
 | MCP in Cursor | 5 min | [examples/mcp](../../examples/mcp/README.md) |
 | Support bot + dev twin | 15 min | [Quickstart](quickstart.md) |
 | Tune `.soul.json` in browser | 10 min | [Soul Builder](soul-builder.md) |
+
+**Ports:** full stack kernel **`:8000`** (`docker compose up`); sidecar stack kernel **`:8001`** (`docker-compose.sidecar.yml`).
 
 ## Prerequisites
 
@@ -24,10 +27,10 @@ SoulOS is an open-source runtime for persistent AI avatars — HEXACO psychometr
 
 | Component | Port / transport | Role |
 |-----------|------------------|------|
-| **SoulOS kernel** | `http://localhost:8000` | Personality, memory, dual-process chat, REST + MCP |
+| **SoulOS kernel** | `http://localhost:8000` (full) / `:8001` (sidecar) | Personality, memory, hybrid + dual-process chat, REST + MCP |
 | **MCP (HTTP SSE)** | `http://localhost:8000/mcp/sse` | Cursor / Claude tool integration — [MCP guide](../guides/mcp.md) |
 | **Soul Studio** | `http://localhost:8765` | Soul Builder UI — [Soul Builder](soul-builder.md) |
-| **@soulos/sdk** | HTTP to kernel or gateway | App integrations — [Python bot](../guides/python-bot.md), [Quickstart](quickstart.md) |
+| **@soulos/sdk** | HTTP to kernel or gateway | App integrations — [sidecar](../guides/sidecar-integration.md), [Python bot](../guides/python-bot.md) |
 
 Architecture detail: [reference/architecture.md](../reference/architecture.md).
 
@@ -39,6 +42,13 @@ From the repo root:
 docker compose up --build
 # Kernel: http://localhost:8000
 # Studio:  http://localhost:8765
+```
+
+Sidecar (your LLM keeps generation):
+
+```bash
+docker compose -f docker-compose.sidecar.yml --profile bridge-mock up --build
+# Kernel: http://localhost:8001
 ```
 
 Full curl walkthrough: [Quickstart](quickstart.md).
@@ -53,7 +63,9 @@ curl -X POST http://localhost:8000/v1/avatars \
   -d @examples/support-bot/support-bot.soul.json
 ```
 
-The response `id` is your `bot_id` for chat, memory, and MCP tools. Invalid traits return `422` with a readable error list.
+Prefer idempotent `POST /v1/avatars/ensure` with `external_key` for apps — [identity model](../guides/identity-model.md).
+
+The response `id` is your `bot_id` for chat, memory, and MCP tools. Invalid traits return `422` with RFC 7807 `code: SOUL_INVALID`.
 
 ## Connect MCP (Cursor / Claude)
 
@@ -71,6 +83,7 @@ Default self-host mode uses `REQUIRE_AUTH=0` — fine for solo local use only. D
 
 ## Next steps
 
+- [My first sidecar](../tutorials/my-first-sidecar.md) — hybrid primary path
 - [Soul standard](../reference/soul-standard.md) — `.soul.json` anatomy
 - [API reference](../reference/api.md) — REST + SSE events
 - [Psychometrics cheat sheet](../guides/psychometrics.md) — what HEXACO sliders do

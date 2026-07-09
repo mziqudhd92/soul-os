@@ -29,6 +29,10 @@ class MockConnection:
         self.last_insert = None
 
     async def execute(self, query, params=None):
+        q = str(query)
+        if "DELETE FROM episodic_memories" in q:
+            return type("DeleteResult", (), {"rowcount": 2})()
+
         class MockResult:
             def __init__(self, row_id="123e4567-e89b-12d3-a456-426614174000"):
                 self.row_id = row_id
@@ -50,7 +54,7 @@ class MockConnection:
                 row.content = "Mocked retrieved memory"
                 return [row]
 
-        if params and "INSERT INTO bots" in str(query):
+        if params and "INSERT INTO bots" in q:
             MockConnection.last_insert = params
             return MockResult()
         return MockResult()
@@ -186,6 +190,50 @@ async def test_update_state_invalid_msv():
 
     assert response.status_code == 422
     assert "MSV validation failed" in response.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_forget_memory_route():
+    payload = {
+        "bot_id": "123e4567-e89b-12d3-a456-426614174000",
+        "content_match": "refund policy",
+    }
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.post("/memory/forget", json=payload)
+    assert response.status_code == 200
+    body = response.json()
+    assert body == {"status": "success", "deleted": 2}
+
+
+@pytest.mark.asyncio
+async def test_delete_session_memories_route():
+    bot_id = "123e4567-e89b-12d3-a456-426614174000"
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.delete(f"/memory/session/{bot_id}/sess-xyz")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "success"
+    assert body["deleted"] == 2
+    assert body["session_id"] == "sess-xyz"
+
+
+@pytest.mark.asyncio
+async def test_register_avatar_simple_persona_mode():
+    simple_soul = {
+        "name": "Simple Bot",
+        "role": "Helper",
+        "description": "Simple persona test.",
+        "attachment_style": "Secure",
+        "persona_mode": "simple",
+        "simple_persona": {"warmth": 0.9, "rigor": 0.8, "caution": 0.3},
+    }
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.post("/v1/avatars", json=simple_soul)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["name"] == "Simple Bot"
+    assert data["baseline_msv"]["hexaco"]["A"] > 0
 
 
 @pytest.mark.asyncio

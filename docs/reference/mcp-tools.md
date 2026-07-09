@@ -6,6 +6,8 @@ Transport: HTTP SSE at `/mcp/sse` (see [MCP guide](../guides/mcp.md)). Self-host
 
 **Not exposed via MCP:** `chat/generate` and `msv_update` streaming — use REST or `@soulos/sdk`.
 
+**REST-only in v0.2 (no MCP tool):** `POST /memory/forget` and `DELETE /memory/session/{bot_id}/{session_id}` — call the kernel REST API (or SDK HTTP client) for GDPR / content-match deletes. See [api.md](api.md) and [session-memory.md](../guides/session-memory.md).
+
 All tool responses are JSON strings in `TextContent`.
 
 ## `ingest_memory`

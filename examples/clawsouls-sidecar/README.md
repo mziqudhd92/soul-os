@@ -1,5 +1,9 @@
 # ClawSouls + SoulOS sidecar
 
+> **Shows:** bootstrap a ClawSouls persona on the sidecar stack
+> **Time:** ~10 min
+> **Prerequisites:** `docker-compose.sidecar.yml --profile bridge-mock`
+
 Run SoulOS beside your API and bootstrap a ClawSouls persona on startup.
 
 ## Quick start

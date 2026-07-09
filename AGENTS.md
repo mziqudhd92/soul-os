@@ -20,6 +20,27 @@ Instructions for AI coding agents (Cursor, Claude Code, Copilot, etc.) working i
 
 Boot: `docker compose up --build` from repo root. Tests: `npm run test:all`.
 
+## Testing (TDD)
+
+Write or update tests **before or alongside** behavior changes — CI blocks merges on failing tests.
+
+| Command | Scope |
+|---------|--------|
+| `npm run test:all` | Kernel, bridge, gateway, studio, Python SDK |
+| `npm run test:kernel` | `packages/soulos-core/test_*.py` |
+| `npm run test:sdk` | `packages/soulos-sdk/python/tests/` |
+| `npm run doc:check` | Hybrid doc drift + OpenAPI contract |
+
+**Conventions**
+
+- Kernel HTTP tests: `httpx.AsyncClient` + `ASGITransport(app=app)` with dependency overrides (`test_main.py` mocks).
+- Pure logic: unit tests without HTTP (e.g. `test_persona_simple.py`, `runtime/` helpers).
+- SDK: mock `httpx` / `_request`; assert RFC 7807 `SoulOSError` codes.
+- New API routes need route tests + unit tests for service functions when non-trivial.
+- Persona / hybrid regressions: extend `test_persona_simple.py` or run `python3 scripts/soulos-eval.py`.
+
+Do not merge untested public API or SDK surface changes.
+
 ## Conventions
 
 - Soul files: `spec/soul.schema.json` — HEXACO keys H,E,X,A,C,O in range -1..1.

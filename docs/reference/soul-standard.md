@@ -23,6 +23,17 @@ At the database level, a bot's identity is defined in the `bots` table. When cre
 | `description`| `TEXT` | The foundational system prompt defining core beliefs. |
 | `baseline_msv`| `JSONB` | The starting psychological state. The bot naturally tries to return to this baseline unless repeatedly traumatized/crystallized. |
 
+### Authoring-only fields (`persona_mode` / `simple_persona`)
+
+These are **not** columns on `bots` and are **not** in [spec/soul.schema.json](../../spec/soul.schema.json). They exist only on the register/ensure payload so authors can skip hand-tuning HEXACO:
+
+| Field | Purpose |
+|-------|---------|
+| `persona_mode` | `"simple"` or `"advanced"` (also accepted under `runtime_config.persona_mode`) |
+| `simple_persona` | `{ "warmth", "rigor", "caution" }` sliders in `0..1` |
+
+When `persona_mode` is `"simple"`, the kernel derives `baseline_msv` and **removes** `persona_mode` / `simple_persona` before persistence. Studio’s **Simple** tab writes these on register; exported souls after save may show only `baseline_msv`. See [psychometrics.md](../guides/psychometrics.md).
+
 ### The `.soul` file format (recommended)
 
 Human-editable souls use **Markdown with YAML front matter**. Psychology weights live in front matter; behavior rules live in the Markdown body (compiled into `description`).

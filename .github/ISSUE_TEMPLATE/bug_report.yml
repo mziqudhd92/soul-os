@@ -1,0 +1,66 @@
+name: Bug report
+description: Something is broken in the kernel, SDK, Studio, or docs
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug. Include doctor output and any RFC 7807 `code` when possible.
+        Security issues → [SECURITY.md](https://github.com/mziqudhd92/soul-os/blob/main/SECURITY.md) (do not report publicly).
+  - type: input
+    id: version
+    attributes:
+      label: Kernel / commit version
+      description: Tag (e.g. 0.2.0) or short git SHA
+      placeholder: "0.2.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: compose
+    attributes:
+      label: Compose / deploy mode
+      options:
+        - docker-compose.yml (full stack :8000)
+        - docker-compose.sidecar.yml (:8001)
+        - SoulOS Cloud / gateway
+        - Other / custom
+    validations:
+      required: true
+  - type: input
+    id: error_code
+    attributes:
+      label: RFC 7807 `code` (if any)
+      description: From `application/problem+json` body
+      placeholder: "READY_DEGRADED / INFERENCE_DOWN / BOT_NOT_FOUND / …"
+    validations:
+      required: false
+  - type: textarea
+    id: doctor
+    attributes:
+      label: soulos-doctor.py output
+      description: `python3 scripts/soulos-doctor.py --kernel <url> …`
+      render: shell
+    validations:
+      required: false
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. …
+        2. …
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Logs / extra context
+    validations:
+      required: false

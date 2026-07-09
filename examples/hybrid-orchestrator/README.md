@@ -1,5 +1,9 @@
 # Hybrid orchestrator pattern
 
+> **Shows:** hybrid client pattern (LiteLLM / custom SSE + SoulHybridClient)
+> **Time:** ~10 min
+> **Prerequisites:** sidecar on `:8001` with bridge-mock profile
+
 Use SoulOS for **persistent soul + episodic memory** while your app keeps **LiteLLM / OpenAI tools + custom SSE**.
 
 ## Recommended client

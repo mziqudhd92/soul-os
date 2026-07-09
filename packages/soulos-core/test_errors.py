@@ -9,11 +9,17 @@ from runtime.errors import (
     ACCESS_DENIED,
     BOT_NOT_FOUND,
     CLAWSOULS_IMPORT_DISABLED,
+    INFERENCE_DOWN,
+    MEMORY_DIM_MISMATCH,
     PROBLEM_CONTENT_TYPE,
     READY_DEGRADED,
     SOUL_INVALID,
+    VALIDATION_ERROR,
+    INTERNAL_ERROR,
     SoulOSProblem,
+    _map_http_detail_to_code,
     problem_body,
+    validation_exception_handler,
 )
 from test_main import MockEmbedder, MockLLMService, VALID_SOUL, mock_get_db
 
@@ -104,3 +110,40 @@ def test_soulos_problem_exception_fields():
     exc = SoulOSProblem(ACCESS_DENIED, 403, "Access denied")
     assert exc.code == ACCESS_DENIED
     assert exc.status == 403
+
+
+def test_map_http_detail_to_code_branches():
+    assert _map_http_detail_to_code(404, "Bot not found: x") == BOT_NOT_FOUND
+    assert _map_http_detail_to_code(403, "Access denied") == ACCESS_DENIED
+    assert _map_http_detail_to_code(403, "ClawSouls import disabled") == CLAWSOULS_IMPORT_DISABLED
+    assert _map_http_detail_to_code(422, "Soul validation failed") == SOUL_INVALID
+    assert _map_http_detail_to_code(422, "field required") == VALIDATION_ERROR
+    assert _map_http_detail_to_code(500, "embedding service down") == INFERENCE_DOWN
+    assert _map_http_detail_to_code(401, "Unauthorized") == ACCESS_DENIED
+    assert _map_http_detail_to_code(500, "unexpected") == INTERNAL_ERROR
+
+
+@pytest.mark.asyncio
+async def test_validation_exception_handler_shape():
+    from fastapi.exceptions import RequestValidationError
+
+    exc = RequestValidationError(
+        [{"loc": ("body", "bot_id"), "msg": "field required", "type": "missing"}]
+    )
+    response = await validation_exception_handler(None, exc)
+    assert response.status_code == 422
+    body = response.body.decode()
+    assert VALIDATION_ERROR in body
+    assert PROBLEM_CONTENT_TYPE in response.media_type
+
+
+@pytest.mark.asyncio
+async def test_memory_forget_missing_field_problem():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.post(
+            "/memory/forget",
+            json={"bot_id": "123e4567-e89b-12d3-a456-426614174000"},
+        )
+    assert response.status_code == 422
+    assert PROBLEM_CONTENT_TYPE in response.headers.get("content-type", "")
+    assert response.json()["code"] == VALIDATION_ERROR

@@ -68,4 +68,11 @@ def apply_persona_mode(soul: dict[str, Any]) -> dict[str, Any]:
     )
     out = dict(soul)
     out["baseline_msv"] = baseline
+    # Authoring-only fields — not part of soul.schema.json
+    out.pop("persona_mode", None)
+    out.pop("simple_persona", None)
+    if isinstance(out.get("runtime_config"), dict):
+        rc = dict(out["runtime_config"])
+        rc.pop("persona_mode", None)
+        out["runtime_config"] = rc
     return out

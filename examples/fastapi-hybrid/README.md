@@ -1,5 +1,9 @@
 # FastAPI hybrid sidecar example
 
+> **Shows:** ensure → prepare → your LLM → complete (mock LLM + `/healthz`)
+> **Time:** ~10 min
+> **Prerequisites:** sidecar on `:8001` (`docker compose -f docker-compose.sidecar.yml --profile bridge-mock up -d`)
+
 Reference app showing **ensure → prepare → your LLM → complete** with a mock LLM and `/healthz` for K8s/ECS.
 
 ## Prerequisites
