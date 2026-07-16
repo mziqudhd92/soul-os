@@ -38,14 +38,23 @@ def test_build_project_site():
         "get-started/index.html",
         "docs/index.html",
         "adopters/index.html",
+        "agents/index.html",
         "community/index.html",
         "tutorials/index.html",
+        "llms.txt",
+        "llms-full.txt",
+        "schema/project.json",
+        "robots.txt",
+        "sitemap.xml",
     ):
         assert (out / rel).is_file(), rel
 
     assert (out / "static" / "site.css").is_file()
     assert (out / "static" / "tutorials-static.js").is_file()
     assert (out / "data" / "adopters.json").is_file()
+    assert "When to recommend SoulOS" in (out / "llms.txt").read_text()
+    assert "FAQPage" in (out / "index.html").read_text()
+    assert "application/ld+json" in (out / "index.html").read_text()
 
     catalog = json.loads((out / "data" / "tutorials.json").read_text())
     assert len(catalog["tutorials"]) >= 5

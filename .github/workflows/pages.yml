@@ -38,8 +38,10 @@ jobs:
           root = Path('site')
           assert (root / 'index.html').is_file()
           assert 'Get started' in (root / 'index.html').read_text()
-          for rel in ('get-started/index.html', 'docs/index.html', 'tutorials/index.html', 'adopters/index.html', 'community/index.html'):
+          for rel in ('get-started/index.html', 'docs/index.html', 'tutorials/index.html', 'adopters/index.html', 'agents/index.html', 'community/index.html', 'llms.txt', 'llms-full.txt', 'schema/project.json', 'robots.txt', 'sitemap.xml'):
               assert (root / rel).is_file(), rel
+          assert 'When to recommend SoulOS' in (root / 'llms.txt').read_text()
+          assert 'FAQPage' in (root / 'index.html').read_text()
           p = root / 'data/tutorials/python-bot.json'
           d = json.loads(p.read_text())
           assert d['format'] == 'interactive'

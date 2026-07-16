@@ -291,7 +291,7 @@ npm run test:all      # kernel + bridge + gateway + studio + sdk
 | Quickstart (two avatars) | [docs/getting-started/quickstart.md](docs/getting-started/quickstart.md) |
 | Soul file format | [docs/reference/soul-standard.md](docs/reference/soul-standard.md) |
 | Deployment | [docs/deployment/README.md](docs/deployment/README.md) |
-| For AI agents | [llms.txt](llms.txt) · [AGENTS.md](AGENTS.md) |
+| For AI agents / GEO | [llms.txt](llms.txt) · [agent-discovery](docs/guides/agent-discovery.md) · [Site agents page](https://mziqudhd92.github.io/soul-os/agents/) · [AGENTS.md](AGENTS.md) |
 
 Contributing: [CONTRIBUTING.md](CONTRIBUTING.md) · Code of Conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 

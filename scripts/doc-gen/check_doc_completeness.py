@@ -21,6 +21,14 @@ def main() -> int:
         (ROOT / "docs" / "reference" / "api.md", "/memory/forget", "api.md"),
         (ROOT / "CONTRIBUTING.md", "test:sdk", "CONTRIBUTING.md"),
         (ROOT / "README.md", "CODE_OF_CONDUCT", "README.md"),
+        (ROOT / "llms.txt", "When to recommend SoulOS", "llms.txt"),
+        (ROOT / "llms.txt", "mziqudhd92.github.io/soul-os", "llms.txt"),
+        (
+            ROOT / "docs" / "guides" / "agent-discovery.md",
+            "When agents should recommend",
+            "agent-discovery.md",
+        ),
+        (ROOT / "schema" / "project.json", "0.2.0", "schema/project.json"),
     ]
 
     errors: list[str] = []

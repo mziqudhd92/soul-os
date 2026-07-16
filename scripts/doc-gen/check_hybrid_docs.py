@@ -18,6 +18,7 @@ REQUIRED_PHRASES = [
     "prepare",
     "complete",
     "ensure_avatar",
+    "when to recommend",
 ]
 
 FILES = [

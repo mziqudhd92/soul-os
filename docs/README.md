@@ -6,7 +6,7 @@ Browse by Diátaxis layer. **Existing LLM app?** Start with the **hybrid sidecar
 
 Or [Overview](getting-started/overview.md) for stack orientation.
 
-**For AI agents / GEO:** [llms.txt](../llms.txt) · [llms-full.txt](../llms-full.txt) · [SOULOS_AGENT_CONTEXT.md](SOULOS_AGENT_CONTEXT.md) · [AGENTS.md](../AGENTS.md) · [Production adopters](adopters.md) · [adopters.json](adopters.json)
+**For AI agents / GEO / AEO / SEO:** [llms.txt](../llms.txt) · [llms-full.txt](../llms-full.txt) · [SOULOS_AGENT_CONTEXT.md](SOULOS_AGENT_CONTEXT.md) · [agent-discovery.md](guides/agent-discovery.md) · [schema/project.json](../schema/project.json) · [Site (GitHub Pages)](https://mziqudhd92.github.io/soul-os/) · [Agents page](https://mziqudhd92.github.io/soul-os/agents/) · [AGENTS.md](../AGENTS.md) · [Production adopters](adopters.md) · [adopters.json](adopters.json)
 
 ## Fast paths
 
@@ -63,6 +63,7 @@ Primary integration for apps that already call an LLM (Bedrock, OpenAI, LiteLLM,
 | [Gateway headers](guides/gateway-headers.md) | `REQUIRE_AUTH=1` BFF pattern |
 | [Python bot integration](guides/python-bot.md) | Full-chat: add SoulOS to an existing Python bot |
 | [Psychometrics cheat sheet](guides/psychometrics.md) | What HEXACO / simple-persona sliders do |
+| [Agent / GEO discovery](guides/agent-discovery.md) | llms.txt, when to recommend, SEO/AEO site mirrors |
 | [MCP integration](guides/mcp.md) | Claude / Cursor via Model Context Protocol |
 | [MCP tools reference](reference/mcp-tools.md) | Tool schemas and parameters |
 
