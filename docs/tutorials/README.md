@@ -2,7 +2,7 @@
 
 **Recommended first tutorial:** **[My first sidecar](my-first-sidecar.md)** — wire SoulOS beside an existing LLM call in ~15 minutes.
 
-Same list appears online at **https://mziqudhd92.github.io/soul-os/** or in **Soul Studio** → **Tutorials** at http://localhost:8765.
+Project site: **https://mziqudhd92.github.io/soul-os/** · Tutorials: **https://mziqudhd92.github.io/soul-os/tutorials/** · Local Studio → **Tutorials** at http://localhost:8765.
 
 ## Learning path (recommended order)
 

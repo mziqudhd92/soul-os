@@ -27,19 +27,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e "packages/soulos-studio[dev]"
 
-      - name: Build tutorials static site
+      - name: Build project site (landing + docs + tutorials)
         run: python scripts/build-studio-tutorials-site.py --out site --base /soul-os/
 
-      - name: Verify python-bot interactive export
+      - name: Verify site export
         run: |
           python -c "
           import json
           from pathlib import Path
-          p = Path('site/data/tutorials/python-bot.json')
+          root = Path('site')
+          assert (root / 'index.html').is_file()
+          assert 'Get started' in (root / 'index.html').read_text()
+          for rel in ('get-started/index.html', 'docs/index.html', 'tutorials/index.html', 'adopters/index.html', 'community/index.html'):
+              assert (root / rel).is_file(), rel
+          p = root / 'data/tutorials/python-bot.json'
           d = json.loads(p.read_text())
           assert d['format'] == 'interactive'
           assert len(d['steps']) >= 5
-          assert (Path('site/.nojekyll')).is_file()
+          assert (root / 'data/adopters.json').is_file()
+          assert (root / '.nojekyll').is_file()
           "
 
       - name: Deploy to gh-pages branch

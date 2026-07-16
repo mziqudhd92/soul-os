@@ -7,10 +7,10 @@ Give your bot a **soul file** instead of a fragile system prompt. Primary path: 
 <p align="center">
   <a href="https://github.com/mziqudhd92/soul-os/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mziqudhd92/soul-os/ci.yml?branch=main&label=CI" alt="CI"/></a>
   <a href="https://github.com/mziqudhd92/soul-os/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green" alt="License MIT"/></a>
-  <a href="https://mziqudhd92.github.io/soul-os/"><img src="https://img.shields.io/badge/Tutorials-online-6d28d9" alt="Tutorials"/></a>
+  <a href="https://mziqudhd92.github.io/soul-os/"><img src="https://img.shields.io/badge/Site-GitHub%20Pages-3ecfba" alt="Project site"/></a>
 </p>
 
-**Tutorials (interactive)** · [GitHub Pages](https://mziqudhd92.github.io/soul-os/) · [Python bot guide](docs/guides/python-bot.md) · [Full docs](docs/README.md) · [FAQ](#faq)
+**Project site** · [GitHub Pages](https://mziqudhd92.github.io/soul-os/) · [Tutorials](https://mziqudhd92.github.io/soul-os/tutorials/) · [Python bot guide](docs/guides/python-bot.md) · [Full docs](docs/README.md) · [FAQ](#faq)
 
 ## Trust & adoption
 
@@ -66,7 +66,7 @@ Wait until the kernel is up (first build can take several minutes).
 | I want to… | Start here | Time |
 |------------|------------|------|
 | **Add SoulOS to my existing LLM app** (recommended) | [Sidecar integration](docs/guides/sidecar-integration.md) · [Hybrid API](docs/reference/hybrid-api.md) | ~20 min |
-| **Wire SoulOS into my Python bot** | [Interactive tutorial](https://mziqudhd92.github.io/soul-os/?tutorial=python-bot) or [Python bot guide](docs/guides/python-bot.md) | ~25 min |
+| **Wire SoulOS into my Python bot** | [Interactive tutorial](https://mziqudhd92.github.io/soul-os/tutorials/?tutorial=python-bot) or [Python bot guide](docs/guides/python-bot.md) | ~25 min |
 | **Click around in a UI** | Open http://localhost:8765 → **Wizard** or **Tutorials** | ~15 min |
 | **Test the API with curl** (no code) | [Quickstart Path A](docs/getting-started/quickstart.md#path-a) | ~10 min |
 | **Use SoulOS from Cursor / Claude** | [MCP guide](docs/guides/mcp.md) → `http://localhost:8000/mcp/sse` | ~15 min |
@@ -326,7 +326,7 @@ Same SDK surface. Self-host: kernel on `:8000`. Cloud: API key through the gatew
 <details>
 <summary><strong>GitHub Pages tutorials vs local Studio?</strong></summary>
 
-[GitHub Pages](https://mziqudhd92.github.io/soul-os/) hosts read-only tutorials (including the interactive Python bot walkthrough). Enable once: repo **Settings → Pages → Branch `gh-pages`** / root. Local Studio adds soul building, kernel deploy, and live chat — run `docker compose up`.
+[GitHub Pages](https://mziqudhd92.github.io/soul-os/) hosts the project site (landing, get-started, docs index, adopters, community) plus interactive tutorials. Enable once: repo **Settings → Pages → Branch `gh-pages`** / root. Local Studio adds soul building, kernel deploy, and live chat — run `docker compose up`.
 </details>
 
 ---

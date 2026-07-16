@@ -6,6 +6,14 @@ from typing import Any
 
 TUTORIALS: list[dict[str, Any]] = [
     {
+        "id": "my-first-sidecar",
+        "title": "My first sidecar",
+        "description": "Recommended first path — ensure → prepare → your LLM → complete.",
+        "duration": "15 min",
+        "category": "Getting started",
+        "source": {"type": "docs", "path": "tutorials/my-first-sidecar.md"},
+    },
+    {
         "id": "python-bot",
         "title": "Python bot integration",
         "description": "Interactive walkthrough — migrate from static system prompts.",
