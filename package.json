@@ -46,6 +46,8 @@
     "smoke:hybrid": "bash scripts/hybrid-smoke.sh",
     "doc:gen": "python3 scripts/doc-gen/generate_docs.py",
     "doc:check": "python3 scripts/doc-gen/check_hybrid_docs.py && python3 scripts/doc-gen/check_doc_completeness.py && (test -x packages/soulos-core/.venv/bin/python && packages/soulos-core/.venv/bin/python scripts/doc-gen/check_openapi_drift.py || python3 scripts/doc-gen/check_openapi_drift.py)",
+    "licenses:gen": "python3 scripts/generate-dependency-licenses.py",
+    "licenses:check": "python3 scripts/generate-dependency-licenses.py --fail-on-copyleft --check",
     "openapi:export": "(test -x packages/soulos-core/.venv/bin/python && packages/soulos-core/.venv/bin/python scripts/export-openapi.py || python3 scripts/export-openapi.py)",
     "build:site": "(test -x packages/soulos-studio/.venv/bin/python && packages/soulos-studio/.venv/bin/python || python3) scripts/build-studio-tutorials-site.py --out site --base /soul-os/",
     "build:tutorials-site": "npm run build:site"

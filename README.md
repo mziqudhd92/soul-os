@@ -23,7 +23,7 @@ SoulOS is maintained in the open so you can inspect, fork, and self-host before 
 | **Security** | Report vulnerabilities privately — [SECURITY.md](SECURITY.md) |
 | **Code of Conduct** | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) |
 | **Contributing** | [CONTRIBUTING.md](CONTRIBUTING.md) · [SUPPORT.md](SUPPORT.md) |
-| **Third-party** | Upstream licenses (e.g. ClawSouls personas) — [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) |
+| **Third-party** | Dependency licenses — [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) · [inventory](docs/dependency-licenses.generated.md) |
 
 ### Production adopters
 
@@ -71,7 +71,7 @@ Wait until the kernel is up (first build can take several minutes).
 | **Test the API with curl** (no code) | [Quickstart Path A](docs/getting-started/quickstart.md#path-a) | ~10 min |
 | **Use SoulOS from Cursor / Claude** | [MCP guide](docs/guides/mcp.md) → `http://localhost:8000/mcp/sse` | ~15 min |
 | **Deploy on my own servers** | [Plug in SoulOS](docs/guides/plug-in-soulos.md) · [Self-hosted](docs/deployment/self-hosted.md) | ~15 min |
-| **Use a ClawSouls persona** | [ClawSouls import](docs/guides/clawsouls-import.md) · Studio **ClawSouls** tab | ~10 min |
+| **Author a soul / persona pack** | Soul Studio Wizard · [persona packs (planned)](docs/guides/persona-packs.md) | ~10 min |
 
 ### 3. Five-minute sidecar (hybrid)
 
@@ -269,8 +269,6 @@ docs/                      Guides, reference, deployment
 | [examples/support-bot](examples/support-bot/) | Customer support + `.soul-memory/` |
 | [examples/dev-twin](examples/dev-twin/) | Developer assistant |
 | [examples/companion](examples/companion/) | Personal companion |
-| [examples/clawsouls](examples/clawsouls/) | ClawSouls import metadata + helpers |
-| [examples/clawsouls-sidecar](examples/clawsouls-sidecar/) | ClawSouls persona on sidecar stack |
 | [examples/mcp](examples/mcp/) | Cursor MCP workflow |
 
 ```bash
@@ -333,4 +331,4 @@ Same SDK surface. Self-host: kernel on `:8000`. Cloud: API key through the gatew
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Third-party persona content (e.g. [ClawSouls](https://clawsouls.ai) import) remains under upstream licenses — see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+MIT — see [LICENSE](LICENSE). Third-party dependency licenses — [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

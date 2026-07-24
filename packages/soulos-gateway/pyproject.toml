@@ -3,6 +3,12 @@ name = "soulos-gateway"
 version = "0.1.0"
 description = "SoulOS Cloud API gateway — API keys, rate limits, proxy to kernel"
 requires-python = ">=3.12"
+license = { text = "MIT" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
 dependencies = [
     "fastapi>=0.111.0",
     "uvicorn>=0.30.1",

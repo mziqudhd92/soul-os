@@ -32,5 +32,10 @@ jobs:
 
       - run: npm run test:all
 
+      - name: Dependency license inventory
+        run: |
+          python scripts/generate-dependency-licenses.py --fail-on-copyleft
+          # Refresh committed snapshot when maintainers bump deps locally via npm run licenses:gen
+
       - name: Doc drift checks
         run: npm run doc:check

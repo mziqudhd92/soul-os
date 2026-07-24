@@ -4,6 +4,8 @@ Thanks for helping improve SoulOS. This is an open-source monorepo (MIT kernel +
 
 By participating, you agree to follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 
+**Developer Certificate of Origin (DCO):** By contributing, you certify that you have the right to submit the contribution under the project's [MIT License](LICENSE), and that you grant SoulOS the right to distribute it under that license (see [DCO 1.1](https://developercertificate.org/)).
+
 ## Repository layout
 
 ```

@@ -34,17 +34,11 @@ from runtime.avatars import (
     fetch_bot_identity,
     register_avatar_record,
 )
-from runtime.clawsouls_import import (
-    default_external_key,
-    import_clawsouls_soul,
-    import_enabled,
-)
 from runtime.hybrid import build_hybrid_system_prompt, extract_inner_monologue
 from runtime.hybrid_tasks import run_reflect_background
 from runtime.telemetry import hybrid_complete_span, hybrid_prepare_span
 from runtime.errors import (
     BOT_NOT_FOUND,
-    CLAWSOULS_IMPORT_DISABLED,
     READY_DEGRADED,
     SOUL_INVALID,
     SoulOSProblem,
@@ -60,7 +54,6 @@ from schemas import (
     EnsureAvatarRequest,
     HybridCompleteRequest,
     HybridPrepareRequest,
-    ImportClawSoulsRequest,
     MemoryForget,
     MemoryIngest,
     MemoryRetrieve,
@@ -190,62 +183,10 @@ async def ensure_avatar(
         raise SoulOSProblem(SOUL_INVALID, 422, str(e)) from e
 
 
-@app.post("/v1/avatars/import-clawsouls")
-async def import_clawsouls_avatar(
-    payload: ImportClawSoulsRequest,
-    db: AsyncConnection = Depends(get_db),
-    account: AccountContext = Depends(get_account_context),
-):
-    if not import_enabled():
-        raise SoulOSProblem(
-            CLAWSOULS_IMPORT_DISABLED,
-            403,
-            "ClawSouls import is disabled (set CLAWSOULS_IMPORT_ENABLED=1)",
-        )
-    try:
-        soul, runtime_config, warnings = await import_clawsouls_soul(
-            payload.owner.strip(),
-            payload.name.strip(),
-            version=payload.version,
-            msv_preset=payload.msv_preset,
-        )
-    except ValueError as e:
-        raise SoulOSProblem(SOUL_INVALID, 422, str(e)) from e
-
-    merged_runtime = dict(runtime_config)
-    if payload.runtime_config:
-        merged_runtime.update(payload.runtime_config)
-
-    version = payload.version or merged_runtime.get("source", {}).get("version")
-    external_key = payload.external_key or default_external_key(
-        payload.owner, payload.name, version
-    )
-
-    if not payload.persist:
-        return {
-            "soul": soul,
-            "runtime_config": merged_runtime,
-            "warnings": warnings,
-            "external_key": external_key,
-        }
-
-    try:
-        record = await ensure_avatar_record(
-            db,
-            account.account_id,
-            external_key,
-            soul,
-            merged_runtime,
-        )
-    except ValueError as e:
-        raise SoulOSProblem(SOUL_INVALID, 422, str(e)) from e
-
-    return {
-        **record,
-        "warnings": warnings,
-        "external_key": external_key,
-        "runtime_config": merged_runtime,
-    }
+# ClawSouls third-party persona import was removed due to licensing complexity
+# (upstream persona prose and derivative-work / attribution obligations).
+# We will implement our own persona-pack format and import path instead —
+# see docs/guides/persona-packs.md.
 
 
 @app.post("/memory/ingest")

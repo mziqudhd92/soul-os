@@ -59,7 +59,7 @@ Primary integration for apps that already call an LLM (Bedrock, OpenAI, LiteLLM,
 | [Session memory](guides/session-memory.md) | Per-conversation scope + GDPR forget/delete |
 | [Migrate from system prompt](guides/migrate-from-system-prompt.md) | Convert a big prompt into a soul |
 | [Troubleshooting](guides/troubleshooting.md) | Errors by RFC 7807 `code` + `soulos-doctor.py` |
-| [ClawSouls import](guides/clawsouls-import.md) | Import personas from [clawsouls.ai](https://clawsouls.ai) |
+| [Persona packs (planned)](guides/persona-packs.md) | Own persona-pack format (ClawSouls import removed for licensing) |
 | [Gateway headers](guides/gateway-headers.md) | `REQUIRE_AUTH=1` BFF pattern |
 | [Python bot integration](guides/python-bot.md) | Full-chat: add SoulOS to an existing Python bot |
 | [Psychometrics cheat sheet](guides/psychometrics.md) | What HEXACO / simple-persona sliders do |
@@ -104,8 +104,6 @@ Primary integration for apps that already call an LLM (Bedrock, OpenAI, LiteLLM,
 | [examples/support-bot](../examples/support-bot/) | Customer support soul |
 | [examples/dev-twin](../examples/dev-twin/) | Developer assistant soul |
 | [examples/companion](../examples/companion/) | Personal companion soul |
-| [examples/clawsouls](../examples/clawsouls/) | ClawSouls import metadata |
-| [examples/clawsouls-sidecar](../examples/clawsouls-sidecar/) | ClawSouls on sidecar stack |
 
 ## Release & testing
 

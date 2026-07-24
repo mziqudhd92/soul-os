@@ -7,6 +7,13 @@ name = "soulos-inference-bridge"
 version = "0.1.0"
 description = "Ollama-compatible inference bridge for SoulOS (mock, AWS Bedrock, GCP Vertex)"
 requires-python = ">=3.11"
+license = { text = "MIT" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
 dependencies = [
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.32.0",

@@ -3,6 +3,12 @@ name = "soulos-core"
 version = "0.1.0"
 description = "SoulOS kernel — FastAPI runtime for avatar state, memory, and dual-process inference"
 requires-python = ">=3.12"
+license = { text = "MIT" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
 dependencies = [
     "fastapi>=0.111.0",
     "uvicorn>=0.30.1",
@@ -38,9 +44,6 @@ only-include = [
     "cli.py",
     "runtime",
 ]
-
-[tool.hatch.build.targets.wheel.force-include]
-"runtime/clawsouls_presets.yaml" = "runtime/clawsouls_presets.yaml"
 
 [project.scripts]
 soulos = "cli:main"

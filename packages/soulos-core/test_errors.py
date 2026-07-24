@@ -8,7 +8,6 @@ from main import app
 from runtime.errors import (
     ACCESS_DENIED,
     BOT_NOT_FOUND,
-    CLAWSOULS_IMPORT_DISABLED,
     INFERENCE_DOWN,
     MEMORY_DIM_MISMATCH,
     PROBLEM_CONTENT_TYPE,
@@ -91,21 +90,6 @@ async def test_ready_degraded_problem():
     assert PROBLEM_CONTENT_TYPE in response.headers.get("content-type", "")
 
 
-@pytest.mark.asyncio
-async def test_clawsouls_import_disabled_problem():
-    from unittest.mock import patch
-
-    with patch("main.import_enabled", return_value=False):
-        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-            response = await ac.post(
-                "/v1/avatars/import-clawsouls",
-                json={"owner": "test", "name": "bot", "persist": False},
-            )
-    assert response.status_code == 403
-    body = response.json()
-    assert body["code"] == CLAWSOULS_IMPORT_DISABLED
-
-
 def test_soulos_problem_exception_fields():
     exc = SoulOSProblem(ACCESS_DENIED, 403, "Access denied")
     assert exc.code == ACCESS_DENIED
@@ -115,7 +99,6 @@ def test_soulos_problem_exception_fields():
 def test_map_http_detail_to_code_branches():
     assert _map_http_detail_to_code(404, "Bot not found: x") == BOT_NOT_FOUND
     assert _map_http_detail_to_code(403, "Access denied") == ACCESS_DENIED
-    assert _map_http_detail_to_code(403, "ClawSouls import disabled") == CLAWSOULS_IMPORT_DISABLED
     assert _map_http_detail_to_code(422, "Soul validation failed") == SOUL_INVALID
     assert _map_http_detail_to_code(422, "field required") == VALIDATION_ERROR
     assert _map_http_detail_to_code(500, "embedding service down") == INFERENCE_DOWN

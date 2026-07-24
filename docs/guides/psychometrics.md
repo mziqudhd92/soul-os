@@ -26,7 +26,7 @@ Example soul fragment (authoring / register payload):
 }
 ```
 
-After save, exported `.soul.json` from Studio may contain only the derived `baseline_msv` (Simple tab fields are authoring UX). ClawSouls imports open in **Advanced** mode with an inferred MSV banner in Studio.
+After save, exported `.soul.json` from Studio may contain only the derived `baseline_msv` (Simple tab fields are authoring UX).
 
 ---
 

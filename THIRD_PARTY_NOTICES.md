@@ -1,17 +1,34 @@
 # Third-party notices
 
-SoulOS (MIT License — see [LICENSE](LICENSE)) may interoperate with external persona registries and specifications. The SoulOS **source code** is MIT-licensed; **imported persona prose** remains under each upstream soul's license.
+SoulOS source code is **MIT** — see [LICENSE](LICENSE).
 
-## ClawSouls
+## Dependency license inventory
 
-SoulOS can fetch persona packages from [ClawSouls](https://clawsouls.ai) via their public API (`https://clawsouls.ai/api/v1`). ClawSouls persona packages are community or official works published under permissive licenses (typically **Apache-2.0** or **MIT** per soul `soul.json`).
+A generated inventory of installed third-party Python and npm packages (name, version, declared license) lives in:
 
-- ClawSouls platform README: [github.com/clawsouls/clawsouls](https://github.com/clawsouls/clawsouls) (Apache-2.0)
-- Soul Spec: [github.com/clawsouls/soulspec](https://github.com/clawsouls/soulspec) (Apache-2.0)
-- Registry souls: per-package `license` field — see [ClawSouls license guide](https://clawsouls.ai/en/licenses)
+- [docs/dependency-licenses.generated.md](docs/dependency-licenses.generated.md)
 
-**Relationship:** SoulOS is an independent project. It is **not affiliated with or endorsed by ClawSouls**. The integration imports personas at runtime or via local conversion; it does not replace the ClawSouls registry or CLI.
+Regenerate after changing dependencies:
 
-**Derivatives:** When persona markdown is merged into a SoulOS soul payload, SoulOS adds HEXACO MSV and other fields. That combined payload is a derivative of the upstream soul. You must comply with the upstream license (attribution, license copy for Apache-2.0 derivatives, etc.). See [examples/clawsouls/ATTRIBUTION.md](examples/clawsouls/ATTRIBUTION.md).
+```bash
+python3 scripts/generate-dependency-licenses.py
+```
 
-**Apache License 2.0** (applies to many ClawSouls official souls): [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+CI regenerates the inventory and fails the build if any package declares a high-risk license (GPL / AGPL / SSPL / BUSL / Commons Clause / CC-BY-NC). Refresh the committed snapshot after dependency bumps with `npm run licenses:gen`.
+
+## Removed: ClawSouls persona import
+
+Third-party **ClawSouls** persona import (API bridge, Studio gallery, examples, and docs) was **removed** because of licensing complexity around upstream persona prose and derivative-work / attribution obligations.
+
+SoulOS will implement its **own** persona-pack format and import path instead. See [docs/guides/persona-packs.md](docs/guides/persona-packs.md).
+
+## Web fonts (GitHub Pages / Studio CSS)
+
+The project site CSS may load **Figtree** and **Fraunces** from Google Fonts under the **SIL Open Font License 1.1 (OFL-1.1)**.
+
+- CDN use for rendering HTML pages does not require vendoring font binaries into this repository.
+- **If font files are ever vendored** under `site-src/`, `packages/soulos-studio/`, or elsewhere in-tree, ship the OFL copyright notice and license text next to those files (do not relicense the fonts as MIT).
+
+## Runtime images (Docker Compose)
+
+Compose stacks may pull images such as `pgvector/pgvector` and `ollama/ollama`. Those are **runtime dependencies**, not linked into the MIT source tree. Model weights pulled by Ollama are licensed separately by their publishers.

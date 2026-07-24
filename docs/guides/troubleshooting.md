@@ -67,10 +67,6 @@ Tenant / gateway auth rejected the call.
 - Local: `REQUIRE_AUTH=0`
 - Cloud/BFF: send gateway headers — [gateway-headers.md](gateway-headers.md)
 
-### `CLAWSOULS_IMPORT_DISABLED`
-
-Import endpoint disabled in this deployment — enable per [clawsouls-import.md](clawsouls-import.md) or generate souls offline.
-
 ### `INTERNAL_ERROR` (500)
 
 Unexpected server failure — check kernel logs; open a bug with doctor output ([SUPPORT.md](../../SUPPORT.md)).

@@ -104,6 +104,5 @@ python vendor/soul-os/scripts/soulos-doctor.py \
 ## Docs
 
 - [Sidecar integration guide](../../docs/guides/sidecar-integration.md)
-- [ClawSouls import](../../docs/guides/clawsouls-import.md)
-- [ClawSouls sidecar example](../clawsouls-sidecar/README.md)
+- [Persona packs (planned)](../../docs/guides/persona-packs.md)
 - [Upstream sidecar compose](../../docker-compose.sidecar.yml)

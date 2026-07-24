@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-To win the developer ecosystem from text-only spec solutions (like ClawSouls) and rigid code-only engines (like Opensouls), Soul OS must eliminate developer friction while maximizing cognitive observability. This document outlines the architectural shift to a unified `.soul` file format, a live Dual-Process visual debugger for Soul Studio, and an append-only, Git-compatible episodic memory ledger.
+To win the developer ecosystem from text-only persona specs and rigid code-only engines, Soul OS must eliminate developer friction while maximizing cognitive observability. This document outlines the architectural shift to a unified `.soul` file format, a live Dual-Process visual debugger for Soul Studio, and an append-only, Git-compatible episodic memory ledger.
 
 ---
 

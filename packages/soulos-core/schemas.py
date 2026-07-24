@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from pydantic import AliasChoices, BaseModel, Field
+from pydantic import BaseModel
 
 
 class MemoryIngest(BaseModel):
@@ -63,14 +63,4 @@ class HybridCompleteRequest(BaseModel):
 class EnsureAvatarRequest(BaseModel):
     external_key: str
     soul: dict[str, Any]
-    runtime_config: dict[str, Any] | None = None
-
-
-class ImportClawSoulsRequest(BaseModel):
-    owner: str
-    name: str
-    version: str | None = None
-    external_key: str | None = None
-    msv_preset: str | None = None
-    persist: bool = Field(default=True, validation_alias=AliasChoices("persist", "register"))
     runtime_config: dict[str, Any] | None = None

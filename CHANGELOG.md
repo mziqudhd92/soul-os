@@ -2,6 +2,18 @@
 
 All notable changes to SoulOS are documented here. Version **0.2.0** focuses on hybrid sidecar DX, RFC 7807 errors, OpenAPI-locked SDK contract, and OTel tracing.
 
+## [Unreleased]
+
+### Removed
+
+- **ClawSouls persona import** — removed kernel route, Studio gallery, examples, and docs due to licensing complexity around upstream persona prose / derivatives. Own persona-pack format planned — see `docs/guides/persona-packs.md`.
+
+### Added
+
+- MIT `license` + classifiers on all Python `pyproject.toml` packages
+- Generated dependency license inventory (`docs/dependency-licenses.generated.md`) checked in CI
+- CONTRIBUTING DCO note; OFL font vendoring note in `THIRD_PARTY_NOTICES.md`
+
 ## [0.2.0] — 2026-07-09
 
 ### Added

@@ -1,4 +1,9 @@
-/* SoulOS project site — GitHub Pages */
+/* SoulOS project site — GitHub Pages
+ *
+ * Figtree + Fraunces are loaded from Google Fonts under SIL OFL-1.1.
+ * If these fonts are ever vendored into the repo, ship the OFL license
+ * text beside the font files (see THIRD_PARTY_NOTICES.md).
+ */
 @import url("https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap");
 
 :root {

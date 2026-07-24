@@ -18,7 +18,6 @@ SOUL_INVALID = "SOUL_INVALID"
 MEMORY_DIM_MISMATCH = "MEMORY_DIM_MISMATCH"
 BOT_NOT_FOUND = "BOT_NOT_FOUND"
 ACCESS_DENIED = "ACCESS_DENIED"
-CLAWSOULS_IMPORT_DISABLED = "CLAWSOULS_IMPORT_DISABLED"
 READY_DEGRADED = "READY_DEGRADED"
 VALIDATION_ERROR = "VALIDATION_ERROR"
 INTERNAL_ERROR = "INTERNAL_ERROR"
@@ -29,7 +28,6 @@ _CODE_TITLES: dict[str, str] = {
     MEMORY_DIM_MISMATCH: "Embedding dimension mismatch",
     BOT_NOT_FOUND: "Bot not found",
     ACCESS_DENIED: "Access denied",
-    CLAWSOULS_IMPORT_DISABLED: "ClawSouls import disabled",
     READY_DEGRADED: "Kernel not ready",
     VALIDATION_ERROR: "Request validation failed",
     INTERNAL_ERROR: "Internal server error",
@@ -102,8 +100,6 @@ def _map_http_detail_to_code(status: int, detail: str) -> str:
         return BOT_NOT_FOUND
     if status == 403 and "access" in lowered:
         return ACCESS_DENIED
-    if status == 403 and "clawsouls" in lowered:
-        return CLAWSOULS_IMPORT_DISABLED
     if status == 422:
         return SOUL_INVALID if "soul" in lowered else VALIDATION_ERROR
     if status == 500 and "embedding" in lowered:
