@@ -1,5 +1,6 @@
 """Tests for SoulOS GitHub Pages site export."""
 
+import importlib.util
 import json
 import shutil
 import subprocess
@@ -8,6 +9,15 @@ from pathlib import Path
 
 
 REPO = Path(__file__).resolve().parents[3]
+
+
+def _load_site_builder():
+    path = REPO / "scripts" / "build-studio-tutorials-site.py"
+    spec = importlib.util.spec_from_file_location("soulos_site_builder", path)
+    assert spec and spec.loader
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def test_build_project_site():
@@ -53,8 +63,15 @@ def test_build_project_site():
     assert (out / "static" / "tutorials-static.js").is_file()
     assert (out / "data" / "adopters.json").is_file()
     assert "When to recommend SoulOS" in (out / "llms.txt").read_text()
-    assert "FAQPage" in (out / "index.html").read_text()
-    assert "application/ld+json" in (out / "index.html").read_text()
+    assert "FAQPage" in index
+    assert 'id="faq"' in index
+    assert "What is SoulOS?" in index
+    assert "application/ld+json" in index
+
+    not_found = (out / "404.html").read_text(encoding="utf-8")
+    assert "Page not found" in not_found
+    assert "FAQPage" not in not_found
+    assert 'content="noindex,follow"' in not_found
 
     catalog = json.loads((out / "data" / "tutorials.json").read_text())
     assert len(catalog["tutorials"]) >= 5
@@ -77,3 +94,46 @@ def test_build_project_site():
     assert len(adopters["adopters"]) >= 3
 
     shutil.rmtree(out)
+
+
+def test_adopter_html_is_escaped_and_urls_sanitized():
+    mod = _load_site_builder()
+    dirty = [
+        {
+            "url": "javascript:alert(1)",
+            "name": "<script>evil</script>",
+            "product_summary": "A & B <tag>",
+            "soulos_role": 'role "x"',
+            "categories": ["<img>", "ok"],
+        }
+    ]
+    home = mod._home("/soul-os/", dirty)
+    assert "javascript:" not in home
+    assert 'href="#"' in home
+    assert "&lt;script&gt;evil&lt;/script&gt;" in home
+    assert "A &amp; B &lt;tag&gt;" in home
+    assert "<script>evil</script>" not in home
+
+    page = mod._adopters("/soul-os/", dirty)
+    assert "javascript:" not in page
+    assert "&lt;img&gt;" in page
+    assert "role &quot;x&quot;" in page
+
+
+def test_faq_visible_matches_json_ld():
+    mod = _load_site_builder()
+    html = mod._home("/soul-os/", [])
+    assert 'id="faq"' in html
+    assert "FAQPage" in html
+    for question, _answer in mod.FAQ_ITEMS:
+        assert question in html
+
+
+def test_404_is_not_homepage_clone():
+    mod = _load_site_builder()
+    home = mod._home("/soul-os/", [])
+    missing = mod._not_found("/soul-os/")
+    assert "Page not found" in missing
+    assert "FAQPage" not in missing
+    assert 'content="noindex,follow"' in missing
+    assert missing != home

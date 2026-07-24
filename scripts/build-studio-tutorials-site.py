@@ -8,7 +8,9 @@ import json
 import os
 import shutil
 import sys
+from html import escape
 from pathlib import Path
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE_SRC = ROOT / "site-src"
@@ -16,6 +18,32 @@ TEMPLATES = SITE_SRC / "templates"
 sys.path.insert(0, str(TEMPLATES))
 
 from _shell import absolute_url, page  # noqa: E402
+
+# Visible homepage FAQ must stay in sync with FAQPage JSON-LD (AEO).
+FAQ_ITEMS: list[tuple[str, str]] = [
+    (
+        "What is SoulOS?",
+        "SoulOS is an open-source identity and episodic memory sidecar for AI agents. "
+        "It provides HEXACO MSV personality, pgvector memory, and a hybrid prepare/complete "
+        "API so your existing LLM keeps generation.",
+    ),
+    (
+        "When should I use SoulOS?",
+        "Use SoulOS when you need persistent persona beyond a static system prompt, "
+        "episodic memory across sessions, a hybrid sidecar next to Bedrock/OpenAI/LiteLLM, "
+        "or MCP tools for memory and identity in Cursor or Claude.",
+    ),
+    (
+        "What is the primary integration path?",
+        "ensure_avatar → POST /hybrid/prepare → your LLM → POST /hybrid/complete. "
+        "See the sidecar integration guide and npm run smoke:hybrid.",
+    ),
+    (
+        "Is SoulOS free and open source?",
+        "Yes. The kernel, SDK, Studio, and examples are MIT-licensed. "
+        "The project site is free on GitHub Pages and synced from the same repository.",
+    ),
+]
 
 
 def _ensure_base(base: str) -> str:
@@ -33,19 +61,62 @@ def _write(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
+def _safe_http_url(url: str) -> str:
+    """Allow only http(s) adopter URLs; reject javascript: and other schemes."""
+    try:
+        parsed = urlparse((url or "").strip())
+    except ValueError:
+        return "#"
+    if parsed.scheme in ("http", "https") and parsed.netloc:
+        return parsed.geturl()
+    return "#"
+
+
+def _faq_html() -> str:
+    items = []
+    for question, answer in FAQ_ITEMS:
+        items.append(
+            f"""
+          <details class="faq-item">
+            <summary>{escape(question)}</summary>
+            <p>{escape(answer)}</p>
+          </details>"""
+        )
+    return "\n".join(items)
+
+
+def _faq_json_ld() -> dict:
+    return {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": question,
+                "acceptedAnswer": {"@type": "Answer", "text": answer},
+            }
+            for question, answer in FAQ_ITEMS
+        ],
+    }
+
+
 def _home(base: str, adopters: list[dict]) -> str:
     adopter_cards = []
     for a in adopters:
+        href = escape(_safe_http_url(str(a.get("url", ""))), quote=True)
+        name = escape(str(a.get("name", "")))
+        summary = escape(str(a.get("product_summary", "")))
         adopter_cards.append(
             f"""
         <article class="adopter-card">
-          <a href="{a["url"]}" rel="noopener">
-            <h3>{a["name"]}</h3>
-            <p>{a["product_summary"]}</p>
+          <a href="{href}" rel="noopener">
+            <h3>{name}</h3>
+            <p>{summary}</p>
           </a>
         </article>"""
         )
     adopters_html = "\n".join(adopter_cards) or "<p class='sub'>No adopters listed yet.</p>"
+    faq_body = _faq_html()
 
     body = f"""
     <section class="site-shell hero">
@@ -130,6 +201,16 @@ def _home(base: str, adopters: list[dict]) -> str:
       </div>
     </section>
 
+    <section class="section" id="faq" aria-labelledby="faq-heading">
+      <div class="site-shell">
+        <h2 id="faq-heading">FAQ</h2>
+        <p class="sub">Common questions for humans and answer engines — same content as the FAQPage structured data.</p>
+        <div class="faq-list">
+{faq_body}
+        </div>
+      </div>
+    </section>
+
     <section class="section">
       <div class="site-shell">
         <h2>Trust</h2>
@@ -146,44 +227,7 @@ def _home(base: str, adopters: list[dict]) -> str:
     </section>
 """
     project_ld = json.loads((ROOT / "schema" / "project.json").read_text(encoding="utf-8"))
-    faq_ld = {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "What is SoulOS?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "SoulOS is an open-source identity and episodic memory sidecar for AI agents. It provides HEXACO MSV personality, pgvector memory, and a hybrid prepare/complete API so your existing LLM keeps generation.",
-                },
-            },
-            {
-                "@type": "Question",
-                "name": "When should I use SoulOS?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Use SoulOS when you need persistent persona beyond a static system prompt, episodic memory across sessions, a hybrid sidecar next to Bedrock/OpenAI/LiteLLM, or MCP tools for memory and identity in Cursor or Claude.",
-                },
-            },
-            {
-                "@type": "Question",
-                "name": "What is the primary integration path?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "ensure_avatar → POST /hybrid/prepare → your LLM → POST /hybrid/complete. See the sidecar integration guide and npm run smoke:hybrid.",
-                },
-            },
-            {
-                "@type": "Question",
-                "name": "Is SoulOS free and open source?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. The kernel, SDK, Studio, and examples are MIT-licensed. The project site is free on GitHub Pages and synced from the same repository.",
-                },
-            },
-        ],
-    }
+    faq_ld = _faq_json_ld()
     website_ld = {
         "@context": "https://schema.org",
         "@type": "WebSite",
@@ -335,13 +379,17 @@ def _docs(base: str) -> str:
 def _adopters(base: str, adopters: list[dict]) -> str:
     cards = []
     for a in adopters:
-        cats = ", ".join(a.get("categories", [])[:4])
+        cats = escape(", ".join(str(c) for c in (a.get("categories") or [])[:4]))
+        href = escape(_safe_http_url(str(a.get("url", ""))), quote=True)
+        name = escape(str(a.get("name", "")))
+        summary = escape(str(a.get("product_summary", "")))
+        role = escape(str(a.get("soulos_role", "")))
         cards.append(
             f"""
       <article class="adopter-card">
-        <h3><a href="{a["url"]}" rel="noopener">{a["name"]}</a></h3>
-        <p>{a["product_summary"]}</p>
-        <p style="margin-top:0.75rem"><strong style="color:var(--accent-2)">SoulOS role:</strong> {a["soulos_role"]}</p>
+        <h3><a href="{href}" rel="noopener">{name}</a></h3>
+        <p>{summary}</p>
+        <p style="margin-top:0.75rem"><strong style="color:var(--accent-2)">SoulOS role:</strong> {role}</p>
         <p style="margin-top:0.5rem;font-size:0.85rem;color:var(--muted)">{cats}</p>
       </article>"""
         )
@@ -471,6 +519,30 @@ def _community(base: str) -> str:
         active="community",
         path="community/",
         body=body,
+    )
+
+
+def _not_found(base: str) -> str:
+    body = f"""
+    <section class="site-shell page-hero" style="padding-bottom:3rem">
+      <h1>Page not found</h1>
+      <p>That URL is not part of the SoulOS project site. Try one of these:</p>
+      <div class="btn-row" style="margin-top:1.25rem">
+        <a class="btn btn-primary" href="{base}">Home</a>
+        <a class="btn btn-ghost" href="{base}get-started/">Get started</a>
+        <a class="btn btn-ghost" href="{base}docs/">Docs</a>
+        <a class="btn btn-ghost" href="{base}tutorials/">Tutorials</a>
+      </div>
+    </section>
+"""
+    return page(
+        base=base,
+        title="Page not found — SoulOS",
+        description="The requested SoulOS project site page was not found.",
+        active="",
+        path="",
+        body=body,
+        robots="noindex,follow",
     )
 
 
@@ -637,8 +709,8 @@ Sitemap: {absolute_url(base, "sitemap.xml")}
 """,
     )
 
-    # SPA-style fallback for unknown paths on project pages
-    shutil.copy2(out / "index.html", out / "404.html")
+    # Distinct 404 body (avoid soft-404 homepage clones for crawlers)
+    _write(out / "404.html", _not_found(base))
     (out / ".nojekyll").touch()
 
     print(f"Built SoulOS site → {out.resolve()}")

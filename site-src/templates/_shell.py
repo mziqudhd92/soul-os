@@ -50,10 +50,12 @@ def page(
     extra_head: str = "",
     path: str = "",
     json_ld: list[dict] | None = None,
+    robots: str = "index,follow,max-image-preview:large",
 ) -> str:
     canonical = absolute_url(base, path)
     desc = escape(description, quote=True)
     title_esc = escape(title, quote=True)
+    robots_esc = escape(robots, quote=True)
     ld_blocks = ""
     for obj in json_ld or []:
         payload = json.dumps(obj, ensure_ascii=True, indent=2)
@@ -68,7 +70,7 @@ def page(
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title_esc}</title>
   <meta name="description" content="{desc}" />
-  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta name="robots" content="{robots_esc}" />
   <link rel="canonical" href="{canonical}" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="SoulOS" />
