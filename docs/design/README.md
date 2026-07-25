@@ -6,3 +6,4 @@ Product / architecture blueprints for SoulOS. These are **not** pytest TDD docs 
 |-----|--------|
 | [Evolution Matrix (product blueprint)](evolution-matrix.md) | Proposed blueprint |
 | [Alignment with current kernel](alignment-with-current-kernel.md) | Gap analysis vs `main` |
+| [SoulPacks TDD plan](soulpacks-tdd-plan.md) | Planned — M1–M5 checklist |

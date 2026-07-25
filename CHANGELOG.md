@@ -11,6 +11,7 @@ All notable changes to SoulOS are documented here. Version **0.2.0** focuses on 
 
 ### Added
 
+- **SoulPacks TDD plan** — detailed M1–M5 todo list in `docs/design/soulpacks-tdd-plan.md`
 - MIT `license` + classifiers on all Python `pyproject.toml` packages
 - Generated dependency license inventory (`docs/dependency-licenses.generated.md`) checked in CI
 - CONTRIBUTING DCO note; OFL font vendoring note in `THIRD_PARTY_NOTICES.md`
