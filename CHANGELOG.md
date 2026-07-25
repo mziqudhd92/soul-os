@@ -6,7 +6,7 @@ All notable changes to SoulOS are documented here. Version **0.2.0** focuses on 
 
 ### Removed
 
-- **ClawSouls persona import** — removed kernel route, Studio gallery, examples, and docs due to licensing complexity around upstream persona prose / derivatives. Own persona-pack format planned — see `docs/guides/persona-packs.md`.
+- **Third-party persona registry import** — removed external registry bridge, gallery, examples, and docs. First-party MIT **SoulPacks** planned — see `docs/guides/persona-packs.md`.
 
 ### Added
 

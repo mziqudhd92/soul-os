@@ -16,11 +16,9 @@ python3 scripts/generate-dependency-licenses.py
 
 CI regenerates the inventory and fails the build if any package declares a high-risk license (GPL / AGPL / SSPL / BUSL / Commons Clause / CC-BY-NC). Refresh the committed snapshot after dependency bumps with `npm run licenses:gen`.
 
-## Removed: ClawSouls persona import
+## First-party persona content (SoulPacks)
 
-Third-party **ClawSouls** persona import (API bridge, Studio gallery, examples, and docs) was **removed** because of licensing complexity around upstream persona prose and derivative-work / attribution obligations.
-
-SoulOS will implement its **own** persona-pack format and import path instead. See [docs/guides/persona-packs.md](docs/guides/persona-packs.md).
+Planned **SoulPacks** (in-repo persona packages) are authored under the same **MIT** license as SoulOS. Do not vendor third-party persona prose into the tree unless it is MIT (or equivalently permissive with no attribution-derivative burden) and reviewed. See [docs/guides/persona-packs.md](docs/guides/persona-packs.md).
 
 ## Web fonts (GitHub Pages / Studio CSS)
 

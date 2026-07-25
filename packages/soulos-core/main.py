@@ -183,10 +183,8 @@ async def ensure_avatar(
         raise SoulOSProblem(SOUL_INVALID, 422, str(e)) from e
 
 
-# ClawSouls third-party persona import was removed due to licensing complexity
-# (upstream persona prose and derivative-work / attribution obligations).
-# We will implement our own persona-pack format and import path instead —
-# see docs/guides/persona-packs.md.
+# SoulPacks (first-party MIT persona packages): list/import routes land in
+# runtime/soulpacks.py — see docs/guides/persona-packs.md.
 
 
 @app.post("/memory/ingest")

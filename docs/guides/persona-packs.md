@@ -1,11 +1,11 @@
-# Persona packs (planned)
+# SoulPacks (planned)
 
-Third-party **ClawSouls** persona import was **removed** from SoulOS because of licensing complexity: upstream persona prose creates derivative-work and attribution obligations (including CC-BY / Apache-2.0 redistribution rules) that are hard to keep correct for every deploy and redistribute path.
+SoulOS will ship **SoulPacks**: first-party, MIT-licensed persona packages in this repository (`packs/soulpacks/`), with kernel list/import APIs and a Studio gallery.
 
-**We will implement our own persona-pack format and import path** instead of re-adding a ClawSouls bridge. Until then:
+Until SoulPacks land:
 
 - Author souls in Soul Studio or hand-write `.soul.json` ([soul schema](../../spec/soul.schema.json))
 - Register with `POST /v1/avatars` or `POST /v1/avatars/ensure`
 - Use the [hybrid sidecar](sidecar-integration.md) path for apps that already have an LLM
 
-See [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md) for dependency licenses and the historical note on this removal.
+See [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md) for dependency licenses. SoulPacks content will be MIT, same as the SoulOS codebase.
