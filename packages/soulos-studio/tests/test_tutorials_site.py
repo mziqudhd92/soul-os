@@ -46,6 +46,7 @@ def test_build_project_site():
 
     for rel in (
         "get-started/index.html",
+        "soulpacks/index.html",
         "docs/index.html",
         "adopters/index.html",
         "agents/index.html",
@@ -56,6 +57,7 @@ def test_build_project_site():
         "schema/project.json",
         "robots.txt",
         "sitemap.xml",
+        "data/soulpacks/catalog.json",
     ):
         assert (out / rel).is_file(), rel
 
@@ -66,7 +68,12 @@ def test_build_project_site():
     assert "FAQPage" in index
     assert 'id="faq"' in index
     assert "What is SoulOS?" in index
+    assert "SoulPacks" in index
     assert "application/ld+json" in index
+    packs_page = (out / "soulpacks" / "index.html").read_text(encoding="utf-8")
+    assert "import-soulpack" in packs_page
+    assert "support-agent" in packs_page
+    assert "How to improve" in packs_page
 
     not_found = (out / "404.html").read_text(encoding="utf-8")
     assert "Page not found" in not_found

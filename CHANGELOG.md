@@ -16,6 +16,11 @@ All notable changes to SoulOS are documented here. Version **0.2.0** focuses on 
 ### Fixed
 
 - **SoulPacks hardening** — reject `files` / pack_id path traversal; document unversioned singleton layout + MSV precedence; atomic `export_pack` writes
+- **GitHub Pages verify quoting** — heredoc so FAQ/`id="faq"` checks work in CI
+
+### Changed
+
+- **Project site** — dedicated `/soulpacks/` page (use + author), nav/home/docs/get-started updates, catalog mirror at `data/soulpacks/catalog.json`
 - MIT `license` + classifiers on all Python `pyproject.toml` packages
 - Generated dependency license inventory (`docs/dependency-licenses.generated.md`) checked in CI
 - CONTRIBUTING DCO note; OFL font vendoring note in `THIRD_PARTY_NOTICES.md`

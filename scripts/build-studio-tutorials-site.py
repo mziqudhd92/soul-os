@@ -40,8 +40,14 @@ FAQ_ITEMS: list[tuple[str, str]] = [
     ),
     (
         "Is SoulOS free and open source?",
-        "Yes. The kernel, SDK, Studio, and examples are MIT-licensed. "
+        "Yes. The kernel, SDK, Studio, SoulPacks, and examples are MIT-licensed. "
         "The project site is free on GitHub Pages and synced from the same repository.",
+    ),
+    (
+        "What are SoulPacks?",
+        "SoulPacks are first-party MIT persona packages in packs/soulpacks/. "
+        "List them with GET /v1/soulpacks and import with POST /v1/avatars/import-soulpack, "
+        "or use the Studio SoulPacks tab.",
     ),
 ]
 
@@ -124,6 +130,7 @@ def _home(base: str, adopters: list[dict]) -> str:
       <p class="lede">Identity + memory sidecar for agents you already run — validated personality, episodic recall, and a hybrid API so your LLM keeps generation.</p>
       <div class="btn-row">
         <a class="btn btn-primary" href="{base}get-started/">Get started</a>
+        <a class="btn btn-ghost" href="{base}soulpacks/">SoulPacks</a>
         <a class="btn btn-ghost" href="{base}docs/">View docs</a>
         <a class="btn btn-ghost" href="https://github.com/mziqudhd92/soul-os">GitHub</a>
       </div>
@@ -169,15 +176,15 @@ def _home(base: str, adopters: list[dict]) -> str:
             </a>
           </article>
           <article class="path-tile">
-            <a href="{base}tutorials/?tutorial=python-bot">
-              <h3>Full-chat Python bot</h3>
-              <p>Let SoulOS stream chat end-to-end with SSE.</p>
+            <a href="{base}soulpacks/">
+              <h3>SoulPacks</h3>
+              <p>First-party MIT personas — import, deploy, or author your own pack.</p>
             </a>
           </article>
           <article class="path-tile">
-            <a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/mcp.md">
-              <h3>MCP in Cursor</h3>
-              <p>Memory and identity tools at <code>/mcp/sse</code>.</p>
+            <a href="{base}tutorials/?tutorial=python-bot">
+              <h3>Full-chat Python bot</h3>
+              <p>Let SoulOS stream chat end-to-end with SSE.</p>
             </a>
           </article>
           <article class="path-tile">
@@ -258,6 +265,147 @@ def _home(base: str, adopters: list[dict]) -> str:
     )
 
 
+def _load_soulpack_catalog() -> list[dict]:
+    path = ROOT / "packs" / "soulpacks" / "catalog.json"
+    if not path.is_file():
+        return []
+    data = json.loads(path.read_text(encoding="utf-8"))
+    packs = data.get("packs") if isinstance(data, dict) else data
+    return [p for p in (packs or []) if isinstance(p, dict)]
+
+
+def _soulpacks(base: str) -> str:
+    pack_cards = []
+    for p in _load_soulpack_catalog():
+        pid = escape(str(p.get("id", "")))
+        name = escape(str(p.get("name", pid)))
+        ver = escape(str(p.get("version", "")))
+        tags = escape(", ".join(str(t) for t in (p.get("tags") or [])[:4]))
+        pack_cards.append(
+            f"""
+        <article class="path-tile">
+          <h3>{name}</h3>
+          <p><code>{pid}</code> · v{ver} · MIT</p>
+          <p style="margin-top:0.5rem;font-size:0.9rem;color:var(--muted)">{tags}</p>
+        </article>"""
+        )
+    packs_html = "\n".join(pack_cards) or "<p class='sub'>No packs in catalog yet.</p>"
+
+    body = f"""
+    <section class="site-shell page-hero">
+      <h1>SoulPacks</h1>
+      <p>First-party, MIT-licensed persona packages. Import a ready personality, deploy it to the kernel, or author your own pack in-repo — no third-party registry.</p>
+      <div class="btn-row" style="margin-top:1.25rem">
+        <a class="btn btn-primary" href="https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/persona-packs.md">Full guide</a>
+        <a class="btn btn-ghost" href="{base}get-started/">Get started (sidecar)</a>
+        <a class="btn btn-ghost" href="https://github.com/mziqudhd92/soul-os/tree/main/packs/soulpacks">Browse on GitHub</a>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="site-shell">
+        <h2>What is a SoulPack?</h2>
+        <p class="sub">A SoulPack is a small directory under <code>packs/soulpacks/</code>: markdown persona slices plus a <code>pack.json</code> manifest (always <code>license: MIT</code>). The kernel compiles it into a validated <code>.soul.json</code> with HEXACO MSV, then optionally <code>ensure</code>s an avatar.</p>
+        <div class="path-grid" style="margin-top:1.25rem">
+          <div class="path-tile">
+            <h3>MIT only</h3>
+            <p>Import rejects any non-MIT pack. Content stays first-party and redistributable with SoulOS.</p>
+          </div>
+          <div class="path-tile">
+            <h3>Unversioned singletons</h3>
+            <p>One directory per pack id. The <code>version</code> field is metadata for <code>external_key</code> (<code>soulos:id@version</code>).</p>
+          </div>
+          <div class="path-tile">
+            <h3>Safe paths</h3>
+            <p>Manifest <code>files</code> must stay inside the pack directory — traversal is rejected.</p>
+          </div>
+          <div class="path-tile">
+            <h3>MSV precedence</h3>
+            <p><code>baseline_msv</code> in pack.json ≫ named preset ≫ schema defaults.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="site-shell">
+        <h2>Shipped packs</h2>
+        <p class="sub">Included in the repository catalog today.</p>
+        <div class="path-grid">
+{packs_html}
+        </div>
+      </div>
+    </section>
+
+    <section class="site-shell prose-block">
+      <h2>How to use</h2>
+      <h3>1. API</h3>
+      <pre><code># List
+curl -s http://localhost:8000/v1/soulpacks
+
+# Convert only (no DB write)
+curl -s -X POST http://localhost:8000/v1/avatars/import-soulpack \\
+  -H 'content-type: application/json' \\
+  -d '{{"pack_id":"support-agent","persist":false}}'
+
+# Ensure avatar
+curl -s -X POST http://localhost:8000/v1/avatars/import-soulpack \\
+  -H 'content-type: application/json' \\
+  -d '{{"pack_id":"companion","persist":true}}'</code></pre>
+      <p>Errors use RFC 7807 codes: <code>SOULPACK_NOT_FOUND</code>, <code>SOULPACK_LICENSE_REJECTED</code>, <code>SOULPACK_INVALID</code>.</p>
+
+      <h3>2. CLI</h3>
+      <pre><code>cd packages/soulos-core
+.venv/bin/python -m cli pack list
+.venv/bin/python -m cli pack import support-agent --persist false
+.venv/bin/python -m cli pack export companion -o /tmp/my-companion</code></pre>
+
+      <h3>3. Soul Studio</h3>
+      <p>Run Studio locally (<code>soulos-studio</code> on :8765), open the <strong>SoulPacks</strong> tab, then <em>Open in Studio</em> or <em>Deploy to kernel</em>.</p>
+
+      <h3>4. Sidecar seed</h3>
+      <pre><code>python3 examples/soulpack-sidecar/seed_soulpack.py \\
+  --pack-id support-agent --persist true \\
+  --kernel http://localhost:8000</code></pre>
+      <p>Then continue with hybrid <code>prepare → your LLM → complete</code>.</p>
+
+      <h2>How to improve / author packs</h2>
+      <ol>
+        <li>Copy an existing pack under <code>packs/soulpacks/</code> or export one with <code>soulos pack export</code>.</li>
+        <li>Edit <code>SOUL.md</code> (and optional <code>IDENTITY.md</code> / <code>STYLE.md</code>) — keep prose MIT-authored.</li>
+        <li>Update <code>pack.json</code>: <code>id</code>, <code>name</code>, <code>version</code>, <code>license: "MIT"</code>, <code>files</code>, and either <code>baseline_msv</code> or <code>msv_preset</code>.</li>
+        <li>Register the pack in <code>packs/soulpacks/catalog.json</code>.</li>
+        <li>Add or extend tests in <code>packages/soulos-core/test_soulpacks.py</code> (compile + MIT checks).</li>
+        <li>Open a PR — CI runs kernel tests and the license copyleft gate.</li>
+      </ol>
+      <pre><code>packs/soulpacks/
+  catalog.json
+  _presets.yaml
+  my-pack/
+    pack.json      # license must be MIT
+    SOUL.md
+    IDENTITY.md    # optional
+    STYLE.md       # optional</code></pre>
+
+      <h2>Docs &amp; plan</h2>
+      <ul>
+        <li><a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/persona-packs.md">SoulPacks guide</a></li>
+        <li><a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/design/soulpacks-tdd-plan.md">TDD delivery plan (M1–M5)</a></li>
+        <li><a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/reference/hybrid-api.md">Hybrid API (import-soulpack)</a></li>
+        <li><a href="https://github.com/mziqudhd92/soul-os/tree/main/examples/soulpack-sidecar">examples/soulpack-sidecar</a></li>
+      </ul>
+    </section>
+"""
+    return page(
+        base=base,
+        title="SoulPacks — MIT persona packages — SoulOS",
+        description="SoulPacks are first-party MIT persona packages for SoulOS: list, import, Studio gallery, and how to author your own.",
+        active="soulpacks",
+        path="soulpacks/",
+        body=body,
+    )
+
+
 def _get_started(base: str) -> str:
     body = f"""
     <section class="site-shell page-hero">
@@ -269,7 +417,7 @@ def _get_started(base: str) -> str:
       <pre><code>git clone https://github.com/mziqudhd92/soul-os.git
 cd soul-os
 docker compose -f docker-compose.sidecar.yml --profile bridge-mock up -d</code></pre>
-      <p>Kernel listens on <code>http://localhost:8001</code>.</p>
+      <p>Kernel listens on <code>http://localhost:8001</code> in the sidecar compose file (or :8000 for full stack).</p>
 
       <h2>2. Smoke test</h2>
       <pre><code>npm run smoke:hybrid</code></pre>
@@ -283,8 +431,16 @@ docker compose -f docker-compose.sidecar.yml --profile bridge-mock up -d</code><
         <li><a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/reference/hybrid-api.md">Hybrid API reference</a></li>
       </ul>
 
+      <h2>4. Optional — start from a SoulPack</h2>
+      <p>Import a first-party MIT persona, then run hybrid turns.</p>
+      <pre><code>curl -s -X POST http://localhost:8000/v1/avatars/import-soulpack \\
+  -H 'content-type: application/json' \\
+  -d '{{"pack_id":"support-agent","persist":true}}'</code></pre>
+      <p>Details: <a href="{base}soulpacks/">SoulPacks</a> · <a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/persona-packs.md">guide</a>.</p>
+
       <h2>Secondary paths</h2>
       <ul>
+        <li><a href="{base}soulpacks/">SoulPacks</a> — MIT persona packages</li>
         <li><a href="{base}tutorials/?tutorial=python-bot">Full-chat Python bot</a> — SoulOS streams SSE</li>
         <li><a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/mcp.md">MCP for Cursor / Claude</a></li>
         <li><a href="https://github.com/mziqudhd92/soul-os#quickstart">Run Soul Studio locally</a> on :8765</li>
@@ -319,6 +475,18 @@ def _docs(base: str) -> str:
           <a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/sidecar-integration.md">
             <h3>Sidecar integration</h3>
             <p>Bedrock/OpenAI apps: prepare → LLM → complete.</p>
+          </a>
+        </article>
+        <article class="doc-card">
+          <a href="{base}soulpacks/">
+            <h3>SoulPacks</h3>
+            <p>MIT persona packages — use, import, and author your own.</p>
+          </a>
+        </article>
+        <article class="doc-card">
+          <a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/persona-packs.md">
+            <h3>SoulPacks guide (repo)</h3>
+            <p>API, CLI, layout, MSV precedence, path safety.</p>
           </a>
         </article>
         <article class="doc-card">
@@ -440,6 +608,7 @@ def _agents(base: str) -> str:
         <li>Episodic memory across sessions (pgvector)</li>
         <li>Hybrid sidecar: keep Bedrock/OpenAI/LiteLLM; SoulOS does prepare/complete</li>
         <li>MCP memory/identity tools in Cursor or Claude</li>
+        <li>First-party MIT <a href="{base}soulpacks/">SoulPacks</a> for ready personas</li>
       </ul>
       <p>Primary path to cite: <code>ensure → prepare → your LLM → complete</code>.</p>
 
@@ -530,6 +699,7 @@ def _not_found(base: str) -> str:
       <div class="btn-row" style="margin-top:1.25rem">
         <a class="btn btn-primary" href="{base}">Home</a>
         <a class="btn btn-ghost" href="{base}get-started/">Get started</a>
+        <a class="btn btn-ghost" href="{base}soulpacks/">SoulPacks</a>
         <a class="btn btn-ghost" href="{base}docs/">Docs</a>
         <a class="btn btn-ghost" href="{base}tutorials/">Tutorials</a>
       </div>
@@ -568,6 +738,7 @@ def _tutorials_page(base: str) -> str:
       </a>
       <nav class="nav" aria-label="Primary">
         <a href="{base}get-started/">Get started</a>
+        <a href="{base}soulpacks/">SoulPacks</a>
         <a href="{base}docs/">Docs</a>
         <a href="{base}tutorials/" aria-current="page">Tutorials</a>
         <a class="hide-sm" href="{base}adopters/">Adopters</a>
@@ -666,15 +837,24 @@ def build(out: Path, base: str) -> None:
 
     _write(out / "index.html", _home(base, adopters))
     _write(out / "get-started" / "index.html", _get_started(base))
+    _write(out / "soulpacks" / "index.html", _soulpacks(base))
     _write(out / "docs" / "index.html", _docs(base))
     _write(out / "adopters" / "index.html", _adopters(base, adopters))
     _write(out / "agents" / "index.html", _agents(base))
     _write(out / "community" / "index.html", _community(base))
     _write(out / "tutorials" / "index.html", _tutorials_page(base))
 
+    # Mirror pack catalog for the static site / agents
+    packs_data = out / "data" / "soulpacks"
+    packs_data.mkdir(parents=True, exist_ok=True)
+    catalog_src = ROOT / "packs" / "soulpacks" / "catalog.json"
+    if catalog_src.is_file():
+        shutil.copy2(catalog_src, packs_data / "catalog.json")
+
     site_paths = [
         "",
         "get-started/",
+        "soulpacks/",
         "docs/",
         "tutorials/",
         "adopters/",
@@ -683,6 +863,7 @@ def build(out: Path, base: str) -> None:
         "llms.txt",
         "llms-full.txt",
         "schema/project.json",
+        "data/soulpacks/catalog.json",
     ]
     sitemap_urls = "\n".join(
         f"  <url><loc>{absolute_url(base, p)}</loc><changefreq>weekly</changefreq></url>"
@@ -716,7 +897,8 @@ Sitemap: {absolute_url(base, "sitemap.xml")}
     print(f"Built SoulOS site → {out.resolve()}")
     print(f"  base URL path: {base}")
     print(
-        "  pages: home, get-started, docs, tutorials, adopters, agents, community"
+        "  pages: home, get-started, soulpacks, docs, tutorials, "
+        "adopters, agents, community"
     )
     print(f"  agent mirrors: llms.txt, llms-full.txt, schema/project.json")
     print(f"  tutorials: {len(TUTORIALS)}")

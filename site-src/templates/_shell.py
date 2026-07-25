@@ -11,6 +11,7 @@ DEFAULT_BASE = "/soul-os/"
 
 NAV_ITEMS = [
     ("get-started/", "Get started"),
+    ("soulpacks/", "SoulPacks"),
     ("docs/", "Docs"),
     ("tutorials/", "Tutorials"),
     ("adopters/", "Adopters"),
@@ -31,7 +32,11 @@ def nav_html(base: str, active: str = "") -> str:
     parts: list[str] = []
     for href, label in NAV_ITEMS:
         current = ' aria-current="page"' if active == href.rstrip("/") else ""
-        hide = ' class="hide-sm"' if label in ("Adopters", "Community", "Agents") else ""
+        hide = (
+            ' class="hide-sm"'
+            if label in ("Adopters", "Community", "Agents", "Tutorials")
+            else ""
+        )
         parts.append(f'<a href="{base}{href}"{current}{hide}>{label}</a>')
     parts.append(
         f'<a class="btn btn-ghost" style="padding:0.4rem 0.85rem" '
@@ -109,6 +114,7 @@ def page(
       <div>SoulOS — MIT · Identity + memory sidecar for agents you already run</div>
       <div class="footer-links">
         <a href="{base}docs/">Docs</a>
+        <a href="{base}soulpacks/">SoulPacks</a>
         <a href="{base}tutorials/">Tutorials</a>
         <a href="{base}agents/">Agents / GEO</a>
         <a href="{base}llms.txt">llms.txt</a>

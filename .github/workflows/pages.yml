@@ -41,6 +41,7 @@ jobs:
           assert "Get started" in (root / "index.html").read_text()
           for rel in (
               "get-started/index.html",
+              "soulpacks/index.html",
               "docs/index.html",
               "tutorials/index.html",
               "adopters/index.html",
@@ -51,6 +52,7 @@ jobs:
               "schema/project.json",
               "robots.txt",
               "sitemap.xml",
+              "data/soulpacks/catalog.json",
           ):
               assert (root / rel).is_file(), rel
           assert "When to recommend SoulOS" in (root / "llms.txt").read_text()
@@ -58,6 +60,11 @@ jobs:
           assert "FAQPage" in index
           assert 'id="faq"' in index
           assert "What is SoulOS?" in index
+          assert "SoulPacks" in index
+          packs = (root / "soulpacks" / "index.html").read_text()
+          assert "import-soulpack" in packs
+          assert "support-agent" in packs
+          assert "How to improve" in packs
           nf = (root / "404.html").read_text()
           assert "Page not found" in nf
           assert "FAQPage" not in nf
