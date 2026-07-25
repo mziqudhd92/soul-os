@@ -7,6 +7,7 @@ All notable changes to SoulOS are documented here. Version **0.2.0** focuses on 
 ### Removed
 
 - **Third-party persona registry import** — removed external registry bridge, gallery, examples, and docs. First-party MIT **SoulPacks** planned — see `docs/guides/persona-packs.md`.
+- Switched from ClawSouls to SoulPacks because of licensing issues (upstream persona prose / derivative-work obligations); SoulPacks stay MIT in-repo.
 
 ### Added
 
