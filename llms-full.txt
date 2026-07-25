@@ -53,6 +53,8 @@ SoulPacks (MIT in-repo personas): `GET /v1/soulpacks`, `POST /v1/avatars/import-
 
 See [docs/guides/identity-model.md](docs/guides/identity-model.md): `owner_id`, `external_key` → `bot_id`, `session_id` vs global memory.
 
+Multi-agent Phase A (app conductor, no kernel teams API): [docs/guides/multi-agent-teams.md](docs/guides/multi-agent-teams.md).
+
 ## SDK
 
 - Python: `SoulHybridClient.run_turn()` — ensure → prepare → generate callback → complete

@@ -164,7 +164,10 @@ def test_catalog_has_at_least_three_mit_packs():
         assert manifest["license"] == "MIT"
 
 
-@pytest.mark.parametrize("pack_id", ["support-agent", "companion", "dev-twin"])
+@pytest.mark.parametrize(
+    "pack_id",
+    ["support-agent", "companion", "dev-twin", "customer-front", "inventory"],
+)
 def test_each_catalog_pack_compiles(pack_id: str):
     soul, runtime, _ = compile_pack(pack_id, root=PACKS)
     validate_soul_payload(soul)

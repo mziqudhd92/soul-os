@@ -28,6 +28,7 @@ Primary integration for apps that already call an LLM (Bedrock, OpenAI, LiteLLM,
 | [My first sidecar](tutorials/my-first-sidecar.md) | 15-min beginner tutorial (curl + `SoulHybridClient`) |
 | [Sidecar integration](guides/sidecar-integration.md) | Compose, client, production checklist |
 | [Identity model](guides/identity-model.md) | `external_key`, `bot_id`, `session_id`, tenants |
+| [Multi-agent teams (Phase A)](guides/multi-agent-teams.md) | App-orchestrated specialist handoffs |
 | [Hybrid API](reference/hybrid-api.md) | `prepare` / `complete` / `ensure` / `/ready` JSON |
 | [examples/fastapi-hybrid](../examples/fastapi-hybrid/) | Reference FastAPI app |
 | [Port layout](guides/sidecar-integration.md#port-layout-common-confusion) | `:8000` full stack vs `:8001` sidecar |
@@ -60,6 +61,7 @@ Primary integration for apps that already call an LLM (Bedrock, OpenAI, LiteLLM,
 | [Migrate from system prompt](guides/migrate-from-system-prompt.md) | Convert a big prompt into a soul |
 | [Troubleshooting](guides/troubleshooting.md) | Errors by RFC 7807 `code` + `soulos-doctor.py` |
 | [SoulPacks](guides/persona-packs.md) | First-party MIT persona packages (list/import + Studio) |
+| [Multi-agent teams](guides/multi-agent-teams.md) | Customer → Inventory handoff without a teams API |
 | [SoulPacks TDD plan](design/soulpacks-tdd-plan.md) | Single delivery plan — M1–M5 complete |
 | [Gateway headers](guides/gateway-headers.md) | `REQUIRE_AUTH=1` BFF pattern |
 | [Python bot integration](guides/python-bot.md) | Full-chat: add SoulOS to an existing Python bot |
@@ -106,6 +108,7 @@ Primary integration for apps that already call an LLM (Bedrock, OpenAI, LiteLLM,
 | [examples/dev-twin](../examples/dev-twin/) | Developer assistant soul |
 | [examples/companion](../examples/companion/) | Personal companion soul |
 | [examples/soulpack-sidecar](../examples/soulpack-sidecar/) | Seed a MIT SoulPack into the kernel |
+| [examples/multi-agent-handoff](../examples/multi-agent-handoff/) | Phase A Customer → Inventory handoff |
 
 ## Release & testing
 

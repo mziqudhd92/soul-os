@@ -80,6 +80,18 @@ Studio and MCP can also read/update identity; hybrid sidecar is the production p
 
 ---
 
+## Multi-agent teams (Phase A)
+
+One turn still uses one `bot_id`. For specialist handoffs (e.g. Customer → Inventory):
+
+- Stable keys per role: `org:{org_id}:{role}`
+- Shared app `conversation_id` → hybrid `session_id` `conv:{id}` (memory remains per bot)
+- On transfer: complete current bot → ingest handoff note on next bot → prepare on next `bot_id`
+
+Full recipe: [Multi-agent teams](multi-agent-teams.md) · [examples/multi-agent-handoff](../../examples/multi-agent-handoff/)
+
+---
+
 ## Multi-tenant cloud
 
 When using SoulOS Cloud gateway, pass:

@@ -31,6 +31,7 @@ Boot: `docker compose up --build` (kernel :8000, studio :8765, Postgres, Ollama)
 | Hand-tune `.soul.json` | **Soul Studio** (`pip install soulos-studio`) |
 
 Identity model: [guides/identity-model.md](guides/identity-model.md)
+Multi-agent (Phase A): [guides/multi-agent-teams.md](guides/multi-agent-teams.md)
 
 ---
 
@@ -225,7 +226,7 @@ async for event in soul.send_message(avatar["id"], "hello"):
 | `packages/soulos-sdk/python/` | `soulos-sdk` |
 | `packages/soulos-studio/` | Soul Builder UI (`soulos-studio` CLI) |
 | `spec/soul.schema.json` | Soul validation contract |
-| `examples/` | support-bot, dev-twin, companion, mcp |
+| `examples/` | support-bot, dev-twin, companion, mcp, multi-agent-handoff |
 
 **Runtime pipeline:** `embedder` → `memory` (recall) → `pipeline` (System 1 SSE) → `reflector` (System 2 MSV). Routes in `main.py`.
 

@@ -1,0 +1,12 @@
+{
+  "id": "customer-front",
+  "name": "Customer Front Desk",
+  "version": "1.0.0",
+  "license": "MIT",
+  "role": "Customer Front Desk",
+  "attachment_style": "Secure",
+  "files": ["SOUL.md", "IDENTITY.md", "STYLE.md"],
+  "msv_preset": "customer-front",
+  "status": "available",
+  "tags": ["customer", "triage", "multi-agent", "front-desk"]
+}

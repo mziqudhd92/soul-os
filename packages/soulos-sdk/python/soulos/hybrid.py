@@ -209,6 +209,28 @@ class SoulHybridClient:
             logger.warning("SoulOS complete_turn failed: %s", e)
             return None
 
+    async def ingest_memory(
+        self,
+        content: str,
+        bot_id: str | None = None,
+        session_id: str | None = None,
+    ) -> dict[str, Any] | None:
+        """POST /memory/ingest — seed facts (e.g. Phase A handoff notes)."""
+        if not self.enabled:
+            return None
+        bid = bot_id or self.bot_id
+        if not bid:
+            return None
+        try:
+            body: dict[str, Any] = {"bot_id": bid, "content": content}
+            if session_id is not None:
+                body["session_id"] = session_id
+            resp = await self._request("POST", "/memory/ingest", json_body=body)
+            return resp.json()
+        except (httpx.HTTPError, SoulOSError) as e:
+            logger.warning("SoulOS ingest_memory failed: %s", e)
+            return None
+
     async def run_turn(
         self,
         query: str,

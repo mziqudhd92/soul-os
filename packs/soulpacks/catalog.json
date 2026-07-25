@@ -23,6 +23,22 @@
       "license": "MIT",
       "tags": ["engineering", "code"],
       "path": "dev-twin"
+    },
+    {
+      "id": "customer-front",
+      "name": "Customer Front Desk",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": ["customer", "triage", "multi-agent"],
+      "path": "customer-front"
+    },
+    {
+      "id": "inventory",
+      "name": "Inventory Specialist",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": ["inventory", "warehouse", "multi-agent"],
+      "path": "inventory"
     }
   ]
 }

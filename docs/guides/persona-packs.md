@@ -25,6 +25,8 @@ Studio: open **SoulPacks** → Open in Studio or Deploy to kernel.
 
 Sidecar seed: [examples/soulpack-sidecar](../../examples/soulpack-sidecar/README.md).
 
+Multi-agent demo packs: `customer-front`, `inventory` — see [Multi-agent teams](multi-agent-teams.md) and [examples/multi-agent-handoff](../../examples/multi-agent-handoff/).
+
 ## APIs
 
 | Method | Path | Purpose |

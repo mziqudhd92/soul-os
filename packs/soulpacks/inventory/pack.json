@@ -1,0 +1,12 @@
+{
+  "id": "inventory",
+  "name": "Inventory Specialist",
+  "version": "1.0.0",
+  "license": "MIT",
+  "role": "Inventory Specialist",
+  "attachment_style": "Secure",
+  "files": ["SOUL.md", "IDENTITY.md", "STYLE.md"],
+  "msv_preset": "inventory",
+  "status": "available",
+  "tags": ["inventory", "warehouse", "multi-agent", "stock"]
+}

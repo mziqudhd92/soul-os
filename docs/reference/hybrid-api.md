@@ -130,6 +130,16 @@ Post-turn ingest + optional MSV reflect.
 
 `POST /memory/forget` — `{ "bot_id", "content_match" }` deletes rows matching content (ILIKE).
 
+## Multi-agent handoff (Phase A)
+
+Kernel still runs **one `bot_id` per turn**. For specialist transfer, the app:
+
+1. `POST /hybrid/complete` on the current bot (same `session_id` as the thread).
+2. `POST /memory/ingest` on the **next** bot with a handoff note and the same `session_id`.
+3. `POST /hybrid/prepare` on the next `bot_id`.
+
+SDK: `soulos.handoff_to`, `role_external_key`, `conversation_session_id`. Guide: [multi-agent-teams.md](../guides/multi-agent-teams.md). Example: [examples/multi-agent-handoff](../../examples/multi-agent-handoff/).
+
 ### `runtime_config.memory_policy` (stub)
 
 Optional stub on bot `runtime_config`:
