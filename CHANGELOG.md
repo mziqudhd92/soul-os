@@ -6,12 +6,12 @@ All notable changes to SoulOS are documented here. Version **0.2.0** focuses on 
 
 ### Removed
 
-- **Third-party persona registry import** — removed external registry bridge, gallery, examples, and docs. First-party MIT **SoulPacks** planned — see `docs/guides/persona-packs.md`.
+- **Third-party persona registry import** — removed external registry bridge, gallery, examples, and docs.
 - Switched from ClawSouls to SoulPacks because of licensing issues (upstream persona prose / derivative-work obligations); SoulPacks stay MIT in-repo.
 
 ### Added
 
-- **SoulPacks TDD plan** — detailed M1–M5 todo list in `docs/design/soulpacks-tdd-plan.md`
+- **SoulPacks (M1–M5)** — in-repo MIT packs (`packs/soulpacks/`), `GET /v1/soulpacks`, `POST /v1/avatars/import-soulpack`, Studio gallery, `soulos pack` CLI, `examples/soulpack-sidecar/`; plan: `docs/design/soulpacks-tdd-plan.md`
 - MIT `license` + classifiers on all Python `pyproject.toml` packages
 - Generated dependency license inventory (`docs/dependency-licenses.generated.md`) checked in CI
 - CONTRIBUTING DCO note; OFL font vendoring note in `THIRD_PARTY_NOTICES.md`

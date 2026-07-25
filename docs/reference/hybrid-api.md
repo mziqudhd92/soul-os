@@ -40,6 +40,31 @@ Idempotent registration by `external_key` (per tenant / workspace / product).
 
 **Response** — same as `POST /v1/avatars`: `{ "id", "name", "role", "baseline_msv", "current_msv" }`
 
+## `GET /v1/soulpacks`
+
+List first-party MIT [SoulPacks](../guides/persona-packs.md). Optional `?q=` filters by id, name, or tags.
+
+**Response:** `{ "packs": […], "total": N }`
+
+## `POST /v1/avatars/import-soulpack`
+
+Compile a SoulPack from `packs/soulpacks/` (or `SOULPACKS_ROOT`). License must be `MIT`.
+
+**Request**
+
+```json
+{
+  "pack_id": "support-agent",
+  "persist": true,
+  "msv_preset": "support-agent"
+}
+```
+
+- `persist: false` (alias `register`) — return `soul`, `external_key`, `warnings` without DB write
+- `persist: true` — `ensure` with `external_key` default `soulos:{pack_id}@{version}`
+
+Errors: `SOULPACK_NOT_FOUND` (404), `SOULPACK_LICENSE_REJECTED` / `SOULPACK_INVALID` (422).
+
 ## `POST /hybrid/prepare`
 
 Single pre-turn call (replaces `GET /bot/{id}/identity` + `POST /memory/retrieve`).

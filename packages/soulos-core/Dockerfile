@@ -10,6 +10,9 @@ WORKDIR /app
 
 COPY packages/soulos-core/ .
 COPY spec/ /spec/
+COPY packs/soulpacks/ /packs/soulpacks/
+
+ENV SOULPACKS_ROOT=/packs/soulpacks
 
 RUN uv pip compile pyproject.toml -o requirements.txt && \
     uv pip install --system -r requirements.txt

@@ -1,0 +1,12 @@
+{
+  "packs": [
+    {
+      "id": "minimal",
+      "name": "Minimal Pack",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": ["fixture"],
+      "path": "minimal"
+    }
+  ]
+}

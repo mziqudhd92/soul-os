@@ -1,0 +1,12 @@
+{
+  "id": "support-agent",
+  "name": "Site Support",
+  "version": "1.0.0",
+  "license": "MIT",
+  "role": "Customer Support Agent",
+  "attachment_style": "Secure",
+  "files": ["SOUL.md", "IDENTITY.md", "STYLE.md"],
+  "msv_preset": "support-agent",
+  "status": "available",
+  "tags": ["support", "billing", "customer"]
+}

@@ -45,7 +45,9 @@ OpenAPI: `/openapi.json` · Swagger UI: `/docs` · Committed artifact: `docs/ref
 
 RFC 7807 Problem Details (`application/problem+json`): `type`, `title`, `status`, `detail`, `code`.
 
-Codes: `BOT_NOT_FOUND`, `ACCESS_DENIED`, `INFERENCE_DOWN`, `MEMORY_DIM_MISMATCH`, `SOUL_INVALID`, `READY_DEGRADED`.
+Codes: `BOT_NOT_FOUND`, `ACCESS_DENIED`, `INFERENCE_DOWN`, `MEMORY_DIM_MISMATCH`, `SOUL_INVALID`, `READY_DEGRADED`, `SOULPACK_NOT_FOUND`, `SOULPACK_LICENSE_REJECTED`, `SOULPACK_INVALID`.
+
+SoulPacks (MIT in-repo personas): `GET /v1/soulpacks`, `POST /v1/avatars/import-soulpack` — see docs/guides/persona-packs.md.
 
 ## Identity model
 

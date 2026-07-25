@@ -21,6 +21,9 @@ ACCESS_DENIED = "ACCESS_DENIED"
 READY_DEGRADED = "READY_DEGRADED"
 VALIDATION_ERROR = "VALIDATION_ERROR"
 INTERNAL_ERROR = "INTERNAL_ERROR"
+SOULPACK_NOT_FOUND = "SOULPACK_NOT_FOUND"
+SOULPACK_LICENSE_REJECTED = "SOULPACK_LICENSE_REJECTED"
+SOULPACK_INVALID = "SOULPACK_INVALID"
 
 _CODE_TITLES: dict[str, str] = {
     INFERENCE_DOWN: "Inference service unavailable",
@@ -31,6 +34,9 @@ _CODE_TITLES: dict[str, str] = {
     READY_DEGRADED: "Kernel not ready",
     VALIDATION_ERROR: "Request validation failed",
     INTERNAL_ERROR: "Internal server error",
+    SOULPACK_NOT_FOUND: "SoulPack not found",
+    SOULPACK_LICENSE_REJECTED: "SoulPack license rejected",
+    SOULPACK_INVALID: "Invalid SoulPack",
 }
 
 

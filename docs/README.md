@@ -59,8 +59,8 @@ Primary integration for apps that already call an LLM (Bedrock, OpenAI, LiteLLM,
 | [Session memory](guides/session-memory.md) | Per-conversation scope + GDPR forget/delete |
 | [Migrate from system prompt](guides/migrate-from-system-prompt.md) | Convert a big prompt into a soul |
 | [Troubleshooting](guides/troubleshooting.md) | Errors by RFC 7807 `code` + `soulos-doctor.py` |
-| [SoulPacks (planned)](guides/persona-packs.md) | First-party MIT persona packages (list/import + Studio) |
-| [SoulPacks TDD plan](design/soulpacks-tdd-plan.md) | M1–M5 detailed todo list (tests first) |
+| [SoulPacks](guides/persona-packs.md) | First-party MIT persona packages (list/import + Studio) |
+| [SoulPacks TDD plan](design/soulpacks-tdd-plan.md) | Single delivery plan — M1–M5 complete |
 | [Gateway headers](guides/gateway-headers.md) | `REQUIRE_AUTH=1` BFF pattern |
 | [Python bot integration](guides/python-bot.md) | Full-chat: add SoulOS to an existing Python bot |
 | [Psychometrics cheat sheet](guides/psychometrics.md) | What HEXACO / simple-persona sliders do |
@@ -105,6 +105,7 @@ Primary integration for apps that already call an LLM (Bedrock, OpenAI, LiteLLM,
 | [examples/support-bot](../examples/support-bot/) | Customer support soul |
 | [examples/dev-twin](../examples/dev-twin/) | Developer assistant soul |
 | [examples/companion](../examples/companion/) | Personal companion soul |
+| [examples/soulpack-sidecar](../examples/soulpack-sidecar/) | Seed a MIT SoulPack into the kernel |
 
 ## Release & testing
 

@@ -1,0 +1,28 @@
+{
+  "packs": [
+    {
+      "id": "support-agent",
+      "name": "Site Support",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": ["support", "billing", "customer"],
+      "path": "support-agent"
+    },
+    {
+      "id": "companion",
+      "name": "Luna",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": ["companion", "personal"],
+      "path": "companion"
+    },
+    {
+      "id": "dev-twin",
+      "name": "Dev Twin",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": ["engineering", "code"],
+      "path": "dev-twin"
+    }
+  ]
+}

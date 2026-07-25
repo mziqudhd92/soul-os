@@ -68,6 +68,12 @@ class HybridPreparePayload(BaseModel):
     top_k: int = 5
 
 
+class SoulPackImportPayload(BaseModel):
+    pack_id: str
+    msv_preset: str | None = None
+    persist: bool = False
+
+
 @app.get("/")
 async def index():
     return FileResponse(STATIC_DIR / "index.html")
@@ -197,6 +203,48 @@ async def tutorial_content(tutorial_id: str):
         return get_tutorial_content(tutorial_id)
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
+
+
+@app.get("/api/soulpacks")
+async def soulpacks_list(q: str | None = None):
+    params: dict[str, str] = {}
+    if q:
+        params["q"] = q
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            res = await client.get(f"{KERNEL_URL}/v1/soulpacks", params=params)
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=502, detail=f"Kernel unreachable at {KERNEL_URL}: {e}"
+        ) from e
+    if res.status_code >= 400:
+        raise HTTPException(status_code=res.status_code, detail=res.text[:500])
+    return res.json()
+
+
+@app.post("/api/soulpacks/import")
+async def soulpacks_import(body: SoulPackImportPayload):
+    payload = {
+        "pack_id": body.pack_id,
+        "msv_preset": body.msv_preset,
+        "persist": body.persist,
+    }
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            res = await client.post(
+                f"{KERNEL_URL}/v1/avatars/import-soulpack",
+                json=payload,
+            )
+    except httpx.RequestError as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Kernel unreachable at {KERNEL_URL}: {e}",
+        ) from e
+    data = res.json()
+    if res.status_code != 200:
+        detail = data.get("detail") or data.get("title") or data
+        raise HTTPException(status_code=res.status_code, detail=detail)
+    return data
 
 
 @app.post("/api/hybrid/prepare")

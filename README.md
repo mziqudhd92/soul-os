@@ -71,7 +71,7 @@ Wait until the kernel is up (first build can take several minutes).
 | **Test the API with curl** (no code) | [Quickstart Path A](docs/getting-started/quickstart.md#path-a) | ~10 min |
 | **Use SoulOS from Cursor / Claude** | [MCP guide](docs/guides/mcp.md) → `http://localhost:8000/mcp/sse` | ~15 min |
 | **Deploy on my own servers** | [Plug in SoulOS](docs/guides/plug-in-soulos.md) · [Self-hosted](docs/deployment/self-hosted.md) | ~15 min |
-| **Author a soul / persona pack** | Soul Studio Wizard · [persona packs (planned)](docs/guides/persona-packs.md) | ~10 min |
+| **Use a SoulPack** | [SoulPacks guide](docs/guides/persona-packs.md) · Studio **SoulPacks** tab | ~10 min |
 
 ### 3. Five-minute sidecar (hybrid)
 
@@ -269,6 +269,7 @@ docs/                      Guides, reference, deployment
 | [examples/support-bot](examples/support-bot/) | Customer support + `.soul-memory/` |
 | [examples/dev-twin](examples/dev-twin/) | Developer assistant |
 | [examples/companion](examples/companion/) | Personal companion |
+| [examples/soulpack-sidecar](examples/soulpack-sidecar/) | Seed a MIT SoulPack into the kernel |
 | [examples/mcp](examples/mcp/) | Cursor MCP workflow |
 
 ```bash

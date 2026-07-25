@@ -27,6 +27,7 @@
       <span class="header-divider" id="toolbar-divider" aria-hidden="true"></span>
 
       <div class="nav-group">
+        <button type="button" id="nav-soulpacks" class="btn nav" data-view="soulpacks">SoulPacks</button>
         <button type="button" id="nav-docs" class="btn nav" data-view="docs">Docs</button>
         <button type="button" id="nav-tutorial" class="btn nav" data-view="tutorial">Tutorials</button>
         <button type="button" id="nav-studio" class="btn primary nav" data-view="studio">Studio</button>
@@ -186,6 +187,30 @@
           </div>
         </section>
       </main>
+    </div>
+
+    <div id="view-soulpacks" class="view hidden">
+      <div class="tutorial-wrap">
+        <header class="page-intro">
+          <h1>SoulPacks</h1>
+          <p>
+            First-party MIT persona packages from this repository. Open in Studio to edit,
+            or deploy straight to the kernel.
+          </p>
+        </header>
+        <div class="soulpacks-toolbar">
+          <input
+            type="search"
+            id="soulpacks-search"
+            class="soulpacks-search"
+            placeholder="Search packs…"
+            aria-label="Search SoulPacks"
+          />
+          <button type="button" id="soulpacks-refresh" class="btn ghost sm">Refresh</button>
+        </div>
+        <p id="soulpacks-status" class="hint"></p>
+        <div id="soulpacks-grid" class="tutorial-grid"></div>
+      </div>
     </div>
 
     <div id="view-docs" class="view hidden">
