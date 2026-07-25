@@ -20,6 +20,12 @@ First-party, MIT-only persona packages. This is the **only** SoulPacks plan docu
 
 No remote registry. Import rejects any pack whose manifest `license` is not exactly `MIT`.
 
+**Layout (v1):** Unversioned singletons — `packs/soulpacks/{id}/` only (no `/{id}/{version}/`). Version in `pack.json` is metadata for `external_key`.
+
+**MSV precedence:** explicit `baseline_msv` ≫ `msv_preset` / `_presets.yaml` ≫ `default_msv_dict()`.
+
+**Security:** Pack `files` paths are resolved and must remain under the pack directory ⊆ `SOULPACKS_ROOT`. Export uses atomic temp-file + `os.replace` writes.
+
 ## Before → after
 
 | Area | Before (ClawSouls) | After (SoulPacks) |

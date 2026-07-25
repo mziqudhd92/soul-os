@@ -42,13 +42,25 @@ Error codes: `SOULPACK_NOT_FOUND`, `SOULPACK_LICENSE_REJECTED`, `SOULPACK_INVALI
 packs/soulpacks/
   catalog.json
   _presets.yaml
-  support-agent/
-    pack.json          # license must be MIT
+  support-agent/       # one directory per pack id (unversioned singleton)
+    pack.json          # license must be MIT; version is metadata only
     SOUL.md
     …
 ```
 
+**Versioning (v1):** In-repo packs are **unversioned singletons** — `packs/soulpacks/{id}/` holds one pack. The `version` field in `pack.json` is metadata for `external_key` (`soulos:{id}@{version}`). Side-by-side `@1.0.0` / `@2.0.0` trees are not supported; bump `version` in place or replace the directory.
+
 Import rejects any pack whose `license` is not exactly `MIT`.
+
+**Path safety:** `files` entries must stay inside the pack directory (resolved under `SOULPACKS_ROOT`). Traversal (`..`, absolute paths) is rejected.
+
+## MSV resolution precedence
+
+Highest wins:
+
+1. Explicit `baseline_msv` in `pack.json`
+2. Named preset: request `msv_preset` or manifest `msv_preset` → `_presets.yaml`
+3. `default_msv_dict()` (schema defaults — not a zero vector)
 
 ## Authoring
 

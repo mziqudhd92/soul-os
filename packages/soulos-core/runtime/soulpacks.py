@@ -1,10 +1,23 @@
-"""First-party MIT SoulPacks — load, compile, list, export."""
+"""First-party MIT SoulPacks — load, compile, list, export.
+
+Layout policy (v1): each pack id is a **single unversioned directory** under
+SOULPACKS_ROOT (e.g. ``support-agent/``). The ``version`` field in pack.json is
+metadata for ``external_key`` only — side-by-side ``@1.0.0`` / ``@2.0.0`` trees
+are not supported. Bump version in place or replace the pack directory.
+
+MSV resolution precedence (highest wins):
+
+1. Explicit ``baseline_msv`` in pack.json
+2. Named preset: request ``msv_preset`` or manifest ``msv_preset`` → ``_presets.yaml``
+3. ``default_msv_dict()`` from soul_validation (schema defaults — not a zero vector)
+"""
 
 from __future__ import annotations
 
 import json
 import os
 import re
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +26,8 @@ import yaml
 from soul_validation import default_msv_dict, validate_soul_payload
 
 ALLOWED_LICENSE = "MIT"
+# Pack ids / catalog paths: single path segment only (no slashes or ..)
+_SAFE_SEGMENT = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9._-]*$")
 
 
 class SoulPackError(ValueError):
@@ -51,6 +66,31 @@ def packs_root() -> Path:
 
 def default_external_key(pack_id: str, version: str) -> str:
     return f"soulos:{pack_id}@{version}"
+
+
+def _safe_segment(value: str, *, label: str) -> str:
+    text = (value or "").strip()
+    if not text or not _SAFE_SEGMENT.match(text):
+        raise SoulPackError(f"Invalid {label}: {value!r}")
+    if text in (".", "..") or "/" in text or "\\" in text:
+        raise SoulPackError(f"Invalid {label}: {value!r}")
+    return text
+
+
+def _ensure_under(root: Path, path: Path, *, label: str) -> Path:
+    """Resolve path and require it stays inside root (no symlink escape)."""
+    root_res = root.resolve()
+    try:
+        resolved = path.resolve(strict=False)
+    except OSError as e:
+        raise SoulPackError(f"{label}: cannot resolve path") from e
+    try:
+        resolved.relative_to(root_res)
+    except ValueError as e:
+        raise SoulPackError(
+            f"{label}: path escapes SoulPacks root ({root_res})"
+        ) from e
+    return resolved
 
 
 def _load_presets(root: Path) -> dict[str, Any]:
@@ -105,17 +145,19 @@ def list_packs(*, q: str | None = None, root: Path | None = None) -> list[dict[s
 
 
 def load_pack(pack_id: str, *, root: Path | None = None) -> tuple[Path, dict[str, Any]]:
-    root = root or packs_root()
-    pack_dir = root / pack_id
+    root = (root or packs_root()).resolve()
+    safe_id = _safe_segment(pack_id, label="pack_id")
+    pack_dir = root / safe_id
     manifest_path = pack_dir / "pack.json"
     if not manifest_path.is_file():
-        # catalog may remap path
         for entry in _read_catalog(root):
-            if entry.get("id") == pack_id:
-                rel = entry.get("path") or pack_id
+            if entry.get("id") == safe_id:
+                rel = _safe_segment(str(entry.get("path") or safe_id), label="catalog path")
                 pack_dir = root / rel
                 manifest_path = pack_dir / "pack.json"
                 break
+    pack_dir = _ensure_under(root, pack_dir, label="pack directory")
+    manifest_path = _ensure_under(root, manifest_path, label="pack.json")
     if not manifest_path.is_file():
         raise SoulPackNotFoundError(f"SoulPack not found: {pack_id}")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -124,10 +166,22 @@ def load_pack(pack_id: str, *, root: Path | None = None) -> tuple[Path, dict[str
     return pack_dir, manifest
 
 
-def _merge_markdown(pack_dir: Path, files: list[str]) -> str:
+def _merge_markdown(root: Path, pack_dir: Path, files: list[str]) -> str:
+    """Merge markdown files; every path must resolve under pack_dir (⊆ root)."""
+    pack_dir = _ensure_under(root, pack_dir, label="pack directory")
     parts: list[str] = []
     for rel in files:
-        path = pack_dir / rel
+        rel_text = str(rel).strip()
+        if not rel_text or rel_text.startswith("/") or rel_text.startswith("\\"):
+            raise SoulPackError(f"Invalid pack file path: {rel!r}")
+        # Reject empty segments / parent refs before join
+        for segment in Path(rel_text).parts:
+            if segment in ("", ".", ".."):
+                raise SoulPackError(f"Invalid pack file path: {rel!r}")
+        candidate = pack_dir / rel_text
+        path = _ensure_under(pack_dir, candidate, label=f"pack file {rel!r}")
+        # Also require under SOULPACKS_ROOT (defense in depth)
+        _ensure_under(root, path, label=f"pack file {rel!r}")
         if not path.is_file():
             raise SoulPackError(f"Missing pack file: {rel}")
         text = path.read_text(encoding="utf-8").strip()
@@ -144,6 +198,7 @@ def _resolve_msv(
     *,
     msv_preset: str | None,
 ) -> tuple[dict[str, Any], list[str]]:
+    """Precedence: explicit baseline_msv >> msv_preset lookup >> default_msv_dict()."""
     warnings: list[str] = []
     if isinstance(manifest.get("baseline_msv"), dict):
         return dict(manifest["baseline_msv"]), warnings
@@ -173,7 +228,7 @@ def compile_pack(
     msv_preset: str | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any], list[str]]:
     """Return (soul, runtime_config, warnings)."""
-    root = root or packs_root()
+    root = (root or packs_root()).resolve()
     pack_dir, manifest = load_pack(pack_id, root=root)
 
     license_id = str(manifest.get("license") or "").strip()
@@ -186,7 +241,7 @@ def compile_pack(
     if not isinstance(files, list) or not files:
         raise SoulPackError("pack.json 'files' must be a non-empty list")
 
-    description = _merge_markdown(pack_dir, [str(f) for f in files])
+    description = _merge_markdown(root, pack_dir, [str(f) for f in files])
     presets = _load_presets(root)
     baseline_msv, warnings = _resolve_msv(manifest, presets, msv_preset=msv_preset)
 
@@ -219,8 +274,31 @@ def compile_pack(
     return soul, runtime_config, warnings
 
 
+def _atomic_write_text(path: Path, content: str) -> None:
+    """Write via temp file + os.replace to avoid torn reads across workers."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp_name = tempfile.mkstemp(
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        dir=str(path.parent),
+    )
+    tmp_path = Path(tmp_name)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(tmp_path, path)
+    except Exception:
+        try:
+            tmp_path.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise
+
+
 def export_pack(soul: dict[str, Any], out_dir: Path | str) -> Path:
-    """Write a MIT SoulPack directory from a validated soul dict."""
+    """Write a MIT SoulPack directory from a validated soul dict (atomic files)."""
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     validated = validate_soul_payload(soul)
@@ -239,8 +317,6 @@ def export_pack(soul: dict[str, Any], out_dir: Path | str) -> Path:
     }
     if payload.get("capabilities"):
         pack_json["capabilities"] = payload["capabilities"]
-    (out / "pack.json").write_text(
-        json.dumps(pack_json, indent=2) + "\n", encoding="utf-8"
-    )
-    (out / "SOUL.md").write_text(payload["description"].strip() + "\n", encoding="utf-8")
+    _atomic_write_text(out / "pack.json", json.dumps(pack_json, indent=2) + "\n")
+    _atomic_write_text(out / "SOUL.md", payload["description"].strip() + "\n")
     return out

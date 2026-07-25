@@ -12,6 +12,10 @@ All notable changes to SoulOS are documented here. Version **0.2.0** focuses on 
 ### Added
 
 - **SoulPacks (M1–M5)** — in-repo MIT packs (`packs/soulpacks/`), `GET /v1/soulpacks`, `POST /v1/avatars/import-soulpack`, Studio gallery, `soulos pack` CLI, `examples/soulpack-sidecar/`; plan: `docs/design/soulpacks-tdd-plan.md`
+
+### Fixed
+
+- **SoulPacks hardening** — reject `files` / pack_id path traversal; document unversioned singleton layout + MSV precedence; atomic `export_pack` writes
 - MIT `license` + classifiers on all Python `pyproject.toml` packages
 - Generated dependency license inventory (`docs/dependency-licenses.generated.md`) checked in CI
 - CONTRIBUTING DCO note; OFL font vendoring note in `THIRD_PARTY_NOTICES.md`

@@ -195,3 +195,119 @@ def test_export_rejects_if_license_not_mit(tmp_path: Path):
 def test_load_pack_missing():
     with pytest.raises(SoulPackNotFoundError):
         load_pack("does-not-exist", root=PACKS)
+
+
+def _valid_msv(**hexaco_overrides: float) -> dict:
+    hexaco = {k: 0.0 for k in "HEXACO"}
+    hexaco.update(hexaco_overrides)
+    return {
+        "hexaco": hexaco,
+        "moral_foundations": {
+            "care_harm": 0.5,
+            "fairness_cheating": 0.5,
+            "loyalty_betrayal": 0.5,
+            "authority_subversion": 0.5,
+            "sanctity_degradation": 0.5,
+        },
+        "drives": {"curiosity": 0.5, "autonomy": 0.5, "social_approval": 0.5},
+        "epistemic_uncertainty": 0.1,
+        "inner_monologue": "test",
+    }
+
+
+def test_compile_rejects_path_traversal_in_files(tmp_path: Path):
+    secret = tmp_path / "secret.txt"
+    secret.write_text("SHOULD_NOT_READ", encoding="utf-8")
+    pack = tmp_path / "evil"
+    pack.mkdir()
+    (pack / "SOUL.md").write_text("ok", encoding="utf-8")
+    (pack / "pack.json").write_text(
+        json.dumps(
+            {
+                "id": "evil",
+                "name": "Evil",
+                "version": "1.0.0",
+                "license": "MIT",
+                "role": "X",
+                "attachment_style": "Secure",
+                "files": ["../secret.txt"],
+                "baseline_msv": _valid_msv(),
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(SoulPackError, match="Invalid pack file path|escapes"):
+        compile_pack("evil", root=tmp_path)
+
+
+def test_compile_rejects_path_traversal_pack_id(tmp_path: Path):
+    with pytest.raises(SoulPackError, match="Invalid pack_id"):
+        compile_pack("../etc", root=tmp_path)
+
+
+def test_msv_precedence_baseline_beats_preset(tmp_path: Path):
+    """Explicit baseline_msv >> msv_preset >> default_msv_dict()."""
+    (tmp_path / "_presets.yaml").write_text(
+        "presets:\n  loud:\n    hexaco: { H: 0.1, E: 0.1, X: 0.1, A: 0.1, C: 0.1, O: 0.1 }\n"
+        "    inner_monologue: from-preset\n",
+        encoding="utf-8",
+    )
+    pack = tmp_path / "pref"
+    pack.mkdir()
+    (pack / "SOUL.md").write_text("Hello.", encoding="utf-8")
+    (pack / "pack.json").write_text(
+        json.dumps(
+            {
+                "id": "pref",
+                "name": "Pref",
+                "version": "1.0.0",
+                "license": "MIT",
+                "role": "X",
+                "attachment_style": "Secure",
+                "files": ["SOUL.md"],
+                "msv_preset": "loud",
+                "baseline_msv": _valid_msv(H=0.99),
+            }
+        ),
+        encoding="utf-8",
+    )
+    soul, _, warnings = compile_pack("pref", root=tmp_path, msv_preset="loud")
+    assert soul["baseline_msv"]["hexaco"]["H"] == pytest.approx(0.99)
+    assert not any("preset" in w.lower() for w in warnings)
+
+
+def test_msv_precedence_preset_when_no_baseline(tmp_path: Path):
+    (tmp_path / "_presets.yaml").write_text(
+        "presets:\n  loud:\n    hexaco: { H: 0.11, E: 0.5, X: 0.5, A: 0.5, C: 0.5, O: 0.5 }\n"
+        "    moral_foundations:\n"
+        "      care_harm: 0.5\n"
+        "      fairness_cheating: 0.5\n"
+        "      loyalty_betrayal: 0.5\n"
+        "      authority_subversion: 0.5\n"
+        "      sanctity_degradation: 0.5\n"
+        "    drives: { curiosity: 0.5, autonomy: 0.5, social_approval: 0.5 }\n"
+        "    epistemic_uncertainty: 0.1\n"
+        "    inner_monologue: from-preset\n",
+        encoding="utf-8",
+    )
+    pack = tmp_path / "preset-only"
+    pack.mkdir()
+    (pack / "SOUL.md").write_text("Hello.", encoding="utf-8")
+    (pack / "pack.json").write_text(
+        json.dumps(
+            {
+                "id": "preset-only",
+                "name": "Preset Only",
+                "version": "1.0.0",
+                "license": "MIT",
+                "role": "X",
+                "attachment_style": "Secure",
+                "files": ["SOUL.md"],
+                "msv_preset": "loud",
+            }
+        ),
+        encoding="utf-8",
+    )
+    soul, _, warnings = compile_pack("preset-only", root=tmp_path)
+    assert soul["baseline_msv"]["hexaco"]["H"] == pytest.approx(0.11)
+    assert any("preset" in w.lower() for w in warnings)
