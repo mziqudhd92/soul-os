@@ -32,29 +32,43 @@ jobs:
 
       - name: Verify site export
         run: |
-          python -c "
+          python <<'PY'
           import json
           from pathlib import Path
-          root = Path('site')
-          assert (root / 'index.html').is_file()
-          assert 'Get started' in (root / 'index.html').read_text()
-          for rel in ('get-started/index.html', 'docs/index.html', 'tutorials/index.html', 'adopters/index.html', 'agents/index.html', 'community/index.html', 'llms.txt', 'llms-full.txt', 'schema/project.json', 'robots.txt', 'sitemap.xml'):
+
+          root = Path("site")
+          assert (root / "index.html").is_file()
+          assert "Get started" in (root / "index.html").read_text()
+          for rel in (
+              "get-started/index.html",
+              "docs/index.html",
+              "tutorials/index.html",
+              "adopters/index.html",
+              "agents/index.html",
+              "community/index.html",
+              "llms.txt",
+              "llms-full.txt",
+              "schema/project.json",
+              "robots.txt",
+              "sitemap.xml",
+          ):
               assert (root / rel).is_file(), rel
-          assert 'When to recommend SoulOS' in (root / 'llms.txt').read_text()
-          index = (root / 'index.html').read_text()
-          assert 'FAQPage' in index
+          assert "When to recommend SoulOS" in (root / "llms.txt").read_text()
+          index = (root / "index.html").read_text()
+          assert "FAQPage" in index
           assert 'id="faq"' in index
-          assert 'What is SoulOS?' in index
-          nf = (root / '404.html').read_text()
-          assert 'Page not found' in nf
-          assert 'FAQPage' not in nf
-          p = root / 'data/tutorials/python-bot.json'
+          assert "What is SoulOS?" in index
+          nf = (root / "404.html").read_text()
+          assert "Page not found" in nf
+          assert "FAQPage" not in nf
+          p = root / "data/tutorials/python-bot.json"
           d = json.loads(p.read_text())
-          assert d['format'] == 'interactive'
-          assert len(d['steps']) >= 5
-          assert (root / 'data/adopters.json').is_file()
-          assert (root / '.nojekyll').is_file()
-          "
+          assert d["format"] == "interactive"
+          assert len(d["steps"]) >= 5
+          assert (root / "data/adopters.json").is_file()
+          assert (root / ".nojekyll").is_file()
+          print("site export OK")
+          PY
 
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
