@@ -98,11 +98,14 @@ Python packages need **3.12+**. Kernel tests use `packages/soulos-core/.venv` if
 
 Suggested doc/example tasks to label `good first issue` when filing:
 
-1. Add a TypeScript `runTurn()` smoke test mirroring Python SDK hybrid tests
+1. Expand Helm values examples for a managed Postgres (disable bundled DB)
 2. Optional CI markdown link check (`lychee`) on `docs/**/*.md`
 3. Expand Studio tutorial sync notes when GitHub Pages content drifts
 4. Add a short GIF/screenshot to [my-first-sidecar.md](docs/tutorials/my-first-sidecar.md)
 5. Document one more adopter playbook under `docs/playbooks/`
+6. Add an Ollama backend note to the inference-bridge adapter docs
+
+Architecture map for new contributors: [docs/guides/architecture-overview.md](docs/guides/architecture-overview.md).
 
 ## Documentation
 

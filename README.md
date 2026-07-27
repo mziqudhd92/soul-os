@@ -271,6 +271,7 @@ docs/                      Guides, reference, deployment
 | [examples/companion](examples/companion/) | Personal companion |
 | [examples/soulpack-sidecar](examples/soulpack-sidecar/) | Seed a MIT SoulPack into the kernel |
 | [examples/multi-agent-handoff](examples/multi-agent-handoff/) | Phase A Customer → Inventory handoff |
+| [examples/langchain-hybrid](examples/langchain-hybrid/) | LangChain-shaped prepare → LLM → complete |
 | [examples/mcp](examples/mcp/) | Cursor MCP workflow |
 
 ```bash

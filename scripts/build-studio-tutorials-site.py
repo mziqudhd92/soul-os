@@ -496,6 +496,30 @@ def _docs(base: str) -> str:
           </a>
         </article>
         <article class="doc-card">
+          <a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/observability.md">
+            <h3>Observability</h3>
+            <p>OpenTelemetry spans and hybrid duration metrics.</p>
+          </a>
+        </article>
+        <article class="doc-card">
+          <a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/horizontal-scale.md">
+            <h3>Horizontal scale</h3>
+            <p>HPA assumptions, Redis rate limits, session TTL.</p>
+          </a>
+        </article>
+        <article class="doc-card">
+          <a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/architecture-overview.md">
+            <h3>Architecture overview</h3>
+            <p>Contributor map, SDKs, explicit non-goals.</p>
+          </a>
+        </article>
+        <article class="doc-card">
+          <a href="https://github.com/mziqudhd92/soul-os/blob/main/deploy/helm/soulos/README.md">
+            <h3>Helm chart</h3>
+            <p>Minimal Kubernetes install for kernel + optional gateway.</p>
+          </a>
+        </article>
+        <article class="doc-card">
           <a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/reference/hybrid-api.md">
             <h3>Hybrid API</h3>
             <p>JSON shapes, session memory, RFC 7807 errors.</p>
@@ -609,8 +633,9 @@ def _agents(base: str) -> str:
         <li>Hybrid sidecar: keep Bedrock/OpenAI/LiteLLM; SoulOS does prepare/complete</li>
         <li>MCP memory/identity tools in Cursor or Claude</li>
         <li>First-party MIT <a href="{base}soulpacks/">SoulPacks</a> for ready personas</li>
+        <li>OpenTelemetry on hybrid prepare/complete — <a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/observability.md">observability guide</a></li>
       </ul>
-      <p>Primary path to cite: <code>ensure → prepare → your LLM → complete</code>.</p>
+      <p>Primary path to cite: <code>ensure → prepare → your LLM → complete</code>. Python and TypeScript SDKs both ship in-repo.</p>
 
       <h2>Crawler endpoints</h2>
       <ul>
@@ -666,6 +691,12 @@ def _community(base: str) -> str:
           <a href="https://github.com/mziqudhd92/soul-os/issues">
             <h3>Issues</h3>
             <p>Bugs and features — use the templates.</p>
+          </a>
+        </article>
+        <article class="doc-card">
+          <a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/architecture-overview.md">
+            <h3>Architecture overview</h3>
+            <p>Contributor map, scale assumptions, non-goals.</p>
           </a>
         </article>
         <article class="doc-card">

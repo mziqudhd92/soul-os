@@ -62,7 +62,7 @@ Multi-agent Phase A (app conductor, no kernel teams API): [docs/guides/multi-age
 
 ## Observability
 
-OpenTelemetry spans on hybrid prepare/complete when `OTEL_EXPORTER_OTLP_ENDPOINT` or `SOULOS_OTEL_ENABLED=1`. OpenInference-aligned attributes.
+OpenTelemetry spans and `soulos.hybrid.duration` metrics on hybrid prepare/complete when `OTEL_EXPORTER_OTLP_ENDPOINT` or `SOULOS_OTEL_ENABLED=1`. Optional: `pip install 'soulos-core[otel]'`. Guide: docs/guides/observability.md.
 
 ## Production adopters
 

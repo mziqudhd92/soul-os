@@ -28,6 +28,12 @@ class MemoryForget(BaseModel):
     content_match: str
 
 
+class MemoryPurgeExpired(BaseModel):
+    """Purge session-scoped memories past MEMORY_SESSION_TTL_SECONDS for one bot."""
+
+    bot_id: str
+
+
 class ChatRequest(BaseModel):
     bot_id: str
     message: str

@@ -11,6 +11,7 @@ All notable changes to SoulOS are documented here. Version **0.2.0** focuses on 
 
 ### Added
 
+- **Platform hygiene (roadmap P0–P2)** — OTel duration metrics + ops guide; session memory TTL (`MEMORY_SESSION_TTL_SECONDS`, `POST /memory/purge-expired`); gateway Redis-backed rate limits (`REDIS_URL`); Helm chart (`deploy/helm/soulos`); LangChain hybrid example; TypeScript SDK vitest suite; architecture overview + non-goals docs
 - **Multi-agent teams (Phase A)** — app-orchestrated handoffs via `soulos.handoff` (`role_external_key`, `handoff_to`), `SoulHybridClient.ingest_memory`, packs `customer-front` / `inventory`, guide + `examples/multi-agent-handoff/`
 - **SoulPacks (M1–M5)** — in-repo MIT packs (`packs/soulpacks/`), `GET /v1/soulpacks`, `POST /v1/avatars/import-soulpack`, Studio gallery, `soulos pack` CLI, `examples/soulpack-sidecar/`; plan: `docs/design/soulpacks-tdd-plan.md`
 

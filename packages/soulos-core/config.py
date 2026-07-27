@@ -31,6 +31,9 @@ GATEWAY_SECRET_HEADER = "X-SoulOS-Gateway-Secret"
 
 MEMORY_SYNC_WORKSPACE = os.getenv("SOULOS_MEMORY_SYNC_WORKSPACE", "").strip()
 MEMORY_SYNC_BOT_ID = os.getenv("SOULOS_MEMORY_SYNC_BOT_ID", "").strip()
+# Session-scoped episodic rows older than this are excluded from retrieve and
+# deletable via POST /memory/purge-expired. 0 disables TTL.
+MEMORY_SESSION_TTL_SECONDS = int(os.getenv("MEMORY_SESSION_TTL_SECONDS", "0"))
 
 WEAK_GATEWAY_SECRETS = frozenset(
     {DEFAULT_GATEWAY_SECRET, "changeme", "secret", "password", ""}

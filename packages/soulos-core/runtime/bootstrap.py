@@ -78,6 +78,13 @@ async def init_database() -> None:
         )
         await conn.execute(
             text(
+                "ALTER TABLE episodic_memories "
+                "ADD COLUMN IF NOT EXISTS created_at "
+                "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP;"
+            )
+        )
+        await conn.execute(
+            text(
                 "ALTER TABLE bots ADD COLUMN IF NOT EXISTS external_key VARCHAR(128);"
             )
         )

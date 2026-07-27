@@ -5,6 +5,7 @@ HTTP gateway for **SoulOS Cloud** — validates Bearer API keys, rate limits, pr
 - **Local cloud stack:** `docker compose -f docker-compose.cloud.yml up` from repo root
 - **Default port:** 8080
 - **Keys:** copy `keys.example.json` → `keys.json` (gitignored) or set `SOULOS_API_KEYS` env
+- **Rate limits:** in-memory by default (single replica). Set `REDIS_URL` for shared limits across gateway pods.
 - **Tests:** `pytest` or `npm run test:gateway` from repo root
 
-Docs: [SoulOS Cloud](../../docs/deployment/cloud.md)
+Docs: [SoulOS Cloud](../../docs/deployment/cloud.md) · [Horizontal scale](../../docs/guides/horizontal-scale.md)

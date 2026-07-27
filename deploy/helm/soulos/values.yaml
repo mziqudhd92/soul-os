@@ -1,0 +1,41 @@
+nameOverride: ""
+fullnameOverride: ""
+
+kernel:
+  replicaCount: 1
+  image:
+    repository: soulos-kernel
+    tag: "0.2.0"
+    pullPolicy: IfNotPresent
+  service:
+    port: 8000
+  resources: {}
+  env:
+    REQUIRE_AUTH: "0"
+    GATEWAY_SECRET: "changeme_gateway_secret"
+    INFERENCE_MODE: embeddings_only
+    MEMORY_SESSION_TTL_SECONDS: "0"
+    OTEL_EXPORTER_OTLP_ENDPOINT: ""
+    SOULOS_OTEL_ENABLED: "0"
+  databaseUrl: "postgresql+asyncpg://postgres:changeme@postgresql:5432/soulos"
+
+gateway:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: soulos-gateway
+    tag: "0.2.0"
+    pullPolicy: IfNotPresent
+  service:
+    port: 8080
+  env:
+    KERNEL_URL: "http://soulos-kernel:8000"
+    GATEWAY_SECRET: "changeme_gateway_secret"
+    REDIS_URL: ""
+    SOULOS_API_KEYS: ""
+
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: changeme
+    database: soulos

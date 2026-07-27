@@ -169,9 +169,9 @@ Common codes: `BOT_NOT_FOUND`, `ACCESS_DENIED`, `INFERENCE_DOWN`, `MEMORY_DIM_MI
 
 OpenAPI: `/openapi.json` · committed artifact: [openapi.kernel.json](openapi.kernel.json)
 
-## Observability
+## Observability (OpenTelemetry)
 
-Hybrid prepare/complete emit OpenTelemetry spans when `OTEL_EXPORTER_OTLP_ENDPOINT` or `SOULOS_OTEL_ENABLED=1` is set. Compatible with Langfuse, Phoenix, Datadog OTLP ingest. Studio turn inspector exports prepare JSON/curl for local debugging only.
+Hybrid prepare/complete emit OpenTelemetry **spans** and a **`soulos.hybrid.duration`** histogram when `OTEL_EXPORTER_OTLP_ENDPOINT` or `SOULOS_OTEL_ENABLED=1` is set. Install optional extras: `pip install 'soulos-core[otel]'`. Compatible with Langfuse, Phoenix, Datadog OTLP ingest. Full guide: [observability.md](../guides/observability.md). Studio turn inspector exports prepare JSON/curl for local debugging only.
 
 ## `POST /state/reflect` (legacy)
 
@@ -184,4 +184,4 @@ Still supported. Prefer `hybrid/complete` with `reflect_async: true`.
 | Language | Class | Testing |
 |----------|--------|---------|
 | Python | `SoulHybridClient` from `soulos` — includes `run_turn()` | Covered in CI (`packages/soulos-sdk/python/tests/`) |
-| TypeScript | `SoulHybridClient` from `@soulos/sdk` — includes `runTurn()` | API parity documented; dedicated test suite tracked as a follow-up |
+| TypeScript | `SoulHybridClient` from `@soulos/sdk` — includes `runTurn()` | Covered in CI (`packages/soulos-sdk/ts/tests/`, vitest) |

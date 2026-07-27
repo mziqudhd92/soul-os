@@ -104,5 +104,5 @@ python vendor/soul-os/scripts/soulos-doctor.py \
 ## Docs
 
 - [Sidecar integration guide](../../docs/guides/sidecar-integration.md)
-- [Persona packs (planned)](../../docs/guides/persona-packs.md)
+- [Persona packs](../../docs/guides/persona-packs.md) (SoulPacks — MIT in-repo)
 - [Upstream sidecar compose](../../docker-compose.sidecar.yml)

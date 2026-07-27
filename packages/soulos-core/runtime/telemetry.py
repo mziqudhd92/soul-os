@@ -1,4 +1,4 @@
-"""OpenTelemetry spans for hybrid sidecar (OpenInference-aligned)."""
+"""OpenTelemetry spans and metrics for hybrid sidecar (OpenInference-aligned)."""
 
 from __future__ import annotations
 
@@ -11,6 +11,8 @@ OTEL_ENABLED = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "").strip() != "" or os.
 ).lower() in ("1", "true", "yes")
 
 _tracer = None
+_meter = None
+_duration_histogram = None
 
 
 def _get_tracer():
@@ -38,6 +40,49 @@ def _get_tracer():
     except ImportError:
         _tracer = None
     return _tracer
+
+
+def _get_duration_histogram():
+    global _meter, _duration_histogram
+    if _duration_histogram is not None:
+        return _duration_histogram
+    if not OTEL_ENABLED:
+        return None
+    try:
+        from opentelemetry import metrics
+        from opentelemetry.sdk.metrics import MeterProvider
+        from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+        from opentelemetry.sdk.resources import Resource
+        from opentelemetry.exporter.otlp.proto.http.metric_exporter import (
+            OTLPMetricExporter,
+        )
+
+        resource = Resource.create({"service.name": "soulos-kernel"})
+        endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "").strip()
+        if endpoint:
+            reader = PeriodicExportingMetricReader(OTLPMetricExporter())
+            metrics.set_meter_provider(
+                MeterProvider(resource=resource, metric_readers=[reader])
+            )
+        else:
+            metrics.set_meter_provider(MeterProvider(resource=resource))
+        _meter = metrics.get_meter("soulos.hybrid")
+        _duration_histogram = _meter.create_histogram(
+            name="soulos.hybrid.duration",
+            unit="s",
+            description="Hybrid prepare/complete wall time in seconds",
+        )
+    except ImportError:
+        _duration_histogram = None
+    return _duration_histogram
+
+
+def record_hybrid_duration(operation: str, seconds: float) -> None:
+    """Record prepare/complete duration when OTel metrics are available."""
+    hist = _get_duration_histogram()
+    if hist is None:
+        return
+    hist.record(seconds, {"operation": operation})
 
 
 @contextmanager

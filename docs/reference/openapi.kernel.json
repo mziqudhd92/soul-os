@@ -569,6 +569,77 @@
         }
       }
     },
+    "/memory/purge-expired": {
+      "post": {
+        "summary": "Purge Expired Memories Route",
+        "description": "Delete session-scoped memories past MEMORY_SESSION_TTL_SECONDS for one bot.",
+        "operationId": "purge_expired_memories_route_memory_purge_expired_post",
+        "parameters": [
+          {
+            "name": "X-SoulOS-Account-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Soulos-Account-Id"
+            }
+          },
+          {
+            "name": "X-SoulOS-Gateway-Secret",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Soulos-Gateway-Secret"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemoryPurgeExpired"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/hybrid/prepare": {
       "post": {
         "summary": "Hybrid Prepare",
@@ -1433,6 +1504,20 @@
           "content"
         ],
         "title": "MemoryIngest"
+      },
+      "MemoryPurgeExpired": {
+        "properties": {
+          "bot_id": {
+            "type": "string",
+            "title": "Bot Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "bot_id"
+        ],
+        "title": "MemoryPurgeExpired",
+        "description": "Purge session-scoped memories past MEMORY_SESSION_TTL_SECONDS for one bot."
       },
       "MemoryRetrieve": {
         "properties": {

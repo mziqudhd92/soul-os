@@ -55,3 +55,17 @@ def test_complete_span_sets_attributes(monkeypatch):
     tracer.start_as_current_span.assert_called_once_with("soulos.hybrid.complete")
     span.set_attribute.assert_any_call("bot.id", "bot-2")
     span.set_attribute.assert_any_call("session.id", "")
+
+
+def test_record_hybrid_duration_noop_when_disabled(monkeypatch):
+    monkeypatch.setattr(telemetry, "OTEL_ENABLED", False)
+    monkeypatch.setattr(telemetry, "_duration_histogram", None)
+    telemetry.record_hybrid_duration("prepare", 0.12)
+
+
+def test_record_hybrid_duration_records_when_histogram_present(monkeypatch):
+    hist = MagicMock()
+    monkeypatch.setattr(telemetry, "_duration_histogram", hist)
+    monkeypatch.setattr(telemetry, "OTEL_ENABLED", True)
+    telemetry.record_hybrid_duration("complete", 0.25)
+    hist.record.assert_called_once_with(0.25, {"operation": "complete"})

@@ -2,6 +2,7 @@
 
 import json
 import logging
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -44,7 +45,6 @@ from runtime.soulpacks import (
     default_external_key,
     list_packs,
 )
-from runtime.telemetry import hybrid_complete_span, hybrid_prepare_span
 from runtime.errors import (
     BOT_NOT_FOUND,
     READY_DEGRADED,
@@ -57,9 +57,20 @@ from runtime.errors import (
     register_exception_handlers,
 )
 from runtime.memory import ingest_memory as ingest_memory_record
-from runtime.memory import delete_session_memories, forget_memory, list_memories, retrieve_memories
+from runtime.memory import (
+    delete_session_memories,
+    forget_memory,
+    list_memories,
+    purge_expired_session_memories,
+    retrieve_memories,
+)
 from runtime.memory_sync import sync_memory_directory
 from runtime.readiness import build_ready_payload
+from runtime.telemetry import (
+    hybrid_complete_span,
+    hybrid_prepare_span,
+    record_hybrid_duration,
+)
 from schemas import (
     ChatRequest,
     EnsureAvatarRequest,
@@ -68,6 +79,7 @@ from schemas import (
     ImportSoulPackRequest,
     MemoryForget,
     MemoryIngest,
+    MemoryPurgeExpired,
     MemoryRetrieve,
     MemorySync,
     ReflectStateRequest,
@@ -310,6 +322,18 @@ async def delete_session_memories_route(
     return {"status": "success", "deleted": deleted, "bot_id": bot_id, "session_id": session_id}
 
 
+@app.post("/memory/purge-expired")
+async def purge_expired_memories_route(
+    payload: MemoryPurgeExpired,
+    db: AsyncConnection = Depends(get_db),
+    account: AccountContext = Depends(get_account_context),
+):
+    """Delete session-scoped memories past MEMORY_SESSION_TTL_SECONDS for one bot."""
+    await verify_bot_access(db, payload.bot_id, account)
+    deleted = await purge_expired_session_memories(db, payload.bot_id)
+    return {"status": "success", "deleted": deleted, "bot_id": payload.bot_id}
+
+
 @app.post("/hybrid/prepare")
 async def hybrid_prepare(
     payload: HybridPrepareRequest,
@@ -322,6 +346,7 @@ async def hybrid_prepare(
     identity = await fetch_bot_identity(db, payload.bot_id)
     if not identity:
         raise SoulOSProblem(BOT_NOT_FOUND, 404, f"Bot not found: {payload.bot_id}")
+    t0 = time.perf_counter()
     with hybrid_prepare_span(payload.bot_id, payload.session_id, payload.query) as span:
         memories = await retrieve_memories(
             db,
@@ -336,6 +361,7 @@ async def hybrid_prepare(
         if span is not None:
             span.set_attribute("retrieval.documents.count", len(memories))
             span.set_attribute("output.value", system_prompt[:500])
+    record_hybrid_duration("prepare", time.perf_counter() - t0)
     return {
         "bot_id": payload.bot_id,
         "identity": {
@@ -360,12 +386,14 @@ async def hybrid_complete(
     account: AccountContext = Depends(get_account_context),
 ):
     await verify_bot_access(db, payload.bot_id, account)
+    t0 = time.perf_counter()
     with hybrid_complete_span(payload.bot_id, payload.session_id, payload.summary) as span:
         await ingest_memory_record(
             db, embedder, payload.bot_id, payload.summary, payload.session_id
         )
         if span is not None:
             span.set_attribute("input.value", (payload.user_message or payload.summary)[:500])
+    record_hybrid_duration("complete", time.perf_counter() - t0)
     response: dict = {"status": "success", "ingested": True, "reflect": "skipped"}
     if payload.reflect and payload.user_message:
         current_msv = await pipeline.load_current_msv(db, payload.bot_id)

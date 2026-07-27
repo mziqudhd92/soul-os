@@ -76,3 +76,20 @@ curl -s -X POST "$KERNEL/memory/retrieve" \
 - Use opaque ids (`uuid`, `workspace:user:thread`) — do not put PII in `session_id` itself if logs are retained.
 - `runtime_config.memory_policy` is a v0.2 stub (`summary_only` default); document your app’s ingest policy separately.
 - MCP tools do **not** expose forget/session delete — use REST ([mcp-tools.md](../reference/mcp-tools.md)).
+
+## Session TTL (retention)
+
+Set `MEMORY_SESSION_TTL_SECONDS` (default `0` = disabled). When enabled:
+
+- **Retrieve / list** exclude session-scoped rows older than the TTL (global rows with `session_id IS NULL` never expire this way).
+- **Purge** deletes expired session rows:
+
+```bash
+export MEMORY_SESSION_TTL_SECONDS=86400
+
+curl -s -X POST "$KERNEL/memory/purge-expired" \
+  -H "Content-Type: application/json" \
+  -d "{\"bot_id\":\"$BOT_ID\"}"
+```
+
+See [horizontal-scale.md](horizontal-scale.md) for multi-replica notes.

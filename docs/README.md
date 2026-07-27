@@ -62,7 +62,11 @@ Primary integration for apps that already call an LLM (Bedrock, OpenAI, LiteLLM,
 | [Troubleshooting](guides/troubleshooting.md) | Errors by RFC 7807 `code` + `soulos-doctor.py` |
 | [SoulPacks](guides/persona-packs.md) | First-party MIT persona packages (list/import + Studio) |
 | [Multi-agent teams](guides/multi-agent-teams.md) | Customer → Inventory handoff without a teams API |
+| [Architecture overview](guides/architecture-overview.md) | Contributor map, scale, non-goals |
+| [Observability](guides/observability.md) | OpenTelemetry spans + hybrid duration metrics |
+| [Horizontal scale](guides/horizontal-scale.md) | HPA assumptions, Redis rate limits, TTL |
 | [SoulPacks TDD plan](design/soulpacks-tdd-plan.md) | Single delivery plan — M1–M5 complete |
+| [Near-term non-goals](design/non-goals.md) | What we intentionally skip |
 | [Gateway headers](guides/gateway-headers.md) | `REQUIRE_AUTH=1` BFF pattern |
 | [Python bot integration](guides/python-bot.md) | Full-chat: add SoulOS to an existing Python bot |
 | [Psychometrics cheat sheet](guides/psychometrics.md) | What HEXACO / simple-persona sliders do |
@@ -109,6 +113,7 @@ Primary integration for apps that already call an LLM (Bedrock, OpenAI, LiteLLM,
 | [examples/companion](../examples/companion/) | Personal companion soul |
 | [examples/soulpack-sidecar](../examples/soulpack-sidecar/) | Seed a MIT SoulPack into the kernel |
 | [examples/multi-agent-handoff](../examples/multi-agent-handoff/) | Phase A Customer → Inventory handoff |
+| [examples/langchain-hybrid](../examples/langchain-hybrid/) | LangChain-shaped prepare → LLM → complete |
 
 ## Release & testing
 

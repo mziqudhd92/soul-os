@@ -1,0 +1,57 @@
+{{- if .Values.gateway.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "soulos.fullname" . }}-gateway
+  labels:
+    {{- include "soulos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gateway
+spec:
+  replicas: {{ .Values.gateway.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: gateway
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: gateway
+    spec:
+      containers:
+        - name: gateway
+          image: "{{ .Values.gateway.image.repository }}:{{ .Values.gateway.image.tag }}"
+          imagePullPolicy: {{ .Values.gateway.image.pullPolicy }}
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: KERNEL_URL
+              value: {{ .Values.gateway.env.KERNEL_URL | quote }}
+            - name: GATEWAY_SECRET
+              value: {{ .Values.gateway.env.GATEWAY_SECRET | quote }}
+            - name: REDIS_URL
+              value: {{ .Values.gateway.env.REDIS_URL | quote }}
+            - name: SOULOS_API_KEYS
+              value: {{ .Values.gateway.env.SOULOS_API_KEYS | quote }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "soulos.fullname" . }}-gateway
+  labels:
+    {{- include "soulos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gateway
+spec:
+  selector:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: gateway
+  ports:
+    - port: {{ .Values.gateway.service.port }}
+      targetPort: http
+      name: http
+{{- end }}

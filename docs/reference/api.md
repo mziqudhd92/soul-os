@@ -171,6 +171,13 @@ Delete all memories for a session (GDPR / conversation teardown). **REST-only** 
 
 - **Response:** `{"status": "success", "deleted": N, "bot_id": "...", "session_id": "..."}`
 
+### `POST /memory/purge-expired`
+
+Delete **session-scoped** memories older than `MEMORY_SESSION_TTL_SECONDS` for one bot (no-op when TTL is `0`). Global rows are never purged by this endpoint.
+
+- **Payload:** `{"bot_id": "uuid"}`
+- **Response:** `{"status": "success", "deleted": N, "bot_id": "..."}`
+
 ### `POST /state/update`
 
 - **Payload:** `{"bot_id": "uuid", "new_msv": { ... }}`
