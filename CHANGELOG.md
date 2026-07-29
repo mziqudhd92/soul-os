@@ -12,12 +12,13 @@ All notable changes to SoulOS are documented here. Version **0.2.0** focuses on 
 ### Added
 
 - **Platform hygiene (roadmap P0–P2)** — OTel duration metrics + ops guide; session memory TTL (`MEMORY_SESSION_TTL_SECONDS`, `POST /memory/purge-expired`); gateway Redis-backed rate limits (`REDIS_URL`); Helm chart (`deploy/helm/soulos`); LangChain hybrid example; TypeScript SDK vitest suite; architecture overview + non-goals docs
-- **Vertical SoulPacks** — travel, SDR, tutor, tech-support, developer coach, friendly-friend, warrior, exec-assistant, research-analyst, customer-success, security-coach (16 MIT packs total)
+- **Vertical SoulPacks** — 23 MIT packs spanning travel, sales, tutor, tech-support, developer coach, friend, warrior, exec, research, CSM, security, PM, data, recruiter, content, onboarding, a11y, meeting-notes; Pages catalog with search + detail pages
 - **Multi-agent teams (Phase A)** — app-orchestrated handoffs via `soulos.handoff` (`role_external_key`, `handoff_to`), `SoulHybridClient.ingest_memory`, packs `customer-front` / `inventory`, guide + `examples/multi-agent-handoff/`
 - **SoulPacks (M1–M5)** — in-repo MIT packs (`packs/soulpacks/`), `GET /v1/soulpacks`, `POST /v1/avatars/import-soulpack`, Studio gallery, `soulos pack` CLI, `examples/soulpack-sidecar/`; plan: `docs/design/soulpacks-tdd-plan.md`
 
 ### Fixed
 
+- **CI / MCP pin** — constrain `mcp>=1.0,<2` so kernel import does not break on mcp 2.0 (`list_resources` API change)
 - **SoulPacks hardening** — reject `files` / pack_id path traversal; document unversioned singleton layout + MSV precedence; atomic `export_pack` writes
 - **GitHub Pages verify quoting** — heredoc so FAQ/`id="faq"` checks work in CI
 

@@ -47,6 +47,15 @@ Multi-agent demo packs: `customer-front`, `inventory` — see [Multi-agent teams
 | `research-analyst` | Prism | Evidence-aware briefs |
 | `customer-success` | Harbor | Adoption / retention |
 | `security-coach` | Aegis | Secure habits (defensive only) |
+| `product-manager` | North | Discovery / PRDs / prioritization |
+| `data-analyst` | Lens | Metrics / analysis plans |
+| `recruiter` | Beacon | Hiring briefs / interviews |
+| `content-marketer` | Echo | Copy / content briefs |
+| `onboarding-coach` | Guide | Ramp / first-win plans |
+| `accessibility-editor` | Clear | A11y / inclusive language |
+| `meeting-notes` | Scribe | Decisions / action items |
+
+Browse on the site: [SoulPacks](https://mziqudhd92.github.io/soul-os/soulpacks/) (search + per-pack detail pages).
 
 ## APIs
 

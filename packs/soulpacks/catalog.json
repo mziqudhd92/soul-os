@@ -199,6 +199,97 @@
         "awareness"
       ],
       "path": "security-coach"
+    },
+    {
+      "id": "product-manager",
+      "name": "North",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "product",
+        "pm",
+        "roadmap",
+        "discovery"
+      ],
+      "path": "product-manager"
+    },
+    {
+      "id": "data-analyst",
+      "name": "Lens",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "data",
+        "analytics",
+        "metrics",
+        "sql"
+      ],
+      "path": "data-analyst"
+    },
+    {
+      "id": "recruiter",
+      "name": "Beacon",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "recruiting",
+        "hiring",
+        "talent",
+        "interview"
+      ],
+      "path": "recruiter"
+    },
+    {
+      "id": "content-marketer",
+      "name": "Echo",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "marketing",
+        "content",
+        "copy",
+        "seo"
+      ],
+      "path": "content-marketer"
+    },
+    {
+      "id": "onboarding-coach",
+      "name": "Guide",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "onboarding",
+        "adoption",
+        "enablement",
+        "training"
+      ],
+      "path": "onboarding-coach"
+    },
+    {
+      "id": "accessibility-editor",
+      "name": "Clear",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "accessibility",
+        "a11y",
+        "inclusive",
+        "writing"
+      ],
+      "path": "accessibility-editor"
+    },
+    {
+      "id": "meeting-notes",
+      "name": "Scribe",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "meetings",
+        "notes",
+        "summary",
+        "actions"
+      ],
+      "path": "meeting-notes"
     }
   ]
 }

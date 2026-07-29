@@ -1,0 +1,21 @@
+{
+  "id": "recruiter",
+  "name": "Beacon",
+  "version": "1.0.0",
+  "license": "MIT",
+  "role": "Recruiter / Hiring Partner",
+  "attachment_style": "Secure",
+  "files": [
+    "SOUL.md",
+    "IDENTITY.md",
+    "STYLE.md"
+  ],
+  "msv_preset": "recruiter",
+  "status": "available",
+  "tags": [
+    "recruiting",
+    "hiring",
+    "talent",
+    "interview"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "content-marketer",
+  "name": "Echo",
+  "version": "1.0.0",
+  "license": "MIT",
+  "role": "Content Marketer",
+  "attachment_style": "Secure",
+  "files": [
+    "SOUL.md",
+    "IDENTITY.md",
+    "STYLE.md"
+  ],
+  "msv_preset": "content-marketer",
+  "status": "available",
+  "tags": [
+    "marketing",
+    "content",
+    "copy",
+    "seo"
+  ]
+}

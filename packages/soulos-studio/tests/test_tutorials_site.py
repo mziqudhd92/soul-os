@@ -74,6 +74,10 @@ def test_build_project_site():
     assert "import-soulpack" in packs_page
     assert "support-agent" in packs_page
     assert "How to improve" in packs_page
+    assert "pack-filter" in packs_page
+    assert (out / "soulpacks" / "tutor" / "index.html").is_file()
+    tutor_page = (out / "soulpacks" / "tutor" / "index.html").read_text(encoding="utf-8")
+    assert "import-soulpack" in tutor_page
 
     not_found = (out / "404.html").read_text(encoding="utf-8")
     assert "Page not found" in not_found

@@ -274,31 +274,113 @@ def _load_soulpack_catalog() -> list[dict]:
     return [p for p in (packs or []) if isinstance(p, dict)]
 
 
+def _load_pack_file(pack_id: str, filename: str) -> str:
+    path = ROOT / "packs" / "soulpacks" / pack_id / filename
+    if not path.is_file():
+        return ""
+    return path.read_text(encoding="utf-8").strip()
+
+
+def _load_pack_manifest(pack_id: str) -> dict:
+    path = ROOT / "packs" / "soulpacks" / pack_id / "pack.json"
+    if not path.is_file():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except json.JSONDecodeError:
+        return {}
+
+
+def _soulpack_detail(base: str, entry: dict) -> str:
+    pid = str(entry.get("id", "")).strip()
+    manifest = _load_pack_manifest(pid)
+    name = escape(str(manifest.get("name") or entry.get("name") or pid))
+    role = escape(str(manifest.get("role") or ""))
+    ver = escape(str(manifest.get("version") or entry.get("version") or ""))
+    tags = [str(t) for t in (manifest.get("tags") or entry.get("tags") or [])]
+    tags_html = escape(", ".join(tags))
+    soul = escape(_load_pack_file(pid, "SOUL.md") or "(No SOUL.md)")
+    identity = escape(_load_pack_file(pid, "IDENTITY.md") or "(No IDENTITY.md)")
+    style = escape(_load_pack_file(pid, "STYLE.md") or "(No STYLE.md)")
+    pid_esc = escape(pid)
+    gh = f"https://github.com/mziqudhd92/soul-os/tree/main/packs/soulpacks/{pid}"
+
+    body = f"""
+    <section class="site-shell page-hero">
+      <p class="sub"><a href="{base}soulpacks/">← All SoulPacks</a></p>
+      <h1>{name}</h1>
+      <p>{role}</p>
+      <p class="sub" style="margin-top:0.75rem"><code>{pid_esc}</code> · v{ver} · MIT · {tags_html}</p>
+      <div class="btn-row" style="margin-top:1.25rem">
+        <a class="btn btn-primary" href="{base}get-started/">Use with sidecar</a>
+        <a class="btn btn-ghost" href="{gh}">Source on GitHub</a>
+      </div>
+    </section>
+
+    <section class="site-shell prose-block">
+      <h2>What this pack is for</h2>
+      <div class="pack-doc" style="white-space:pre-wrap;line-height:1.55;margin:1rem 0 2rem">{soul}</div>
+
+      <h2>Identity</h2>
+      <div class="pack-doc" style="white-space:pre-wrap;line-height:1.55;margin:1rem 0 2rem">{identity}</div>
+
+      <h2>Style</h2>
+      <div class="pack-doc" style="white-space:pre-wrap;line-height:1.55;margin:1rem 0 2rem">{style}</div>
+
+      <h2>Import</h2>
+      <pre><code>curl -s -X POST http://localhost:8000/v1/avatars/import-soulpack \\
+  -H 'content-type: application/json' \\
+  -d '{{"pack_id":"{pid_esc}","persist":true}}'</code></pre>
+      <p>Or Studio → <strong>SoulPacks</strong> → Open / Deploy. Guide:
+      <a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/persona-packs.md">persona-packs.md</a>.</p>
+    </section>
+"""
+    return page(
+        base=base,
+        title=f"{name} — SoulPack — SoulOS",
+        description=f"{name} ({pid}): {role}. First-party MIT SoulPack for SoulOS.",
+        active="soulpacks",
+        path=f"soulpacks/{pid}/",
+        body=body,
+    )
+
+
 def _soulpacks(base: str) -> str:
+    catalog = _load_soulpack_catalog()
     pack_cards = []
-    for p in _load_soulpack_catalog():
-        pid = escape(str(p.get("id", "")))
+    for p in catalog:
+        pid = str(p.get("id", ""))
+        pid_esc = escape(pid)
         name = escape(str(p.get("name", pid)))
         ver = escape(str(p.get("version", "")))
-        tags = escape(", ".join(str(t) for t in (p.get("tags") or [])[:4]))
+        tags = [str(t) for t in (p.get("tags") or [])]
+        tags_esc = escape(", ".join(tags[:6]))
+        role = escape(str(_load_pack_manifest(pid).get("role") or ""))
+        search_blob = escape(
+            " ".join([pid, str(p.get("name", "")), role, " ".join(tags)]).lower()
+        )
         pack_cards.append(
             f"""
-        <article class="path-tile">
-          <h3>{name}</h3>
-          <p><code>{pid}</code> · v{ver} · MIT</p>
-          <p style="margin-top:0.5rem;font-size:0.9rem;color:var(--muted)">{tags}</p>
+        <article class="path-tile pack-card" data-search="{search_blob}">
+          <h3><a href="{base}soulpacks/{pid_esc}/">{name}</a></h3>
+          <p>{role}</p>
+          <p style="margin-top:0.5rem"><code>{pid_esc}</code> · v{ver} · MIT</p>
+          <p style="margin-top:0.5rem;font-size:0.9rem;color:var(--muted)">{tags_esc}</p>
+          <p style="margin-top:0.75rem"><a href="{base}soulpacks/{pid_esc}/">View details →</a></p>
         </article>"""
         )
     packs_html = "\n".join(pack_cards) or "<p class='sub'>No packs in catalog yet.</p>"
+    count = len(catalog)
 
     body = f"""
     <section class="site-shell page-hero">
       <h1>SoulPacks</h1>
-      <p>First-party, MIT-licensed persona packages. Import a ready personality, deploy it to the kernel, or author your own pack in-repo — no third-party registry.</p>
+      <p>First-party, MIT-licensed persona packages. Browse {count} packs, open a detail page to read the soul, then import via API, CLI, or Soul Studio.</p>
       <div class="btn-row" style="margin-top:1.25rem">
-        <a class="btn btn-primary" href="https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/persona-packs.md">Full guide</a>
-        <a class="btn btn-ghost" href="{base}get-started/">Get started (sidecar)</a>
-        <a class="btn btn-ghost" href="https://github.com/mziqudhd92/soul-os/tree/main/packs/soulpacks">Browse on GitHub</a>
+        <a class="btn btn-primary" href="#catalog">Browse catalog</a>
+        <a class="btn btn-ghost" href="https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/persona-packs.md">Full guide</a>
+        <a class="btn btn-ghost" href="{base}get-started/">Get started</a>
       </div>
     </section>
 
@@ -312,8 +394,8 @@ def _soulpacks(base: str) -> str:
             <p>Import rejects any non-MIT pack. Content stays first-party and redistributable with SoulOS.</p>
           </div>
           <div class="path-tile">
-            <h3>Unversioned singletons</h3>
-            <p>One directory per pack id. The <code>version</code> field is metadata for <code>external_key</code> (<code>soulos:id@version</code>).</p>
+            <h3>Browse &amp; understand</h3>
+            <p>Each pack has a detail page with role, SOUL, identity, style, and copy-paste import.</p>
           </div>
           <div class="path-tile">
             <h3>Safe paths</h3>
@@ -327,11 +409,17 @@ def _soulpacks(base: str) -> str:
       </div>
     </section>
 
-    <section class="section">
+    <section class="section" id="catalog">
       <div class="site-shell">
-        <h2>Shipped packs</h2>
-        <p class="sub">Included in the repository catalog today.</p>
-        <div class="path-grid">
+        <h2>Catalog ({count})</h2>
+        <p class="sub">Filter by name, id, role, or tag. Click a pack to read how it thinks and how to import it.</p>
+        <p style="margin:1rem 0 1.25rem">
+          <label for="pack-filter" class="sub">Search</label><br>
+          <input id="pack-filter" type="search" placeholder="e.g. tutor, sales, security…"
+            style="width:min(100%,28rem);margin-top:0.35rem;padding:0.65rem 0.85rem;border:1px solid var(--border, #ccc);border-radius:6px;background:var(--bg, #fff);color:inherit;font:inherit">
+        </p>
+        <p id="pack-filter-empty" class="sub" hidden>No packs match that filter.</p>
+        <div class="path-grid" id="pack-grid">
 {packs_html}
         </div>
       </div>
@@ -395,11 +483,32 @@ curl -s -X POST http://localhost:8000/v1/avatars/import-soulpack \\
         <li><a href="https://github.com/mziqudhd92/soul-os/tree/main/examples/soulpack-sidecar">examples/soulpack-sidecar</a></li>
       </ul>
     </section>
+    <script>
+    (function () {{
+      var input = document.getElementById("pack-filter");
+      var grid = document.getElementById("pack-grid");
+      var empty = document.getElementById("pack-filter-empty");
+      if (!input || !grid) return;
+      var cards = Array.prototype.slice.call(grid.querySelectorAll(".pack-card"));
+      function apply() {{
+        var q = (input.value || "").trim().toLowerCase();
+        var shown = 0;
+        cards.forEach(function (card) {{
+          var hay = card.getAttribute("data-search") || "";
+          var ok = !q || hay.indexOf(q) !== -1;
+          card.hidden = !ok;
+          if (ok) shown += 1;
+        }});
+        if (empty) empty.hidden = shown !== 0;
+      }}
+      input.addEventListener("input", apply);
+    }})();
+    </script>
 """
     return page(
         base=base,
         title="SoulPacks — MIT persona packages — SoulOS",
-        description="SoulPacks are first-party MIT persona packages for SoulOS: list, import, Studio gallery, and how to author your own.",
+        description="Browse and understand SoulOS SoulPacks: first-party MIT personas with detail pages, search, and import examples.",
         active="soulpacks",
         path="soulpacks/",
         body=body,
@@ -869,6 +978,12 @@ def build(out: Path, base: str) -> None:
     _write(out / "index.html", _home(base, adopters))
     _write(out / "get-started" / "index.html", _get_started(base))
     _write(out / "soulpacks" / "index.html", _soulpacks(base))
+    pack_entries = _load_soulpack_catalog()
+    for entry in pack_entries:
+        pid = str(entry.get("id", "")).strip()
+        if not pid or "/" in pid or ".." in pid:
+            continue
+        _write(out / "soulpacks" / pid / "index.html", _soulpack_detail(base, entry))
     _write(out / "docs" / "index.html", _docs(base))
     _write(out / "adopters" / "index.html", _adopters(base, adopters))
     _write(out / "agents" / "index.html", _agents(base))
@@ -896,6 +1011,10 @@ def build(out: Path, base: str) -> None:
         "schema/project.json",
         "data/soulpacks/catalog.json",
     ]
+    for entry in pack_entries:
+        pid = str(entry.get("id", "")).strip()
+        if pid and "/" not in pid and ".." not in pid:
+            site_paths.append(f"soulpacks/{pid}/")
     sitemap_urls = "\n".join(
         f"  <url><loc>{absolute_url(base, p)}</loc><changefreq>weekly</changefreq></url>"
         for p in site_paths
@@ -928,11 +1047,12 @@ Sitemap: {absolute_url(base, "sitemap.xml")}
     print(f"Built SoulOS site → {out.resolve()}")
     print(f"  base URL path: {base}")
     print(
-        "  pages: home, get-started, soulpacks, docs, tutorials, "
+        "  pages: home, get-started, soulpacks (+ detail), docs, tutorials, "
         "adopters, agents, community"
     )
     print(f"  agent mirrors: llms.txt, llms-full.txt, schema/project.json")
     print(f"  tutorials: {len(TUTORIALS)}")
+    print(f"  soulpacks: {len(pack_entries)}")
 
 
 def main(argv: list[str] | None = None) -> int:

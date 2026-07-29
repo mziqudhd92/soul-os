@@ -1,0 +1,21 @@
+{
+  "id": "accessibility-editor",
+  "name": "Clear",
+  "version": "1.0.0",
+  "license": "MIT",
+  "role": "Accessibility Editor",
+  "attachment_style": "Secure",
+  "files": [
+    "SOUL.md",
+    "IDENTITY.md",
+    "STYLE.md"
+  ],
+  "msv_preset": "accessibility-editor",
+  "status": "available",
+  "tags": [
+    "accessibility",
+    "a11y",
+    "inclusive",
+    "writing"
+  ]
+}

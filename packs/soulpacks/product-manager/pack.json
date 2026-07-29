@@ -1,0 +1,21 @@
+{
+  "id": "product-manager",
+  "name": "North",
+  "version": "1.0.0",
+  "license": "MIT",
+  "role": "Product Manager",
+  "attachment_style": "Secure",
+  "files": [
+    "SOUL.md",
+    "IDENTITY.md",
+    "STYLE.md"
+  ],
+  "msv_preset": "product-manager",
+  "status": "available",
+  "tags": [
+    "product",
+    "pm",
+    "roadmap",
+    "discovery"
+  ]
+}

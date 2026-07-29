@@ -61,4 +61,4 @@ When changing APIs, MCP tools, or ports, update: `docs/reference/api.md`, `docs/
 
 ## Git commits (agents)
 
-Agent-created commits must use **`fcursor <fcursor@iwantmoneyfromcursor.com>`** — not `cursoragent@cursor.com`. Set `GIT_AUTHOR_*` and `GIT_COMMITTER_*` env vars per commit; do not change `git config`.
+Agent-created commits must use **`Moran <274483692+mziqudhd92@users.noreply.github.com>`** — not `cursoragent@cursor.com`, `fcursor@…`, or `Your Name`. Set `GIT_AUTHOR_*` and `GIT_COMMITTER_*` env vars per commit; do not change `git config`.

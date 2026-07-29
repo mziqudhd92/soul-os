@@ -1,0 +1,21 @@
+{
+  "id": "data-analyst",
+  "name": "Lens",
+  "version": "1.0.0",
+  "license": "MIT",
+  "role": "Data Analyst",
+  "attachment_style": "Secure",
+  "files": [
+    "SOUL.md",
+    "IDENTITY.md",
+    "STYLE.md"
+  ],
+  "msv_preset": "data-analyst",
+  "status": "available",
+  "tags": [
+    "data",
+    "analytics",
+    "metrics",
+    "sql"
+  ]
+}

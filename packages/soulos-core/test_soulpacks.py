@@ -178,6 +178,13 @@ def test_catalog_includes_new_vertical_packs():
         "research-analyst",
         "customer-success",
         "security-coach",
+        "product-manager",
+        "data-analyst",
+        "recruiter",
+        "content-marketer",
+        "onboarding-coach",
+        "accessibility-editor",
+        "meeting-notes",
     ):
         assert expected in ids
 

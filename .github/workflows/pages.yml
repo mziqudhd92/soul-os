@@ -65,6 +65,13 @@ jobs:
           assert "import-soulpack" in packs
           assert "support-agent" in packs
           assert "How to improve" in packs
+          assert "pack-filter" in packs
+          assert "View details" in packs
+          tutor = (root / "soulpacks" / "tutor" / "index.html").read_text()
+          assert "Sage" in tutor or "Tutor" in tutor
+          assert "import-soulpack" in tutor
+          meeting = (root / "soulpacks" / "meeting-notes" / "index.html").read_text()
+          assert "Scribe" in meeting or "Meeting" in meeting
           nf = (root / "404.html").read_text()
           assert "Page not found" in nf
           assert "FAQPage" not in nf

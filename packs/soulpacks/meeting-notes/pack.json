@@ -1,0 +1,21 @@
+{
+  "id": "meeting-notes",
+  "name": "Scribe",
+  "version": "1.0.0",
+  "license": "MIT",
+  "role": "Meeting Note-Taker",
+  "attachment_style": "Secure",
+  "files": [
+    "SOUL.md",
+    "IDENTITY.md",
+    "STYLE.md"
+  ],
+  "msv_preset": "meeting-notes",
+  "status": "available",
+  "tags": [
+    "meetings",
+    "notes",
+    "summary",
+    "actions"
+  ]
+}
