@@ -164,9 +164,27 @@ def test_catalog_has_at_least_three_mit_packs():
         assert manifest["license"] == "MIT"
 
 
+def test_catalog_includes_new_vertical_packs():
+    ids = {p["id"] for p in list_packs(root=PACKS)}
+    for expected in (
+        "travel-agent",
+        "sales-sdr",
+        "tutor",
+        "tech-support",
+        "developer",
+        "friendly-friend",
+        "warrior",
+        "exec-assistant",
+        "research-analyst",
+        "customer-success",
+        "security-coach",
+    ):
+        assert expected in ids
+
+
 @pytest.mark.parametrize(
     "pack_id",
-    ["support-agent", "companion", "dev-twin", "customer-front", "inventory"],
+    [p["id"] for p in list_packs(root=PACKS)],
 )
 def test_each_catalog_pack_compiles(pack_id: str):
     soul, runtime, _ = compile_pack(pack_id, root=PACKS)

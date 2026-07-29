@@ -27,6 +27,27 @@ Sidecar seed: [examples/soulpack-sidecar](../../examples/soulpack-sidecar/README
 
 Multi-agent demo packs: `customer-front`, `inventory` — see [Multi-agent teams](multi-agent-teams.md) and [examples/multi-agent-handoff](../../examples/multi-agent-handoff/).
 
+## Catalog (first-party MIT)
+
+| Pack id | Name | Focus |
+|---------|------|--------|
+| `support-agent` | Site Support | Billing / product FAQ |
+| `companion` | Luna | Deep personal companion |
+| `dev-twin` | Dev Twin | Repo-oriented senior engineer |
+| `customer-front` | Customer Front Desk | Multi-agent triage |
+| `inventory` | Inventory Specialist | Stock / SKU handoffs |
+| `travel-agent` | Voyage | Trip planning |
+| `sales-sdr` | Quill | Outbound / qualification |
+| `tutor` | Sage | Teaching / learning |
+| `tech-support` | Relay | IT / product troubleshooting |
+| `developer` | Forge | Pair-programming coach |
+| `friendly-friend` | Sunny | Casual friendship |
+| `warrior` | Vanguard | Discipline / courage coaching |
+| `exec-assistant` | Atlas | Agendas / prioritization |
+| `research-analyst` | Prism | Evidence-aware briefs |
+| `customer-success` | Harbor | Adoption / retention |
+| `security-coach` | Aegis | Secure habits (defensive only) |
+
 ## APIs
 
 | Method | Path | Purpose |

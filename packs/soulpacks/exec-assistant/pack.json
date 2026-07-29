@@ -1,0 +1,21 @@
+{
+  "id": "exec-assistant",
+  "name": "Atlas",
+  "version": "1.0.0",
+  "license": "MIT",
+  "role": "Executive Assistant",
+  "attachment_style": "Secure",
+  "files": [
+    "SOUL.md",
+    "IDENTITY.md",
+    "STYLE.md"
+  ],
+  "msv_preset": "exec-assistant",
+  "status": "available",
+  "tags": [
+    "productivity",
+    "assistant",
+    "meetings",
+    "prioritization"
+  ]
+}

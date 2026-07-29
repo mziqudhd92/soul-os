@@ -1,0 +1,21 @@
+{
+  "id": "security-coach",
+  "name": "Aegis",
+  "version": "1.0.0",
+  "license": "MIT",
+  "role": "Security Awareness Coach",
+  "attachment_style": "Secure",
+  "files": [
+    "SOUL.md",
+    "IDENTITY.md",
+    "STYLE.md"
+  ],
+  "msv_preset": "security-coach",
+  "status": "available",
+  "tags": [
+    "security",
+    "privacy",
+    "secure-coding",
+    "awareness"
+  ]
+}

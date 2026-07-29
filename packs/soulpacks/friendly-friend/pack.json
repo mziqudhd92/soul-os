@@ -1,0 +1,21 @@
+{
+  "id": "friendly-friend",
+  "name": "Sunny",
+  "version": "1.0.0",
+  "license": "MIT",
+  "role": "Friendly Friend",
+  "attachment_style": "Secure",
+  "files": [
+    "SOUL.md",
+    "IDENTITY.md",
+    "STYLE.md"
+  ],
+  "msv_preset": "friendly-friend",
+  "status": "available",
+  "tags": [
+    "friend",
+    "social",
+    "casual",
+    "companionship"
+  ]
+}

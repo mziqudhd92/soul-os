@@ -1,0 +1,21 @@
+{
+  "id": "tutor",
+  "name": "Sage",
+  "version": "1.0.0",
+  "license": "MIT",
+  "role": "Tutor / Teacher",
+  "attachment_style": "Secure",
+  "files": [
+    "SOUL.md",
+    "IDENTITY.md",
+    "STYLE.md"
+  ],
+  "msv_preset": "tutor",
+  "status": "available",
+  "tags": [
+    "education",
+    "tutor",
+    "teaching",
+    "learning"
+  ]
+}

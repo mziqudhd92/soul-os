@@ -5,7 +5,11 @@
       "name": "Site Support",
       "version": "1.0.0",
       "license": "MIT",
-      "tags": ["support", "billing", "customer"],
+      "tags": [
+        "support",
+        "billing",
+        "customer"
+      ],
       "path": "support-agent"
     },
     {
@@ -13,7 +17,10 @@
       "name": "Luna",
       "version": "1.0.0",
       "license": "MIT",
-      "tags": ["companion", "personal"],
+      "tags": [
+        "companion",
+        "personal"
+      ],
       "path": "companion"
     },
     {
@@ -21,7 +28,10 @@
       "name": "Dev Twin",
       "version": "1.0.0",
       "license": "MIT",
-      "tags": ["engineering", "code"],
+      "tags": [
+        "engineering",
+        "code"
+      ],
       "path": "dev-twin"
     },
     {
@@ -29,7 +39,11 @@
       "name": "Customer Front Desk",
       "version": "1.0.0",
       "license": "MIT",
-      "tags": ["customer", "triage", "multi-agent"],
+      "tags": [
+        "customer",
+        "triage",
+        "multi-agent"
+      ],
       "path": "customer-front"
     },
     {
@@ -37,8 +51,154 @@
       "name": "Inventory Specialist",
       "version": "1.0.0",
       "license": "MIT",
-      "tags": ["inventory", "warehouse", "multi-agent"],
+      "tags": [
+        "inventory",
+        "warehouse",
+        "multi-agent"
+      ],
       "path": "inventory"
+    },
+    {
+      "id": "travel-agent",
+      "name": "Voyage",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "travel",
+        "planning",
+        "hospitality"
+      ],
+      "path": "travel-agent"
+    },
+    {
+      "id": "sales-sdr",
+      "name": "Quill",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "sales",
+        "sdr",
+        "outbound",
+        "b2b"
+      ],
+      "path": "sales-sdr"
+    },
+    {
+      "id": "tutor",
+      "name": "Sage",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "education",
+        "tutor",
+        "teaching",
+        "learning"
+      ],
+      "path": "tutor"
+    },
+    {
+      "id": "tech-support",
+      "name": "Relay",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "support",
+        "it",
+        "troubleshooting",
+        "technical"
+      ],
+      "path": "tech-support"
+    },
+    {
+      "id": "developer",
+      "name": "Forge",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "engineering",
+        "developer",
+        "pair-programming",
+        "mentoring"
+      ],
+      "path": "developer"
+    },
+    {
+      "id": "friendly-friend",
+      "name": "Sunny",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "friend",
+        "social",
+        "casual",
+        "companionship"
+      ],
+      "path": "friendly-friend"
+    },
+    {
+      "id": "warrior",
+      "name": "Vanguard",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "motivation",
+        "discipline",
+        "warrior",
+        "coaching"
+      ],
+      "path": "warrior"
+    },
+    {
+      "id": "exec-assistant",
+      "name": "Atlas",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "productivity",
+        "assistant",
+        "meetings",
+        "prioritization"
+      ],
+      "path": "exec-assistant"
+    },
+    {
+      "id": "research-analyst",
+      "name": "Prism",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "research",
+        "analysis",
+        "synthesis",
+        "knowledge-work"
+      ],
+      "path": "research-analyst"
+    },
+    {
+      "id": "customer-success",
+      "name": "Harbor",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "customer-success",
+        "retention",
+        "csm",
+        "onboarding"
+      ],
+      "path": "customer-success"
+    },
+    {
+      "id": "security-coach",
+      "name": "Aegis",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "security",
+        "privacy",
+        "secure-coding",
+        "awareness"
+      ],
+      "path": "security-coach"
     }
   ]
 }

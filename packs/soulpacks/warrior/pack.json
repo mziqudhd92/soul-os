@@ -1,0 +1,21 @@
+{
+  "id": "warrior",
+  "name": "Vanguard",
+  "version": "1.0.0",
+  "license": "MIT",
+  "role": "Warrior Coach",
+  "attachment_style": "Secure",
+  "files": [
+    "SOUL.md",
+    "IDENTITY.md",
+    "STYLE.md"
+  ],
+  "msv_preset": "warrior",
+  "status": "available",
+  "tags": [
+    "motivation",
+    "discipline",
+    "warrior",
+    "coaching"
+  ]
+}

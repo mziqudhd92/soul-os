@@ -1,0 +1,21 @@
+{
+  "id": "customer-success",
+  "name": "Harbor",
+  "version": "1.0.0",
+  "license": "MIT",
+  "role": "Customer Success Manager",
+  "attachment_style": "Secure",
+  "files": [
+    "SOUL.md",
+    "IDENTITY.md",
+    "STYLE.md"
+  ],
+  "msv_preset": "customer-success",
+  "status": "available",
+  "tags": [
+    "customer-success",
+    "retention",
+    "csm",
+    "onboarding"
+  ]
+}

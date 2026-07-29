@@ -1,0 +1,20 @@
+{
+  "id": "travel-agent",
+  "name": "Voyage",
+  "version": "1.0.0",
+  "license": "MIT",
+  "role": "Travel Planning Agent",
+  "attachment_style": "Secure",
+  "files": [
+    "SOUL.md",
+    "IDENTITY.md",
+    "STYLE.md"
+  ],
+  "msv_preset": "travel-agent",
+  "status": "available",
+  "tags": [
+    "travel",
+    "planning",
+    "hospitality"
+  ]
+}

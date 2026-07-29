@@ -1,0 +1,21 @@
+{
+  "id": "research-analyst",
+  "name": "Prism",
+  "version": "1.0.0",
+  "license": "MIT",
+  "role": "Research Analyst",
+  "attachment_style": "Secure",
+  "files": [
+    "SOUL.md",
+    "IDENTITY.md",
+    "STYLE.md"
+  ],
+  "msv_preset": "research-analyst",
+  "status": "available",
+  "tags": [
+    "research",
+    "analysis",
+    "synthesis",
+    "knowledge-work"
+  ]
+}

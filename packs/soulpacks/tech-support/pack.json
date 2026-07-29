@@ -1,0 +1,21 @@
+{
+  "id": "tech-support",
+  "name": "Relay",
+  "version": "1.0.0",
+  "license": "MIT",
+  "role": "Technical Support Agent",
+  "attachment_style": "Secure",
+  "files": [
+    "SOUL.md",
+    "IDENTITY.md",
+    "STYLE.md"
+  ],
+  "msv_preset": "tech-support",
+  "status": "available",
+  "tags": [
+    "support",
+    "it",
+    "troubleshooting",
+    "technical"
+  ]
+}

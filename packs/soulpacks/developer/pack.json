@@ -1,0 +1,21 @@
+{
+  "id": "developer",
+  "name": "Forge",
+  "version": "1.0.0",
+  "license": "MIT",
+  "role": "Developer Pair-Programming Coach",
+  "attachment_style": "Secure",
+  "files": [
+    "SOUL.md",
+    "IDENTITY.md",
+    "STYLE.md"
+  ],
+  "msv_preset": "developer",
+  "status": "available",
+  "tags": [
+    "engineering",
+    "developer",
+    "pair-programming",
+    "mentoring"
+  ]
+}
