@@ -24,6 +24,7 @@ All notable changes to SoulOS are documented here. Version **0.2.0** focuses on 
 
 ### Changed
 
+- **Adopters** — added [Getbyliner](https://getbyliner.com/) to `docs/adopters.md` / `adopters.json`, llms indexes, schema.org mentions, and Pages adopters section
 - **AEO / GEO / SEO** — SoulPacks catalog (23 packs) reflected in `llms.txt` / `llms-full.txt`, `schema/project.json`, homepage FAQPage, agent-discovery; Pages SoulPacks `CollectionPage`/`ItemList` + per-pack `CreativeWork` JSON-LD; sitemap includes pack detail URLs
 - **Project site** — dedicated `/soulpacks/` page (use + author), nav/home/docs/get-started updates, catalog mirror at `data/soulpacks/catalog.json`
 - MIT `license` + classifiers on all Python `pyproject.toml` packages

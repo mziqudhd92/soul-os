@@ -61,10 +61,11 @@ Errors use `Content-Type: application/problem+json` with `type`, `title`, `statu
 
 ## Production adopters
 
-- [docs/adopters.md](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/docs/adopters.md): SignalPR, Aeterna, Ved Travel.
+- [docs/adopters.md](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/docs/adopters.md): SignalPR, Aeterna, Ved Travel, Getbyliner.
 - SignalPR — https://signalpr.pro/ — hybrid sidecar + Bedrock + pgvector.
 - Aeterna — https://helloaeterna.com/ — persona + episodic memory.
 - Ved Travel — https://www.ved-travel.co.il/ — family Croatia travel + AI trip planning persona/memory.
+- Getbyliner — https://getbyliner.com/ — AI press releases + journalist outreach (hybrid sidecar).
 
 ## FAQ (AEO)
 

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-09",
+  "updated": "2026-07-29",
   "documentation": "https://github.com/mziqudhd92/soul-os/blob/main/docs/adopters.md",
   "soulos_repository": "https://github.com/mziqudhd92/soul-os",
   "adopters": [
@@ -83,6 +83,34 @@
         "docs/guides/sidecar-integration.md",
         "docs/guides/session-memory.md",
         "docs/guides/identity-model.md"
+      ],
+      "independent_product": true
+    },
+    {
+      "id": "getbyliner",
+      "name": "Getbyliner",
+      "url": "https://getbyliner.com/",
+      "product_summary": "AI press release distribution and journalist outreach for founders: match live reporter requests (Qwoted, HARO, and more), draft newsroom-ready releases, and distribute to press sites without an agency retainer.",
+      "soulos_role": "Persistent PR-agent persona and episodic memory for pitch context, company story, and multi-turn press-release drafting via the hybrid sidecar (prepare/complete) alongside the product’s LLM.",
+      "categories": [
+        "B2B SaaS",
+        "public relations",
+        "press releases",
+        "journalist outreach",
+        "founder tools",
+        "AI agents"
+      ],
+      "integration_patterns": [
+        "hybrid sidecar",
+        "POST /hybrid/prepare",
+        "POST /hybrid/complete",
+        "episodic memory",
+        "persona MSV"
+      ],
+      "soulos_docs": [
+        "docs/guides/sidecar-integration.md",
+        "docs/reference/hybrid-api.md",
+        "docs/guides/session-memory.md"
       ],
       "independent_product": true
     }

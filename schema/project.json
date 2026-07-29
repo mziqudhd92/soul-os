@@ -72,6 +72,13 @@
       "url": "https://www.ved-travel.co.il/",
       "description": "Family Croatia travel with AI trip planning using SoulOS for advisor persona and session memory.",
       "applicationCategory": "TravelApplication"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Getbyliner",
+      "url": "https://getbyliner.com/",
+      "description": "AI press release distribution and journalist outreach using SoulOS hybrid sidecar for persistent PR-agent persona and memory.",
+      "applicationCategory": "BusinessApplication"
     }
   ],
   "downloadUrl": "https://github.com/mziqudhd92/soul-os",

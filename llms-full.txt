@@ -71,7 +71,7 @@ OpenTelemetry spans and `soulos.hybrid.duration` metrics on hybrid prepare/compl
 
 ## Production adopters
 
-SignalPR (https://signalpr.pro/) — hybrid sidecar. Aeterna (https://helloaeterna.com/) — episodic memory. Ved Travel (https://www.ved-travel.co.il/) — family Croatia travel + AI trip planning.
+SignalPR (https://signalpr.pro/) — hybrid sidecar. Aeterna (https://helloaeterna.com/) — episodic memory. Ved Travel (https://www.ved-travel.co.il/) — family Croatia travel + AI trip planning. Getbyliner (https://getbyliner.com/) — AI press releases + journalist outreach.
 
 Playbooks: [docs/playbooks/signalpr-hybrid.md](docs/playbooks/signalpr-hybrid.md) · [docs/playbooks/aeterna-memory.md](docs/playbooks/aeterna-memory.md)
 

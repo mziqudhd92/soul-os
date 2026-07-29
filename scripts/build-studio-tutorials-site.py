@@ -785,7 +785,7 @@ def _adopters(base: str, adopters: list[dict]) -> str:
     return page(
         base=base,
         title="Adopters — SoulOS",
-        description="Production adopters of SoulOS: SignalPR, Aeterna, Ved Travel, and more.",
+        description="Production adopters of SoulOS: SignalPR, Aeterna, Ved Travel, Getbyliner, and more.",
         active="adopters",
         path="adopters/",
         body=body,

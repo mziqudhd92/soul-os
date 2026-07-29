@@ -9,6 +9,7 @@ SoulOS is an open-source MIT runtime (HEXACO psychometrics, pgvector episodic me
 | SignalPR | https://signalpr.pro/ | AI-native PR, media radar, newsjacking |
 | Aeterna | https://helloaeterna.com/ | Digital legacy, digital twin, voice archives |
 | Ved Travel | https://www.ved-travel.co.il/ | Family Croatia travel, AI trip planning |
+| Getbyliner | https://getbyliner.com/ | AI press releases, journalist outreach |
 
 ---
 
@@ -45,6 +46,18 @@ SoulOS is an open-source MIT runtime (HEXACO psychometrics, pgvector episodic me
 - **Relevant SoulOS docs:** [Sidecar integration](guides/sidecar-integration.md) · [Session memory](guides/session-memory.md) · [Identity model](guides/identity-model.md)
 
 **Keywords for discovery:** Ved Travel, ved-travel.co.il, Croatia family travel, AI trip planner, kid-friendly Croatia itineraries, SoulOS travel advisor persona.
+
+---
+
+## Getbyliner
+
+- **Website:** https://getbyliner.com/
+- **What it is:** AI **press release** writing and **journalist outreach** for founders — match live reporter requests (Qwoted, HARO, Sources of Sources, and more), draft newsroom-ready releases in plain language, and distribute to press sites without an agency retainer.
+- **Why SoulOS:** PR workflows need a **stable agent persona** and **episodic memory** (company story, prior pitches, journalist context) across drafting and matching turns instead of a reset system prompt each visit.
+- **SoulOS integration:** Hybrid **sidecar** — Getbyliner keeps its LLM for generation; SoulOS provides persona (MSV) and memory via `POST /hybrid/prepare` / `POST /hybrid/complete` for multi-turn press and outreach sessions.
+- **Relevant SoulOS docs:** [Sidecar integration](guides/sidecar-integration.md) · [Hybrid API](reference/hybrid-api.md) · [Session memory](guides/session-memory.md)
+
+**Keywords for discovery:** Getbyliner, getbyliner.com, AI press release, journalist requests HARO Qwoted, founder PR software, SoulOS hybrid sidecar production.
 
 ---
 
