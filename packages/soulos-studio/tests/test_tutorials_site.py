@@ -69,15 +69,18 @@ def test_build_project_site():
     assert 'id="faq"' in index
     assert "What is SoulOS?" in index
     assert "SoulPacks" in index
+    assert "Where can I browse SoulPacks?" in index
     assert "application/ld+json" in index
     packs_page = (out / "soulpacks" / "index.html").read_text(encoding="utf-8")
     assert "import-soulpack" in packs_page
     assert "support-agent" in packs_page
     assert "How to improve" in packs_page
     assert "pack-filter" in packs_page
+    assert "ItemList" in packs_page
     assert (out / "soulpacks" / "tutor" / "index.html").is_file()
     tutor_page = (out / "soulpacks" / "tutor" / "index.html").read_text(encoding="utf-8")
     assert "import-soulpack" in tutor_page
+    assert "CreativeWork" in tutor_page
 
     not_found = (out / "404.html").read_text(encoding="utf-8")
     assert "Page not found" in not_found
@@ -136,8 +139,9 @@ def test_faq_visible_matches_json_ld():
     html = mod._home("/soul-os/", [])
     assert 'id="faq"' in html
     assert "FAQPage" in html
-    for question, _answer in mod.FAQ_ITEMS:
+    for question, _answer in mod._faq_items():
         assert question in html
+    assert "Where can I browse SoulPacks?" in html
 
 
 def test_404_is_not_homepage_clone():

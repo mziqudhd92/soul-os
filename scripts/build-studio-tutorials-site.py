@@ -20,36 +20,50 @@ sys.path.insert(0, str(TEMPLATES))
 from _shell import absolute_url, page  # noqa: E402
 
 # Visible homepage FAQ must stay in sync with FAQPage JSON-LD (AEO).
-FAQ_ITEMS: list[tuple[str, str]] = [
-    (
-        "What is SoulOS?",
-        "SoulOS is an open-source identity and episodic memory sidecar for AI agents. "
-        "It provides HEXACO MSV personality, pgvector memory, and a hybrid prepare/complete "
-        "API so your existing LLM keeps generation.",
-    ),
-    (
-        "When should I use SoulOS?",
-        "Use SoulOS when you need persistent persona beyond a static system prompt, "
-        "episodic memory across sessions, a hybrid sidecar next to Bedrock/OpenAI/LiteLLM, "
-        "or MCP tools for memory and identity in Cursor or Claude.",
-    ),
-    (
-        "What is the primary integration path?",
-        "ensure_avatar → POST /hybrid/prepare → your LLM → POST /hybrid/complete. "
-        "See the sidecar integration guide and npm run smoke:hybrid.",
-    ),
-    (
-        "Is SoulOS free and open source?",
-        "Yes. The kernel, SDK, Studio, SoulPacks, and examples are MIT-licensed. "
-        "The project site is free on GitHub Pages and synced from the same repository.",
-    ),
-    (
-        "What are SoulPacks?",
-        "SoulPacks are first-party MIT persona packages in packs/soulpacks/. "
-        "List them with GET /v1/soulpacks and import with POST /v1/avatars/import-soulpack, "
-        "or use the Studio SoulPacks tab.",
-    ),
-]
+# Pack count is filled at build time from packs/soulpacks/catalog.json.
+
+
+def _faq_items() -> list[tuple[str, str]]:
+    pack_count = len(_load_soulpack_catalog())
+    return [
+        (
+            "What is SoulOS?",
+            "SoulOS is an open-source identity and episodic memory sidecar for AI agents. "
+            "It provides HEXACO MSV personality, pgvector memory, and a hybrid prepare/complete "
+            "API so your existing LLM keeps generation.",
+        ),
+        (
+            "When should I use SoulOS?",
+            "Use SoulOS when you need persistent persona beyond a static system prompt, "
+            "episodic memory across sessions, a hybrid sidecar next to Bedrock/OpenAI/LiteLLM, "
+            "MCP tools for memory and identity in Cursor or Claude, or ready MIT SoulPack personas "
+            "(travel, sales, tutor, support, and more).",
+        ),
+        (
+            "What is the primary integration path?",
+            "ensure_avatar → POST /hybrid/prepare → your LLM → POST /hybrid/complete. "
+            "See the sidecar integration guide and npm run smoke:hybrid.",
+        ),
+        (
+            "Is SoulOS free and open source?",
+            "Yes. The kernel, SDK, Studio, SoulPacks, and examples are MIT-licensed. "
+            "The project site is free on GitHub Pages and synced from the same repository.",
+        ),
+        (
+            "What are SoulPacks?",
+            f"SoulPacks are {pack_count} first-party MIT persona packages in packs/soulpacks/ "
+            "(travel, SDR, tutor, tech support, developer coach, exec assistant, research, "
+            "customer success, security, PM, data, recruiter, content, and more). "
+            "List with GET /v1/soulpacks, import with POST /v1/avatars/import-soulpack, "
+            "or use the Studio SoulPacks tab.",
+        ),
+        (
+            "Where can I browse SoulPacks?",
+            "On the GitHub Pages catalog at /soulpacks/ — search by name, role, or tag, "
+            "then open a detail page for SOUL, identity, style, and a copy-paste import example. "
+            "Each pack is also listed in the site sitemap for crawlers.",
+        ),
+    ]
 
 
 def _ensure_base(base: str) -> str:
@@ -80,7 +94,7 @@ def _safe_http_url(url: str) -> str:
 
 def _faq_html() -> str:
     items = []
-    for question, answer in FAQ_ITEMS:
+    for question, answer in _faq_items():
         items.append(
             f"""
           <details class="faq-item">
@@ -101,13 +115,14 @@ def _faq_json_ld() -> dict:
                 "name": question,
                 "acceptedAnswer": {"@type": "Answer", "text": answer},
             }
-            for question, answer in FAQ_ITEMS
+            for question, answer in _faq_items()
         ],
     }
 
 
 def _home(base: str, adopters: list[dict]) -> str:
     adopter_cards = []
+    pack_count = len(_load_soulpack_catalog())
     for a in adopters:
         href = escape(_safe_http_url(str(a.get("url", ""))), quote=True)
         name = escape(str(a.get("name", "")))
@@ -178,7 +193,7 @@ def _home(base: str, adopters: list[dict]) -> str:
           <article class="path-tile">
             <a href="{base}soulpacks/">
               <h3>SoulPacks</h3>
-              <p>First-party MIT personas — import, deploy, or author your own pack.</p>
+              <p>{pack_count} first-party MIT personas — browse, search, and import ready roles.</p>
             </a>
           </article>
           <article class="path-tile">
@@ -343,6 +358,28 @@ def _soulpack_detail(base: str, entry: dict) -> str:
         active="soulpacks",
         path=f"soulpacks/{pid}/",
         body=body,
+        json_ld=[
+            {
+                "@context": "https://schema.org",
+                "@type": "CreativeWork",
+                "name": str(manifest.get("name") or entry.get("name") or pid),
+                "alternateName": pid,
+                "description": (
+                    f"{role}. First-party MIT SoulPack for SoulOS hybrid sidecar."
+                    if role
+                    else f"SoulOS SoulPack {pid}"
+                ),
+                "license": "https://spdx.org/licenses/MIT.html",
+                "url": absolute_url(base, f"soulpacks/{pid}/"),
+                "isPartOf": {
+                    "@type": "CollectionPage",
+                    "name": "SoulOS SoulPacks",
+                    "url": absolute_url(base, "soulpacks/"),
+                },
+                "keywords": tags,
+                "codeRepository": gh,
+            }
+        ],
     )
 
 
@@ -508,10 +545,46 @@ curl -s -X POST http://localhost:8000/v1/avatars/import-soulpack \\
     return page(
         base=base,
         title="SoulPacks — MIT persona packages — SoulOS",
-        description="Browse and understand SoulOS SoulPacks: first-party MIT personas with detail pages, search, and import examples.",
+        description=(
+            f"Browse and understand {count} SoulOS SoulPacks: first-party MIT personas "
+            "with search, detail pages, and import examples for hybrid sidecar agents."
+        ),
         active="soulpacks",
         path="soulpacks/",
         body=body,
+        json_ld=[
+            {
+                "@context": "https://schema.org",
+                "@type": "CollectionPage",
+                "name": "SoulOS SoulPacks",
+                "description": (
+                    f"{count} first-party MIT persona packages for SoulOS — "
+                    "browse, search, and import ready agent roles."
+                ),
+                "url": absolute_url(base, "soulpacks/"),
+                "isPartOf": {
+                    "@type": "WebSite",
+                    "name": "SoulOS",
+                    "url": absolute_url(base, ""),
+                },
+                "mainEntity": {
+                    "@type": "ItemList",
+                    "numberOfItems": count,
+                    "itemListElement": [
+                        {
+                            "@type": "ListItem",
+                            "position": i + 1,
+                            "name": str(p.get("name") or p.get("id")),
+                            "url": absolute_url(
+                                base, f"soulpacks/{str(p.get('id', '')).strip()}/"
+                            ),
+                        }
+                        for i, p in enumerate(catalog)
+                        if str(p.get("id", "")).strip()
+                    ],
+                },
+            }
+        ],
     )
 
 

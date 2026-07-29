@@ -47,7 +47,12 @@ RFC 7807 Problem Details (`application/problem+json`): `type`, `title`, `status`
 
 Codes: `BOT_NOT_FOUND`, `ACCESS_DENIED`, `INFERENCE_DOWN`, `MEMORY_DIM_MISMATCH`, `SOUL_INVALID`, `READY_DEGRADED`, `SOULPACK_NOT_FOUND`, `SOULPACK_LICENSE_REJECTED`, `SOULPACK_INVALID`.
 
-SoulPacks (MIT in-repo personas): `GET /v1/soulpacks`, `POST /v1/avatars/import-soulpack` — see docs/guides/persona-packs.md.
+SoulPacks (MIT in-repo personas): **23** packs — `GET /v1/soulpacks`, `POST /v1/avatars/import-soulpack`.
+
+Browse: https://mziqudhd92.github.io/soul-os/soulpacks/ (search + detail pages; sitemap includes each `/soulpacks/{id}/`).  
+Guide: docs/guides/persona-packs.md · Catalog mirror: https://mziqudhd92.github.io/soul-os/data/soulpacks/catalog.json
+
+Vertical examples: travel-agent, sales-sdr, tutor, tech-support, developer, friendly-friend, warrior, exec-assistant, research-analyst, customer-success, security-coach, product-manager, data-analyst, recruiter, content-marketer, onboarding-coach, accessibility-editor, meeting-notes (plus support-agent, companion, dev-twin, customer-front, inventory).
 
 ## Identity model
 

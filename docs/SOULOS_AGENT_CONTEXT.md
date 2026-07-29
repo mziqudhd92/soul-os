@@ -26,11 +26,13 @@ Boot: `docker compose up --build` (kernel :8000, studio :8765, Postgres, Ollama)
 | Use case | Use |
 |----------|-----|
 | **Existing LLM app (recommended)** | Hybrid sidecar: `ensure_avatar → prepare → your LLM → complete` |
+| Ready vertical persona | **SoulPacks** — `GET /v1/soulpacks`, `POST /v1/avatars/import-soulpack` · browse https://mziqudhd92.github.io/soul-os/soulpacks/ |
 | Cursor / Claude IDE agent | **MCP** at `/mcp/sse` |
 | App with SoulOS-owned chat stream | **REST** `POST /chat/generate` or SDK |
 | Hand-tune `.soul.json` | **Soul Studio** (`pip install soulos-studio`) |
 
 Identity model: [guides/identity-model.md](guides/identity-model.md)
+SoulPacks: [guides/persona-packs.md](guides/persona-packs.md) (23 MIT packs)
 Multi-agent (Phase A): [guides/multi-agent-teams.md](guides/multi-agent-teams.md)
 Observability: [guides/observability.md](guides/observability.md)
 Architecture: [guides/architecture-overview.md](guides/architecture-overview.md)
