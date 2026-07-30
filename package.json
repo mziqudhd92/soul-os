@@ -44,6 +44,8 @@
     "build:sdk": "npm run build -w @soulos/sdk",
     "seed": "python3 scripts/seed.py",
     "smoke:hybrid": "bash scripts/hybrid-smoke.sh",
+    "demo": "bash scripts/demo-hybrid-cli.sh --simulate",
+    "demo:record": "bash scripts/record-demo-gif.sh",
     "doc:gen": "python3 scripts/doc-gen/generate_docs.py",
     "doc:check": "python3 scripts/doc-gen/check_hybrid_docs.py && python3 scripts/doc-gen/check_doc_completeness.py && (test -x packages/soulos-core/.venv/bin/python && packages/soulos-core/.venv/bin/python scripts/doc-gen/check_openapi_drift.py || python3 scripts/doc-gen/check_openapi_drift.py)",
     "licenses:gen": "python3 scripts/generate-dependency-licenses.py",

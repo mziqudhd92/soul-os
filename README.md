@@ -12,6 +12,26 @@ Give your bot a **soul file** instead of a fragile system prompt. Primary path: 
 
 **Project site** · [GitHub Pages](https://mziqudhd92.github.io/soul-os/) · [Tutorials](https://mziqudhd92.github.io/soul-os/tutorials/) · [Python bot guide](docs/guides/python-bot.md) · [Full docs](docs/README.md) · [FAQ](#faq)
 
+## Demo
+
+Hybrid flow in ~15 seconds — import a SoulPack, `prepare` a system prompt, your LLM replies, then `complete` writes memory:
+
+<p align="center">
+  <img src="docs/assets/demo-hybrid.gif" alt="SoulOS hybrid CLI demo: import SoulPack → prepare → LLM → complete" width="720"/>
+</p>
+
+```bash
+# Watch locally (no Docker)
+./scripts/demo-hybrid-cli.sh --simulate
+# or: npm run demo
+
+# Against a running sidecar kernel
+docker compose -f docker-compose.sidecar.yml --profile bridge-mock up -d
+./scripts/demo-hybrid-cli.sh
+```
+
+Re-record the GIF (needs [asciinema](https://asciinema.org/) + [agg](https://github.com/asciinema/agg)): `npm run demo:record`
+
 ## Trust & adoption
 
 SoulOS is maintained in the open so you can inspect, fork, and self-host before you depend on it.
