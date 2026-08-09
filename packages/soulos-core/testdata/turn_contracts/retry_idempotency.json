@@ -1,0 +1,34 @@
+{
+  "name": "retry_idempotency",
+  "contract": "booking.v1.json",
+  "turns": [
+    {
+      "action": "prepare",
+      "session_id": "id-1",
+      "query": "book",
+      "expect_step": "collect_dates"
+    },
+    {
+      "action": "complete",
+      "session_id": "id-1",
+      "summary": "dates",
+      "filled_slots": { "check_in": "2026-09-01", "check_out": "2026-09-05" },
+      "intent": "provide_dates",
+      "idempotency_key": "same-key",
+      "expect": "allow",
+      "expect_step": "confirm"
+    },
+    {
+      "action": "complete",
+      "session_id": "id-1",
+      "summary": "dates retry",
+      "filled_slots": { "check_in": "2026-09-01", "check_out": "2026-09-05" },
+      "intent": "provide_dates",
+      "idempotency_key": "same-key",
+      "expected_version_override": 0,
+      "expect": "allow",
+      "expect_step": "confirm",
+      "expect_version": 1
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "name": "try_everything",
+  "contract": "booking.v1.json",
+  "turns": [
+    {
+      "action": "prepare",
+      "session_id": "try-1",
+      "query": "fuzz",
+      "expect_step": "collect_dates"
+    },
+    {
+      "action": "complete",
+      "session_id": "try-1",
+      "summary": "bad type",
+      "filled_slots": { "check_in": "Tuesday", "check_out": "2026-09-05" },
+      "intent": "provide_dates",
+      "idempotency_key": "try-a",
+      "expect": "deny",
+      "expect_code": "TURN_CONTRACT_VIOLATION"
+    },
+    {
+      "action": "complete",
+      "session_id": "try-1",
+      "summary": "ok then null clear demo via unit-equivalent",
+      "filled_slots": { "check_in": "2026-09-01", "check_out": "2026-09-05" },
+      "intent": "provide_dates",
+      "idempotency_key": "try-b",
+      "expect": "allow",
+      "expect_step": "confirm"
+    },
+    {
+      "action": "complete",
+      "session_id": "try-1",
+      "summary": "oversized",
+      "filled_slots": { "payment_method": "x" },
+      "intent": "confirm_booking",
+      "idempotency_key": "try-c",
+      "expect": "deny",
+      "expect_code": "TURN_CONTRACT_VIOLATION",
+      "note": "missing user_agreed_to_terms"
+    }
+  ]
+}

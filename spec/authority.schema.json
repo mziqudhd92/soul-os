@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://soulos.dev/schemas/authority.schema.json",
+  "title": "SoulOS Flow Authority",
+  "type": "object",
+  "required": ["authority", "canonical_deploy"],
+  "additionalProperties": false,
+  "properties": {
+    "authority": { "type": "string", "minLength": 1 },
+    "canonical_deploy": { "type": "string", "minLength": 1 },
+    "forbidden_surfaces": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "notes": { "type": "string" }
+  }
+}

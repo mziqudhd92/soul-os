@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { SoulHybridClient } from "../src/hybrid";
+import { mergeContractIntoSystemPrompt, SoulHybridClient } from "../src/hybrid";
 
 describe("SoulHybridClient", () => {
   afterEach(() => {
@@ -70,5 +70,51 @@ describe("SoulHybridClient", () => {
       session_id: "sess-1",
       reflect: false,
     });
+  });
+
+  it("mergeContractIntoSystemPrompt appends appendix", () => {
+    const merged = mergeContractIntoSystemPrompt({
+      bot_id: "b",
+      identity: {},
+      memories: [],
+      inner_monologue: "",
+      system_prompt: "You are a concierge.",
+      contract_context: {
+        expected_step: "collect_dates",
+        missing_slots: [],
+        filled_slots: {},
+        reject_tokens: [],
+        ui_progress: { step_index: 0, step_count: 1, label: "collect_dates" },
+        allowed_intents: [],
+        prompt_appendix: "[SYSTEM DIRECTIVE: Step collect_dates.]",
+        turn_version: 0,
+      },
+    });
+    expect(merged).toContain("You are a concierge.");
+    expect(merged).toContain("[SYSTEM DIRECTIVE");
+  });
+
+  it("completeTurn auto-generates idempotencyKey in contract mode", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        status: "success",
+        turn: { step: "confirm", turn_version: 1 },
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const client = new SoulHybridClient({
+      baseUrl: "http://kernel.test",
+      botId: "bot-1",
+    });
+    await client.completeTurn("summary", {
+      sessionId: "s1",
+      reflect: false,
+      filledSlots: { check_in: "2026-09-01" },
+      expectedVersion: 0,
+    });
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.idempotency_key).toBeTruthy();
+    expect(body.expected_version).toBe(0);
   });
 });

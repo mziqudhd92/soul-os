@@ -7,7 +7,7 @@
   "codeRepository": "https://github.com/mziqudhd92/soul-os",
   "url": "https://mziqudhd92.github.io/soul-os/",
   "license": "https://spdx.org/licenses/MIT.html",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "programmingLanguage": ["Python", "TypeScript"],
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (Docker)",

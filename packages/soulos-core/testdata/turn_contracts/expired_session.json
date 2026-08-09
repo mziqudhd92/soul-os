@@ -1,0 +1,17 @@
+{
+  "name": "expired_session",
+  "contract": "booking.v1.json",
+  "turns": [
+    {
+      "action": "complete",
+      "session_id": "missing-session",
+      "summary": "no prepare",
+      "filled_slots": {},
+      "expected_version_override": 0,
+      "idempotency_key": "exp-1",
+      "expect": "deny",
+      "expect_code": "TURN_SESSION_EXPIRED",
+      "expect_status": 404
+    }
+  ]
+}

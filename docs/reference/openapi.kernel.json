@@ -572,7 +572,7 @@
     "/memory/purge-expired": {
       "post": {
         "summary": "Purge Expired Memories Route",
-        "description": "Delete session-scoped memories past MEMORY_SESSION_TTL_SECONDS for one bot.",
+        "description": "Delete session-scoped memories and turn_sessions past MEMORY_SESSION_TTL_SECONDS.",
         "operationId": "purge_expired_memories_route_memory_purge_expired_post",
         "parameters": [
           {
@@ -1363,6 +1363,78 @@
             "type": "boolean",
             "title": "Reflect Async",
             "default": false
+          },
+          "filled_slots": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filled Slots"
+          },
+          "intent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intent"
+          },
+          "assistant_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assistant Text"
+          },
+          "expected_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
+          "advance": {
+            "type": "boolean",
+            "title": "Advance",
+            "default": true
+          },
+          "expected_step": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Step"
           }
         },
         "type": "object",

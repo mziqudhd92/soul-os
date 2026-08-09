@@ -2,7 +2,9 @@
 
 from typing import Any
 
-from pydantic import AliasChoices, BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field, field_validator
+
+from runtime.turn_contract import TurnContractError, validate_filled_slots_bounds
 
 
 class MemoryIngest(BaseModel):
@@ -64,6 +66,24 @@ class HybridCompleteRequest(BaseModel):
     session_id: str | None = None
     reflect: bool = True
     reflect_async: bool = False
+    filled_slots: dict[str, Any] | None = None
+    intent: str | None = None
+    assistant_text: str | None = None
+    expected_version: int | None = None
+    idempotency_key: str | None = None
+    advance: bool = True
+    expected_step: str | None = None
+
+    @field_validator("filled_slots")
+    @classmethod
+    def _bounds_filled_slots(cls, value: dict[str, Any] | None) -> dict[str, Any] | None:
+        if value is None:
+            return value
+        try:
+            validate_filled_slots_bounds(value)
+        except TurnContractError as e:
+            raise ValueError(e.detail) from e
+        return value
 
 
 class EnsureAvatarRequest(BaseModel):

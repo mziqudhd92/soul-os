@@ -1,0 +1,43 @@
+{
+  "name": "backtrack",
+  "contract": "booking.v1.json",
+  "turns": [
+    {
+      "action": "prepare",
+      "session_id": "bt-1",
+      "query": "book",
+      "expect_step": "collect_dates"
+    },
+    {
+      "action": "complete",
+      "session_id": "bt-1",
+      "summary": "dates",
+      "filled_slots": { "check_in": "2026-09-01", "check_out": "2026-09-05" },
+      "intent": "provide_dates",
+      "idempotency_key": "bt-a",
+      "expect": "allow",
+      "expect_step": "confirm"
+    },
+    {
+      "action": "complete",
+      "session_id": "bt-1",
+      "summary": "terms",
+      "filled_slots": { "user_agreed_to_terms": true, "payment_method": "card" },
+      "advance": false,
+      "idempotency_key": "bt-b",
+      "expect": "allow",
+      "expect_step": "confirm"
+    },
+    {
+      "action": "complete",
+      "session_id": "bt-1",
+      "summary": "edit",
+      "filled_slots": {},
+      "intent": "edit_dates",
+      "idempotency_key": "bt-c",
+      "expect": "allow",
+      "expect_step": "collect_dates",
+      "expect_slots_absent": ["user_agreed_to_terms", "payment_method"]
+    }
+  ]
+}

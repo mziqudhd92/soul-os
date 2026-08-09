@@ -1,0 +1,40 @@
+{
+  "id": "booking.v1",
+  "initial_step": "collect_dates",
+  "reject_tokens": ["IGNORE PREVIOUS", "jailbreak"],
+  "steps": [
+    {
+      "id": "collect_dates",
+      "required_slots": ["check_in", "check_out"],
+      "slot_schemas": {
+        "check_in": { "type": "string", "format": "date" },
+        "check_out": { "type": "string", "format": "date" }
+      },
+      "clear_slots_on_entry": ["user_agreed_to_terms", "payment_method"],
+      "allowed_intents": ["provide_dates", "clarify", "cancel"],
+      "transitions": { "cancel": "cancelled" },
+      "next": "confirm",
+      "completion": { "all_required_slots": true }
+    },
+    {
+      "id": "confirm",
+      "required_slots": ["user_agreed_to_terms"],
+      "slot_schemas": {
+        "check_in": { "type": "string", "format": "date" },
+        "check_out": { "type": "string", "format": "date" },
+        "user_agreed_to_terms": { "type": "boolean" },
+        "payment_method": { "type": "string" }
+      },
+      "allowed_intents": ["confirm_booking", "edit_dates", "cancel"],
+      "transitions": {
+        "confirm_booking": "completed",
+        "edit_dates": "collect_dates",
+        "cancel": "cancelled"
+      },
+      "next": "completed",
+      "completion": { "all_required_slots": true }
+    },
+    { "id": "completed" },
+    { "id": "cancelled" }
+  ]
+}

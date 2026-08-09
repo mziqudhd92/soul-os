@@ -33,6 +33,7 @@ Boot: `docker compose up --build` (kernel :8000, studio :8765, Postgres, Ollama)
 
 Identity model: [guides/identity-model.md](guides/identity-model.md)
 SoulPacks: [guides/persona-packs.md](guides/persona-packs.md) (23 MIT packs)
+Turn contracts (optional reliability): [guides/turn-contracts.md](guides/turn-contracts.md) · tutorials [my-first-turn-contract](tutorials/my-first-turn-contract.md) / [production](tutorials/turn-contracts-production.md)
 Multi-agent (Phase A): [guides/multi-agent-teams.md](guides/multi-agent-teams.md)
 Observability: [guides/observability.md](guides/observability.md)
 Architecture: [guides/architecture-overview.md](guides/architecture-overview.md)

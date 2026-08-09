@@ -95,6 +95,29 @@ async def init_database() -> None:
                 "WHERE external_key IS NOT NULL;"
             )
         )
+        await conn.execute(
+            text(
+                """
+                CREATE TABLE IF NOT EXISTS turn_sessions (
+                    bot_id UUID NOT NULL REFERENCES bots(id) ON DELETE CASCADE,
+                    session_id VARCHAR(128) NOT NULL,
+                    current_step TEXT NOT NULL,
+                    slots JSONB NOT NULL DEFAULT '{}'::jsonb,
+                    turn_version INTEGER NOT NULL DEFAULT 0,
+                    last_idempotency_key VARCHAR(128),
+                    last_success_response JSONB,
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (bot_id, session_id)
+                );
+                """
+            )
+        )
+        await conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS idx_turn_sessions_updated_at "
+                "ON turn_sessions (updated_at);"
+            )
+        )
     await engine.dispose()
     logger.info("Database initialized successfully.")
 

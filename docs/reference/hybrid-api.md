@@ -92,14 +92,29 @@ Single pre-turn call (replaces `GET /bot/{id}/identity` + `POST /memory/retrieve
     "current_msv": { ... }
   },
   "memories": ["string", ...],
-  "system_prompt": "ready-to-use system string",
-  "inner_monologue": "string"
+  "system_prompt": "ready-to-use system string (persona only)",
+  "inner_monologue": "string",
+  "contract_context": {
+    "contract_id": "booking.v1",
+    "expected_step": "collect_dates",
+    "missing_slots": ["check_in", "check_out"],
+    "filled_slots": {},
+    "reject_tokens": ["IGNORE PREVIOUS"],
+    "ui_progress": { "step_index": 0, "step_count": 2, "label": "collect_dates" },
+    "allowed_intents": ["provide_dates", "clarify", "cancel"],
+    "prompt_appendix": "[SYSTEM DIRECTIVE: ...]",
+    "turn_version": 0
+  }
 }
 ```
 
+`contract_context` is present only when the avatar `runtime_config.turn_contract` is set **and** `session_id` is provided. The kernel does **not** append `prompt_appendix` into `system_prompt` — use SDK `merge_contract_into_system_prompt` / `mergeContractIntoSystemPrompt` or place the appendix in a separate message.
+
+Schema: [spec/turn-contract.schema.json](../../spec/turn-contract.schema.json) · Guide: [turn-contracts.md](../guides/turn-contracts.md).
+
 ## `POST /hybrid/complete`
 
-Post-turn ingest + optional MSV reflect.
+Post-turn ingest + optional MSV reflect. When a turn contract is active for the session, also validates slots / advances the state machine.
 
 **Request**
 
@@ -110,15 +125,43 @@ Post-turn ingest + optional MSV reflect.
   "user_message": "original user message for reflect",
   "session_id": "optional-session-uuid",
   "reflect": true,
-  "reflect_async": true
+  "reflect_async": true,
+  "filled_slots": { "check_in": "2026-09-01", "check_out": "2026-09-05" },
+  "intent": "provide_dates",
+  "assistant_text": "optional — scanned for reject_tokens only",
+  "expected_version": 0,
+  "idempotency_key": "uuid-per-logical-turn",
+  "advance": true,
+  "expected_step": "collect_dates"
 }
 ```
 
+Contract fields are optional. When `runtime_config.turn_contract` is set and `session_id` is present:
+
+- `expected_version` is **required** (echo `contract_context.turn_version` from prepare).
+- `idempotency_key` is recommended; SDKs auto-generate one in contract mode. Matching key after success returns the **cached** 200 body (no false 409 on retries).
+- `filled_slots` uses null-delete semantics (`"slot": null` removes the key). Max payload 64 KiB, depth 3, 50 keys (enforced in request validation and resolver).
+- Hard violations do **not** ingest or advance.
+- Session turn state lives in `turn_sessions` (created on prepare). TTL matches `MEMORY_SESSION_TTL_SECONDS` (lazy expire + `POST /memory/purge-expired`).
+
 **Response**
 
-- **200** — sync reflect: `{ "status": "success", "ingested": true, "reflect": "completed", "current_msv": { ... } }`
-- **202** — async reflect: `{ "status": "accepted", "ingested": true, "reflect": "async", "bot_id": "uuid" }`
-- **200** — `reflect: false`: `{ "status": "success", "ingested": true, "reflect": "skipped" }`
+- **200** — sync reflect: `{ "status": "success", "ingested": true, "reflect": "completed", "current_msv": { ... }, "turn": { ... } }`
+- **202** — async reflect: `{ "status": "accepted", "ingested": true, "reflect": "async", "bot_id": "uuid", "turn": { ... } }`
+- **200** — `reflect: false`: `{ "status": "success", "ingested": true, "reflect": "skipped", "turn": { ... } }`
+
+`turn` (when contract active): `{ "step", "slots", "advanced", "turn_version" }`.
+
+**Contract errors** (`application/problem+json`)
+
+| HTTP | Code | Host action |
+|------|------|-------------|
+| 422 | `TURN_CONTRACT_VIOLATION` | Use `remedial_prompt_hint` / `invalid_slots` / `missing_slots`; re-prompt |
+| 422 | `TURN_REJECT_TOKEN` | Rewrite assistant text without reject tokens |
+| 422 | `TURN_STEP_MISMATCH` | Align `expected_step` with prepare |
+| 409 | `TURN_STATE_STALE` | Re-`prepare`; retry with fresh version + **new** idempotency key |
+| 404 | `TURN_SESSION_EXPIRED` | Reset local flow; `prepare` to recreate session at step 0 |
+
 
 ## Memory with `session_id`
 
@@ -165,7 +208,7 @@ Failed requests return `Content-Type: application/problem+json`:
 }
 ```
 
-Common codes: `BOT_NOT_FOUND`, `ACCESS_DENIED`, `INFERENCE_DOWN`, `MEMORY_DIM_MISMATCH`, `SOUL_INVALID`, `READY_DEGRADED`.
+Common codes: `BOT_NOT_FOUND`, `ACCESS_DENIED`, `INFERENCE_DOWN`, `MEMORY_DIM_MISMATCH`, `SOUL_INVALID`, `READY_DEGRADED`, `TURN_CONTRACT_VIOLATION`, `TURN_STATE_STALE`, `TURN_SESSION_EXPIRED`, `TURN_REJECT_TOKEN`.
 
 OpenAPI: `/openapi.json` · committed artifact: [openapi.kernel.json](openapi.kernel.json)
 

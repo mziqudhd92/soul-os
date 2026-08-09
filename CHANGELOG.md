@@ -1,35 +1,42 @@
 # Changelog
 
-All notable changes to SoulOS are documented here. Version **0.2.0** focuses on hybrid sidecar DX, RFC 7807 errors, OpenAPI-locked SDK contract, and OTel tracing.
+All notable changes to SoulOS are documented here.
 
 ## [Unreleased]
 
-### Removed
-
-- **Third-party persona registry import** — removed external registry bridge, gallery, examples, and docs.
-- Switched from ClawSouls to SoulPacks because of licensing issues (upstream persona prose / derivative-work obligations); SoulPacks stay MIT in-repo.
+## [0.3.0] — 2026-08-09
 
 ### Added
 
-- **Platform hygiene (roadmap P0–P2)** — OTel duration metrics + ops guide; session memory TTL (`MEMORY_SESSION_TTL_SECONDS`, `POST /memory/purge-expired`); gateway Redis-backed rate limits (`REDIS_URL`); Helm chart (`deploy/helm/soulos`); LangChain hybrid example; TypeScript SDK vitest suite; architecture overview + non-goals docs
-- **Vertical SoulPacks** — 23 MIT packs spanning travel, sales, tutor, tech-support, developer coach, friend, warrior, exec, research, CSM, security, PM, data, recruiter, content, onboarding, a11y, meeting-notes; Pages catalog with search + detail pages
-- **Multi-agent teams (Phase A)** — app-orchestrated handoffs via `soulos.handoff` (`role_external_key`, `handoff_to`), `SoulHybridClient.ingest_memory`, packs `customer-front` / `inventory`, guide + `examples/multi-agent-handoff/`
-- **SoulPacks (M1–M5)** — in-repo MIT packs (`packs/soulpacks/`), `GET /v1/soulpacks`, `POST /v1/avatars/import-soulpack`, Studio gallery, `soulos pack` CLI, `examples/soulpack-sidecar/`; plan: `docs/design/soulpacks-tdd-plan.md`
+- **Hybrid turn contracts** — optional reliability layer on the hybrid path (`runtime_config.turn_contract`):
+  - Steps, required slots, intent `transitions` + `next`, `clear_slots_on_entry`, null-delete slot patches
+  - `POST /hybrid/prepare` returns decoupled `contract_context` (`prompt_appendix`, `turn_version`, `ui_progress`, …) without mutating persona `system_prompt`
+  - `POST /hybrid/complete` validates `filled_slots` / `intent` / `assistant_text` reject tokens; optimistic `expected_version` with DB compare-and-set; `idempotency_key` replay (preserves 202)
+  - RFC 7807 codes: `TURN_CONTRACT_VIOLATION`, `TURN_REJECT_TOKEN`, `TURN_STEP_MISMATCH`, `TURN_STATE_STALE` (409), `TURN_SESSION_EXPIRED` (404) with `remedial_prompt_hint` / `invalid_slots`
+  - `turn_sessions` table; TTL aligned with `MEMORY_SESSION_TTL_SECONDS` (lazy expire + `POST /memory/purge-expired` / session delete)
+  - Payload bounds (64 KiB / depth 3 / 50 keys) at API boundary + resolver
+  - Schema [`spec/turn-contract.schema.json`](spec/turn-contract.schema.json); CI `npm run test:turn-contracts` (quiet / octoner / try_everything / backtrack / retry_idempotency / expired_session)
+  - SDKs: `merge_contract_into_system_prompt` / `mergeContractIntoSystemPrompt`; contract-mode auto `idempotency_key`
+  - Docs: [turn-contracts.md](docs/guides/turn-contracts.md), tutorials [my-first-turn-contract](docs/tutorials/my-first-turn-contract.md) / [production](docs/tutorials/turn-contracts-production.md), [authority.md](docs/deployment/authority.md) + `deploy/authority.json`
+- **Platform hygiene (roadmap P0–P2)** — OTel duration metrics + ops guide; session memory TTL; gateway Redis-backed rate limits; Helm chart (`deploy/helm/soulos`); LangChain hybrid example; TypeScript SDK vitest suite; architecture overview + non-goals docs
+- **Vertical SoulPacks** — 23 MIT packs; Pages catalog with search + detail pages
+- **Multi-agent teams (Phase A)** — app-orchestrated handoffs via `soulos.handoff`, packs `customer-front` / `inventory`, guide + examples
+- **SoulPacks (M1–M5)** — in-repo MIT packs, `GET /v1/soulpacks`, `POST /v1/avatars/import-soulpack`, Studio gallery, `soulos pack` CLI
 
 ### Fixed
 
-- **CI / MCP pin** — constrain `mcp>=1.0,<2` so kernel import does not break on mcp 2.0 (`list_resources` API change)
-- **SoulPacks hardening** — reject `files` / pack_id path traversal; document unversioned singleton layout + MSV precedence; atomic `export_pack` writes
-- **GitHub Pages verify quoting** — heredoc so FAQ/`id="faq"` checks work in CI
+- Idempotent async `complete` replay preserves HTTP 202; hybrid test module deduplicated
+- CI / MCP pin (`mcp>=1.0,<2`); SoulPacks path traversal hardening; GitHub Pages verify quoting
 
 ### Changed
 
-- **Adopters** — added [Getbyliner](https://getbyliner.com/) to `docs/adopters.md` / `adopters.json`, llms indexes, schema.org mentions, and Pages adopters section
-- **AEO / GEO / SEO** — SoulPacks catalog (23 packs) reflected in `llms.txt` / `llms-full.txt`, `schema/project.json`, homepage FAQPage, agent-discovery; Pages SoulPacks `CollectionPage`/`ItemList` + per-pack `CreativeWork` JSON-LD; sitemap includes pack detail URLs
-- **Project site** — dedicated `/soulpacks/` page (use + author), nav/home/docs/get-started updates, catalog mirror at `data/soulpacks/catalog.json`
-- MIT `license` + classifiers on all Python `pyproject.toml` packages
-- Generated dependency license inventory (`docs/dependency-licenses.generated.md`) checked in CI
-- CONTRIBUTING DCO note; OFL font vendoring note in `THIRD_PARTY_NOTICES.md`
+- Adopters (incl. Getbyliner); AEO/GEO/SEO + SoulPacks catalog mirrors; project site `/soulpacks/`; MIT classifiers; dependency license inventory in CI
+- OpenAPI artifact regenerated for hybrid contract fields
+- Version bump to **0.3.0** (kernel, SDKs, schema, docs indexes)
+
+### Removed
+
+- Third-party persona registry import (ClawSouls bridge); SoulPacks remain MIT in-repo
 
 ## [0.2.0] — 2026-07-09
 
@@ -38,40 +45,8 @@ All notable changes to SoulOS are documented here. Version **0.2.0** focuses on 
 - **Hybrid-first docs** — README, `llms.txt`, and agent context lead with `ensure → prepare → LLM → complete`
 - **RFC 7807 Problem Details** on `/ready`, hybrid, avatars, memory (`application/problem+json`, stable `code` field)
 - **OpenAPI artifact** — `docs/reference/openapi.kernel.json` with CI drift check
-- **`SoulHybridClient.run_turn()`** — thin Python wrapper over prepare/complete with Problem Details errors
-- **`examples/fastapi-hybrid/`** — reference app with mock LLM and `GET /healthz`
-- **OpenTelemetry spans** on hybrid prepare/complete (OpenInference-aligned attributes)
-- **`persona_mode: simple`** — warmth/rigor/caution sliders → HEXACO mapping
-- **Memory APIs** — `POST /memory/forget`, `DELETE /memory/session/{bot_id}/{session_id}`
-- **Studio turn inspector** — export last prepare payload as JSON/curl
-- **`scripts/hybrid-smoke.sh`** / `npm run smoke:hybrid`
-- **Identity model guide** — `docs/guides/identity-model.md`
-- **Compatibility matrix** — `docs/reference/compatibility.md`
-- **Adopter playbooks** — SignalPR hybrid, Aeterna memory
-- **Eval stub** — `scripts/soulos-eval.py`
-- **MCP security** — full blast-radius table in SECURITY.md
+- Soul Studio tutorials path, sidecar compose, dual-process chat telemetry
 
 ### Changed
 
-- **Breaking for error parsers:** clients that only read `{detail}` must also handle Problem Details shape (`type`, `title`, `status`, `detail`, `code`)
-- `/ready` returns 503 Problem Details when degraded (was JSON body with 503)
-- Embedder dimension mismatch returns 422 `MEMORY_DIM_MISMATCH` (was 500)
-
-### Migration
-
-```python
-# Before
-except httpx.HTTPStatusError as e:
-    detail = e.response.json()["detail"]
-
-# After
-body = e.response.json()
-code = body.get("code", "UNKNOWN")
-detail = body.get("detail", str(body))
-```
-
-Hybrid API request/response shapes are stable for v0.2; no version header required yet.
-
-## [0.1.0] — prior
-
-Initial open-source release: kernel, Studio, MCP, full-chat SSE, hybrid sidecar API.
+- Hybrid sidecar positioned as primary integration path

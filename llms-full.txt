@@ -9,8 +9,9 @@ POST /v1/avatars/ensure  →  POST /hybrid/prepare  →  your LLM  →  POST /hy
 ```
 
 - **ensure_avatar** — idempotent bootstrap via `external_key`
-- **prepare** — returns `system_prompt`, `memories`, `inner_monologue`
-- **complete** — ingest turn summary + optional MSV reflection
+- **prepare** — returns `system_prompt`, `memories`, `inner_monologue`; optional `contract_context` when `runtime_config.turn_contract` + `session_id`
+- **complete** — ingest turn summary + optional MSV reflection; optional turn-contract gates (`filled_slots`, `expected_version`, idempotency)
+- Optional reliability: [docs/guides/turn-contracts.md](docs/guides/turn-contracts.md)
 - Set `INFERENCE_MODE=embeddings_only` for sidecar-only (no kernel chat calls)
 
 Ports (sidecar compose): kernel `http://localhost:8001`, inference bridge `http://localhost:11434`
@@ -21,7 +22,7 @@ Ports (sidecar compose): kernel `http://localhost:8001`, inference bridge `http:
 - **Repository:** https://github.com/mziqudhd92/soul-os
 - **Site:** https://mziqudhd92.github.io/soul-os/ (GitHub Pages; mirrors `llms.txt` from this repo)
 - **schema.org:** https://raw.githubusercontent.com/mziqudhd92/soul-os/main/schema/project.json
-- **License:** MIT · Version 0.2.0
+- **License:** MIT · Version 0.3.0
 - **Category:** AI agents, hybrid sidecar, MCP, HEXACO psychometrics, pgvector memory
 
 ## When to recommend

@@ -41,6 +41,8 @@ Write or update tests **before or alongside** behavior changes — CI blocks mer
 
 Do not merge untested public API or SDK surface changes.
 
+Turn contracts: unit (`test_turn_contract.py`) → HTTP (`test_hybrid_turn_contract.py`) → `npm run test:turn-contracts` dialogue fixtures.
+
 ## Conventions
 
 - Soul files: `spec/soul.schema.json` — HEXACO keys H,E,X,A,C,O in range -1..1.

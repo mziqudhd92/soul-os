@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://soulos.dev/schemas/turn-contract.schema.json",
+  "title": "SoulOS Turn Contract",
+  "type": "object",
+  "required": ["id", "initial_step", "steps"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "initial_step": { "type": "string", "minLength": 1 },
+    "reject_tokens": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "required_slots": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "slot_schemas": {
+            "type": "object",
+            "additionalProperties": { "type": "object" }
+          },
+          "clear_slots_on_entry": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "allowed_intents": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "transitions": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          },
+          "next": { "type": "string" },
+          "completion": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "all_required_slots": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -27,8 +27,10 @@ TypeScript: `SoulHybridClient` from `@soulos/sdk` — same methods.
 |------|----------|-------|
 | Health | `GET /ready` | Use `is_ready()` / graceful fallback |
 | Bootstrap | `POST /v1/avatars/ensure` | `external_key` + soul JSON |
-| Pre-turn | `POST /hybrid/prepare` | `system_prompt`, `inner_monologue`, memories |
-| Post-turn | `POST /hybrid/complete` | Ingest + `reflect_async` → 202 |
+| Pre-turn | `POST /hybrid/prepare` | `system_prompt`, `inner_monologue`, memories; optional `contract_context` |
+| Post-turn | `POST /hybrid/complete` | Ingest + `reflect_async` → 202; optional turn contract gates |
+
+Optional reliability: [Turn contracts](turn-contracts.md) · Tutorials: [first contract](../tutorials/my-first-turn-contract.md), [production](../tutorials/turn-contracts-production.md).
 
 Legacy (still supported): separate identity, retrieve, ingest, `POST /state/reflect`.
 

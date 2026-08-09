@@ -9,6 +9,8 @@ Project site: **https://mziqudhd92.github.io/soul-os/** · Tutorials: **https://
 | # | Time | Tutorial | You will learn |
 |---|------|----------|----------------|
 | **1** | 15 min | **[My first sidecar](my-first-sidecar.md)** | `ensure → prepare → your LLM → complete` + memory on turn 2 |
+| **1b** | 20 min | **[My first turn contract](my-first-turn-contract.md)** | Optional slots/steps on hybrid; 422 recovery |
+| **1c** | 40 min | **[Turn contracts in production](turn-contracts-production.md)** | Backtrack, idempotency, 404/409, authority.json |
 | 2 | 25 min | [Python bot integration](../guides/python-bot.md) | Full-chat: soul + memory + `send_message` |
 | 3 | 10 min | [Kernel smoke test (curl)](../getting-started/quickstart.md#path-a) | Register soul, ingest memory, SSE chat without code |
 | 4 | 15 min | [Build your first soul (Wizard)](../../packages/soulos-studio/soulos_studio/content/tutorials/first-soul-wizard.md) | Create `.soul.json` in Studio without hand-editing JSON |
@@ -24,6 +26,8 @@ Project site: **https://mziqudhd92.github.io/soul-os/** · Tutorials: **https://
 | Tutorial | File |
 |----------|------|
 | **My first sidecar** (recommended first) | [my-first-sidecar.md](my-first-sidecar.md) |
+| **My first turn contract** | [my-first-turn-contract.md](my-first-turn-contract.md) |
+| **Turn contracts in production** | [turn-contracts-production.md](turn-contracts-production.md) |
 | Python bot (full-chat) | [python-bot.md](../guides/python-bot.md) |
 | Session memory / GDPR | [session-memory.md](../guides/session-memory.md) |
 | Migrate from system prompt | [migrate-from-system-prompt.md](../guides/migrate-from-system-prompt.md) |

@@ -5,8 +5,9 @@ from __future__ import annotations
 import json
 import logging
 import os
+import uuid
 from pathlib import Path
-from typing import Any, Callable, Awaitable
+from typing import Any, Awaitable, Callable
 
 import httpx
 
@@ -36,6 +37,18 @@ def _parse_problem(resp: httpx.Response) -> SoulOSError:
     return SoulOSError(code, resp.status_code, detail, body)
 
 
+def merge_contract_into_system_prompt(prepare_response: dict[str, Any]) -> str:
+    """Append contract_context.prompt_appendix to system_prompt (default host helper)."""
+    base = str(prepare_response.get("system_prompt") or "")
+    ctx = prepare_response.get("contract_context") or {}
+    appendix = ctx.get("prompt_appendix") if isinstance(ctx, dict) else None
+    if not appendix:
+        return base
+    if not base:
+        return str(appendix)
+    return f"{base.rstrip()}\n\n{appendix}"
+
+
 class SoulHybridClient:
     """Identity + memory + hybrid prepare/complete with graceful fallback."""
 
@@ -53,7 +66,9 @@ class SoulHybridClient:
             base_url or os.getenv("SOULOS_KERNEL_URL", "http://localhost:8000")
         ).rstrip("/")
         self.bot_id = bot_id or os.getenv("SOULOS_BOT_ID", "").strip() or None
-        self.gateway_secret = gateway_secret or os.getenv("SOULOS_GATEWAY_SECRET", "").strip() or None
+        self.gateway_secret = (
+            gateway_secret or os.getenv("SOULOS_GATEWAY_SECRET", "").strip() or None
+        )
         self.account_id = account_id or os.getenv("SOULOS_ACCOUNT_ID", "").strip() or None
         if enabled is None:
             self.enabled = os.getenv("SOULOS_ENABLED", "1").lower() not in (
@@ -77,7 +92,9 @@ class SoulHybridClient:
 
     async def _get_client(self) -> httpx.AsyncClient:
         if self._client is None:
-            self._client = httpx.AsyncClient(timeout=self.timeout, headers=self._request_headers())
+            self._client = httpx.AsyncClient(
+                timeout=self.timeout, headers=self._request_headers()
+            )
         return self._client
 
     async def close(self) -> None:
@@ -185,27 +202,64 @@ class SoulHybridClient:
         session_id: str | None = None,
         reflect: bool = True,
         reflect_async: bool = True,
+        *,
+        filled_slots: dict[str, Any] | None = None,
+        intent: str | None = None,
+        assistant_text: str | None = None,
+        expected_version: int | None = None,
+        idempotency_key: str | None = None,
+        advance: bool = True,
+        expected_step: str | None = None,
+        raise_on_error: bool = False,
     ) -> dict[str, Any] | None:
         if not self.enabled:
             return None
         bid = bot_id or self.bot_id
         if not bid:
             return None
+        contract_mode = (
+            filled_slots is not None
+            or expected_version is not None
+            or intent is not None
+            or idempotency_key is not None
+        )
+        key = idempotency_key
+        if contract_mode and key is None:
+            key = str(uuid.uuid4())
+        body: dict[str, Any] = {
+            "bot_id": bid,
+            "summary": summary,
+            "user_message": user_message,
+            "session_id": session_id,
+            "reflect": reflect,
+            "reflect_async": reflect_async,
+            "advance": advance,
+        }
+        if filled_slots is not None:
+            body["filled_slots"] = filled_slots
+        if intent is not None:
+            body["intent"] = intent
+        if assistant_text is not None:
+            body["assistant_text"] = assistant_text
+        if expected_version is not None:
+            body["expected_version"] = expected_version
+        if key is not None:
+            body["idempotency_key"] = key
+        if expected_step is not None:
+            body["expected_step"] = expected_step
         try:
             resp = await self._request(
                 "POST",
                 "/hybrid/complete",
-                json_body={
-                    "bot_id": bid,
-                    "summary": summary,
-                    "user_message": user_message,
-                    "session_id": session_id,
-                    "reflect": reflect,
-                    "reflect_async": reflect_async,
-                },
+                json_body=body,
             )
             return resp.json()
-        except (httpx.HTTPError, SoulOSError) as e:
+        except SoulOSError as e:
+            if raise_on_error or (contract_mode and str(e.code).startswith("TURN_")):
+                raise
+            logger.warning("SoulOS complete_turn failed: %s", e)
+            return None
+        except httpx.HTTPError as e:
             logger.warning("SoulOS complete_turn failed: %s", e)
             return None
 
@@ -241,6 +295,7 @@ class SoulHybridClient:
         session_id: str | None = None,
         top_k: int = 5,
         reflect: bool = True,
+        merge_contract: bool = True,
     ) -> dict[str, Any]:
         """Optional ensure → prepare → caller generate → complete."""
         if external_key and soul is not None:
@@ -248,7 +303,11 @@ class SoulHybridClient:
         prepared = await self.prepare_turn(query, session_id=session_id, top_k=top_k)
         if not prepared:
             raise SoulOSError("PREPARE_FAILED", 0, "prepare_turn returned no context", {})
-        system_prompt = prepared["system_prompt"]
+        system_prompt = (
+            merge_contract_into_system_prompt(prepared)
+            if merge_contract
+            else prepared["system_prompt"]
+        )
         reply = await generate(system_prompt, prepared)
         completed = await self.complete_turn(
             summary=reply[:2000],

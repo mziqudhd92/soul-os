@@ -136,3 +136,72 @@ async def test_gateway_headers_passed():
     headers = client._request_headers()
     assert headers["X-SoulOS-Gateway-Secret"] == "secret-1"
     assert headers["X-SoulOS-Account-Id"] == "acct-1"
+
+
+def test_merge_contract_into_system_prompt():
+    from soulos.hybrid import merge_contract_into_system_prompt
+
+    merged = merge_contract_into_system_prompt(
+        {
+            "system_prompt": "You are a concierge.",
+            "contract_context": {
+                "prompt_appendix": "[SYSTEM DIRECTIVE: Step collect_dates.]"
+            },
+        }
+    )
+    assert merged.startswith("You are a concierge.")
+    assert "[SYSTEM DIRECTIVE" in merged
+
+
+@pytest.mark.asyncio
+async def test_complete_turn_auto_idempotency_key_and_slots():
+    client = SoulHybridClient(base_url="http://kernel.test", bot_id="bot-1", enabled=True)
+    with patch.object(client, "_request", new_callable=AsyncMock) as mock_req:
+        mock_req.return_value = httpx.Response(
+            200, json={"status": "success", "ingested": True, "turn": {"step": "confirm"}}
+        )
+        out = await client.complete_turn(
+            "summary",
+            session_id="s1",
+            reflect=False,
+            filled_slots={"check_in": "2026-09-01"},
+            expected_version=0,
+            intent="provide_dates",
+        )
+    assert out and out["turn"]["step"] == "confirm"
+    body = mock_req.await_args.kwargs["json_body"]
+    assert body["filled_slots"]["check_in"] == "2026-09-01"
+    assert body["expected_version"] == 0
+    assert body["idempotency_key"]
+
+
+@pytest.mark.asyncio
+async def test_complete_turn_raises_turn_contract_violation():
+    client = SoulHybridClient(base_url="http://kernel.test", bot_id="bot-1", enabled=True)
+    problem = httpx.Response(
+        422,
+        headers={"content-type": "application/problem+json"},
+        content=json.dumps(
+            {
+                "code": "TURN_CONTRACT_VIOLATION",
+                "detail": "bad",
+                "status": 422,
+                "remedial_prompt_hint": "Ask again",
+                "invalid_slots": {"check_in": "Must match format YYYY-MM-DD"},
+            }
+        ).encode(),
+    )
+    with patch.object(client, "_get_client", new_callable=AsyncMock) as mock_get:
+        mock_http = AsyncMock()
+        mock_http.request = AsyncMock(return_value=problem)
+        mock_get.return_value = mock_http
+        with pytest.raises(SoulOSError) as exc:
+            await client.complete_turn(
+                "summary",
+                session_id="s1",
+                reflect=False,
+                filled_slots={"check_in": "nope"},
+                expected_version=0,
+            )
+    assert exc.value.code == "TURN_CONTRACT_VIOLATION"
+    assert exc.value.body.get("remedial_prompt_hint") == "Ask again"

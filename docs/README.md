@@ -57,6 +57,7 @@ Primary integration for apps that already call an LLM (Bedrock, OpenAI, LiteLLM,
 |-----|-------------|
 | [Plug in SoulOS](guides/plug-in-soulos.md) | Integration modes, inference plug-ins, checklist |
 | [Sidecar integration](guides/sidecar-integration.md) | Bedrock/OpenAI apps: hybrid API + compose |
+| [Turn contracts](guides/turn-contracts.md) | Optional slots/steps reliability on hybrid |
 | [Session memory](guides/session-memory.md) | Per-conversation scope + GDPR forget/delete |
 | [Migrate from system prompt](guides/migrate-from-system-prompt.md) | Convert a big prompt into a soul |
 | [Troubleshooting](guides/troubleshooting.md) | Errors by RFC 7807 `code` + `soulos-doctor.py` |

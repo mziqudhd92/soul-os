@@ -1,7 +1,9 @@
 """Tests for hybrid sidecar API."""
 
+from unittest.mock import AsyncMock, patch
+
 import pytest
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
 from dependencies import get_db, get_embedder, get_llm_service
 from main import app
@@ -20,22 +22,6 @@ async def test_ready_endpoint():
     body = response.json()
     assert "checks" in body
     assert "embedding_dimension" in body
-
-
-"""Tests for hybrid sidecar API."""
-
-from unittest.mock import AsyncMock, patch
-
-import pytest
-from httpx import AsyncClient, ASGITransport
-
-from dependencies import get_db, get_embedder, get_llm_service
-from main import app
-from test_main import MockEmbedder, MockLLMService, VALID_SOUL, mock_get_db
-
-app.dependency_overrides[get_db] = mock_get_db
-app.dependency_overrides[get_embedder] = MockEmbedder
-app.dependency_overrides[get_llm_service] = lambda: MockLLMService()
 
 
 @pytest.mark.asyncio

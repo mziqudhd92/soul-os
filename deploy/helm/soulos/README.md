@@ -9,7 +9,7 @@ Minimal Kubernetes starter for self-hosting the SoulOS kernel + Postgres.
 helm upgrade --install soulos deploy/helm/soulos \
   --namespace soulos --create-namespace \
   --set kernel.image.repository=ghcr.io/example/soulos-kernel \
-  --set kernel.image.tag=0.2.0
+  --set kernel.image.tag=0.3.0
 ```
 
 ## Values of interest

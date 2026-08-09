@@ -2,10 +2,12 @@ export const DEFAULT_CLOUD_URL = "https://api.soulos.dev";
 
 export {
   SoulHybridClient,
+  mergeContractIntoSystemPrompt,
   type SoulHybridClientConfig,
   type EnsureAvatarResponse,
   type HybridPrepareResponse,
   type HybridCompleteResponse,
+  type ContractContext,
 } from "./hybrid";
 
 export type SoulOSClientConfig = {

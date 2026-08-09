@@ -1,6 +1,6 @@
 [project]
 name = "soulos-core"
-version = "0.1.0"
+version = "0.3.0"
 description = "SoulOS kernel — FastAPI runtime for avatar state, memory, and dual-process inference"
 requires-python = ">=3.12"
 license = { text = "MIT" }

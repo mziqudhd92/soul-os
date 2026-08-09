@@ -1,0 +1,33 @@
+{
+  "name": "quiet",
+  "contract": "booking.v1.json",
+  "turns": [
+    {
+      "action": "prepare",
+      "session_id": "quiet-1",
+      "query": "I want to book",
+      "expect_step": "collect_dates",
+      "expect_version": 0
+    },
+    {
+      "action": "complete",
+      "session_id": "quiet-1",
+      "summary": "dates",
+      "filled_slots": { "check_in": "2026-09-01", "check_out": "2026-09-05" },
+      "intent": "provide_dates",
+      "idempotency_key": "quiet-a",
+      "expect": "allow",
+      "expect_step": "confirm"
+    },
+    {
+      "action": "complete",
+      "session_id": "quiet-1",
+      "summary": "confirm",
+      "filled_slots": { "user_agreed_to_terms": true },
+      "intent": "confirm_booking",
+      "idempotency_key": "quiet-b",
+      "expect": "allow",
+      "expect_step": "completed"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "authority": "self-hosted SoulOS kernel",
+  "canonical_deploy": "docker compose up --build",
+  "forbidden_surfaces": [
+    "vercel-only frontend deploy",
+    "static GitHub Pages as API host"
+  ],
+  "notes": "Hybrid prepare/complete run on the kernel (:8000) or via the gateway (:8080). Do not treat the marketing site as the API."
+}

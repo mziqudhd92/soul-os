@@ -18,12 +18,25 @@ export type EnsureAvatarResponse = {
   current_msv: Record<string, unknown>;
 };
 
+export type ContractContext = {
+  contract_id?: string;
+  expected_step: string;
+  missing_slots: string[];
+  filled_slots: Record<string, unknown>;
+  reject_tokens: string[];
+  ui_progress: { step_index: number; step_count: number; label: string };
+  allowed_intents: string[];
+  prompt_appendix: string;
+  turn_version: number;
+};
+
 export type HybridPrepareResponse = {
   bot_id: string;
   identity: Record<string, unknown>;
   memories: string[];
   system_prompt: string;
   inner_monologue: string;
+  contract_context?: ContractContext;
 };
 
 export type HybridCompleteResponse = {
@@ -32,7 +45,25 @@ export type HybridCompleteResponse = {
   reflect?: string;
   bot_id?: string;
   current_msv?: Record<string, unknown>;
+  turn?: {
+    step: string;
+    slots: Record<string, unknown>;
+    advanced: boolean;
+    turn_version: number;
+  };
 };
+
+export function mergeContractIntoSystemPrompt(
+  prepareResponse: HybridPrepareResponse | Record<string, unknown>
+): string {
+  const base = String(prepareResponse.system_prompt ?? "");
+  const ctx = prepareResponse.contract_context as ContractContext | undefined;
+  const appendix = ctx?.prompt_appendix;
+  if (!appendix) return base;
+  if (!base) return appendix;
+  return `${base.replace(/\s+$/, "")}\n\n${appendix}`;
+}
+
 
 export class SoulHybridClient {
   private readonly baseUrl: string;
@@ -139,28 +170,76 @@ export class SoulHybridClient {
       sessionId?: string;
       reflect?: boolean;
       reflectAsync?: boolean;
+      filledSlots?: Record<string, unknown> | null;
+      intent?: string;
+      assistantText?: string;
+      expectedVersion?: number;
+      idempotencyKey?: string;
+      advance?: boolean;
+      expectedStep?: string;
+      raiseOnError?: boolean;
     } = {}
   ): Promise<HybridCompleteResponse | null> {
     if (!this.enabled) return null;
     const botId = options.botId ?? this.botId;
     if (!botId) return null;
     const reflect = options.reflect ?? Boolean(options.userMessage);
+    const contractMode =
+      options.filledSlots !== undefined ||
+      options.expectedVersion !== undefined ||
+      options.intent !== undefined ||
+      options.idempotencyKey !== undefined;
+    const idempotencyKey =
+      options.idempotencyKey ?? (contractMode ? crypto.randomUUID() : undefined);
+    const body: Record<string, unknown> = {
+      bot_id: botId,
+      summary,
+      user_message: options.userMessage,
+      session_id: options.sessionId,
+      reflect,
+      reflect_async: options.reflectAsync ?? true,
+      advance: options.advance ?? true,
+    };
+    if (options.filledSlots !== undefined) body.filled_slots = options.filledSlots;
+    if (options.intent !== undefined) body.intent = options.intent;
+    if (options.assistantText !== undefined) body.assistant_text = options.assistantText;
+    if (options.expectedVersion !== undefined) body.expected_version = options.expectedVersion;
+    if (idempotencyKey !== undefined) body.idempotency_key = idempotencyKey;
+    if (options.expectedStep !== undefined) body.expected_step = options.expectedStep;
     try {
       const res = await fetch(`${this.baseUrl}/hybrid/complete`, {
         method: "POST",
         headers: this.headers(),
-        body: JSON.stringify({
-          bot_id: botId,
-          summary,
-          user_message: options.userMessage,
-          session_id: options.sessionId,
-          reflect,
-          reflect_async: options.reflectAsync ?? true,
-        }),
+        body: JSON.stringify(body),
       });
-      if (!res.ok) return null;
+      if (!res.ok) {
+        const problem = await res.json().catch(() => ({}));
+        const code = String(problem.code || "");
+        if (
+          options.raiseOnError ||
+          (contractMode && code.startsWith("TURN_"))
+        ) {
+          const err = new Error(problem.detail || `completeTurn failed (${res.status})`) as Error & {
+            code?: string;
+            status?: number;
+            body?: Record<string, unknown>;
+          };
+          err.code = code || "UNKNOWN";
+          err.status = res.status;
+          err.body = problem;
+          throw err;
+        }
+        return null;
+      }
       return (await res.json()) as HybridCompleteResponse;
-    } catch {
+    } catch (e) {
+      const code = (e as { code?: string }).code;
+      if (
+        options.raiseOnError ||
+        (typeof code === "string" && code.startsWith("TURN_"))
+      ) {
+        throw e;
+      }
       return null;
     }
   }
