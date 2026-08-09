@@ -15,10 +15,18 @@
 __pycache__/
 **/__pycache__/
 *.py[cod]
+*$py.class
 *.egg-info/
 dist/
 build/
 *.egg
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+htmlcov/
+coverage.xml
+.cache/
 
 # testing
 /coverage
@@ -34,16 +42,28 @@ build/
 /site/
 /site-test-output/
 
-# misc
+# misc / OS
 .DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
 *.pem
 *.xlsx
+
+# editors / IDEs (local)
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
 
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+*.log
 
 # secrets — never commit
 .env
@@ -62,3 +82,8 @@ docs/SOULOS_AGENT_CONTEXT_FULL.md
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Cursor local state (keep committed .cursor/rules/ for agent conventions)
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
