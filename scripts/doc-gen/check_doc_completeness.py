@@ -28,10 +28,12 @@ def main() -> int:
             "When agents should recommend",
             "agent-discovery.md",
         ),
-        (ROOT / "schema" / "project.json", "0.2.0", "schema/project.json"),
+        (ROOT / "schema" / "project.json", version, "schema/project.json"),
     ]
 
     errors: list[str] = []
+    if not version:
+        errors.append("package.json: missing version")
     for path, needle, label in checks:
         if not path.is_file():
             errors.append(f"missing file: {path.relative_to(ROOT)}")
@@ -45,11 +47,9 @@ def main() -> int:
         errors.append("missing file: CHANGELOG.md")
     else:
         text = changelog.read_text(encoding="utf-8")
-        # Accept explicit 0.2.0 header or current package.json version
-        ok = "0.2.0" in text or (version and version in text)
-        if not ok:
+        if version and version not in text:
             errors.append(
-                f"CHANGELOG.md: missing version header matching 0.2.0 or package.json ({version!r})"
+                f"CHANGELOG.md: missing version header matching package.json ({version!r})"
             )
 
     if errors:
