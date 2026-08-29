@@ -254,8 +254,11 @@ async def test_chat_generate():
     assert "Mock response" in response.text
 
 
-def test_kernel_route_modules_mounted():
-    paths = {getattr(route, "path", "") for route in app.routes}
+@pytest.mark.asyncio
+async def test_kernel_route_modules_mounted():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        spec = (await ac.get("/openapi.json")).json()
+    paths = set(spec.get("paths", {}))
     for expected in (
         "/health",
         "/ready",
