@@ -296,8 +296,16 @@ class SoulHybridClient:
         top_k: int = 5,
         reflect: bool = True,
         merge_contract: bool = True,
+        filled_slots: dict[str, Any] | None = None,
+        intent: str | None = None,
+        advance: bool = True,
     ) -> dict[str, Any]:
-        """Optional ensure → prepare → caller generate → complete."""
+        """Optional ensure → prepare → caller generate → complete.
+
+        When ``prepare`` returns ``contract_context``, passes ``expected_version``,
+        ``assistant_text``, and optional slot/intent fields so active turn
+        contracts do not silently fail.
+        """
         if external_key and soul is not None:
             await self.ensure_avatar(external_key, soul)
         prepared = await self.prepare_turn(query, session_id=session_id, top_k=top_k)
@@ -309,12 +317,26 @@ class SoulHybridClient:
             else prepared["system_prompt"]
         )
         reply = await generate(system_prompt, prepared)
-        completed = await self.complete_turn(
-            summary=reply[:2000],
-            user_message=query,
-            session_id=session_id,
-            reflect=reflect,
-        )
+        complete_kwargs: dict[str, Any] = {
+            "summary": reply[:2000],
+            "user_message": query,
+            "session_id": session_id,
+            "reflect": reflect,
+            "assistant_text": reply,
+            "advance": advance,
+            "raise_on_error": True,
+        }
+        ctx = prepared.get("contract_context")
+        if isinstance(ctx, dict):
+            if "turn_version" in ctx:
+                complete_kwargs["expected_version"] = ctx["turn_version"]
+            if ctx.get("expected_step"):
+                complete_kwargs["expected_step"] = ctx["expected_step"]
+        if filled_slots is not None:
+            complete_kwargs["filled_slots"] = filled_slots
+        if intent is not None:
+            complete_kwargs["intent"] = intent
+        completed = await self.complete_turn(**complete_kwargs)
         return {
             "query": query,
             "system_prompt": system_prompt,

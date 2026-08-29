@@ -9,21 +9,23 @@ Minimal Kubernetes starter for self-hosting the SoulOS kernel + Postgres.
 helm upgrade --install soulos deploy/helm/soulos \
   --namespace soulos --create-namespace \
   --set kernel.image.repository=ghcr.io/example/soulos-kernel \
-  --set kernel.image.tag=0.3.0
+  --set kernel.image.tag=0.3.1
 ```
 
 ## Values of interest
 
 | Key | Purpose |
 |-----|---------|
-| `kernel.env.REQUIRE_AUTH` | `0` local / `1` behind gateway |
+| `kernel.env.REQUIRE_AUTH` | `0` local / **`1` production behind gateway** |
 | `kernel.env.GATEWAY_SECRET` | Shared secret with gateway |
 | `kernel.env.OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP collector |
-| `kernel.env.MEMORY_SESSION_TTL_SECONDS` | Session memory TTL (0 = off) |
+| `kernel.env.MEMORY_SESSION_TTL_SECONDS` | Session + turn_session TTL (0 = off) |
+| `purgeCron.enabled` | CronJob → `POST /memory/purge-expired` (requires TTL &gt; 0) |
+| `purgeCron.schedule` | Default `15 * * * *` |
 | `gateway.enabled` | Deploy cloud gateway |
 | `gateway.env.REDIS_URL` | Shared rate limits (multi-replica) |
 | `postgresql.enabled` | Chart-bundled Postgres (dev only) |
 
-Production: point `DATABASE_URL` at a managed Postgres with `pgvector`, disable bundled DB, and terminate TLS at your ingress.
+**Production checklist:** `REQUIRE_AUTH=1`, enable `gateway`, point `DATABASE_URL` at managed Postgres with `pgvector`, set `MEMORY_SESSION_TTL_SECONDS` + `purgeCron.enabled=true`, terminate TLS at ingress.
 
 See [horizontal-scale.md](../../docs/guides/horizontal-scale.md) and [self-hosted.md](../../docs/deployment/self-hosted.md).

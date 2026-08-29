@@ -46,6 +46,7 @@ from runtime.soulpacks import (
     list_packs,
 )
 from runtime.errors import (
+    ACCESS_DENIED,
     BOT_NOT_FOUND,
     READY_DEGRADED,
     SOUL_INVALID,
@@ -350,7 +351,14 @@ async def purge_expired_memories_route(
     account: AccountContext = Depends(get_account_context),
 ):
     """Delete session-scoped memories and turn_sessions past MEMORY_SESSION_TTL_SECONDS."""
-    await verify_bot_access(db, payload.bot_id, account)
+    if payload.bot_id:
+        await verify_bot_access(db, payload.bot_id, account)
+    elif account.account_id is not None:
+        raise SoulOSProblem(
+            ACCESS_DENIED,
+            403,
+            "bot_id is required when tenant auth is enabled",
+        )
     deleted = await purge_expired_session_memories(db, payload.bot_id)
     turn_deleted = await purge_expired_turn_sessions(db, payload.bot_id)
     return {
@@ -418,7 +426,25 @@ async def hybrid_prepare(
     return body
 
 
-@app.post("/hybrid/complete")
+@app.post(
+    "/hybrid/complete",
+    responses={
+        200: {"description": "Complete succeeded (sync reflect or reflect skipped)"},
+        202: {"description": "Accepted — async reflect"},
+        404: {
+            "description": "TURN_SESSION_EXPIRED — turn session missing or TTL-purged",
+        },
+        409: {
+            "description": "TURN_STATE_STALE — expected_version mismatch (CAS lost race)",
+        },
+        422: {
+            "description": (
+                "TURN_CONTRACT_VIOLATION | TURN_REJECT_TOKEN | TURN_STEP_MISMATCH "
+                "| request validation"
+            ),
+        },
+    },
+)
 async def hybrid_complete(
     payload: HybridCompleteRequest,
     background_tasks: BackgroundTasks,

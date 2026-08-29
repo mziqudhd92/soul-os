@@ -35,6 +35,58 @@ async def test_run_turn_flow():
         result = await client.run_turn("refund?", fake_generate)
     assert result["reply"] == "Refunds within 30 days."
     assert result["system_prompt"] == prepare_body["system_prompt"]
+    complete_body = mock_req.await_args_list[1].kwargs["json_body"]
+    assert "expected_version" not in complete_body
+
+
+@pytest.mark.asyncio
+async def test_run_turn_passes_contract_version():
+    client = SoulHybridClient(base_url="http://kernel.test", bot_id="bot-1", enabled=True)
+    prepare_body = {
+        "bot_id": "bot-1",
+        "system_prompt": "You are Concierge.",
+        "memories": [],
+        "inner_monologue": "Ready.",
+        "identity": {},
+        "contract_context": {
+            "expected_step": "collect_dates",
+            "missing_slots": ["check_in"],
+            "filled_slots": {},
+            "reject_tokens": [],
+            "ui_progress": {"step_index": 0, "step_count": 2, "label": "collect_dates"},
+            "allowed_intents": [],
+            "prompt_appendix": "[SYSTEM DIRECTIVE: Step 'collect_dates'.]",
+            "turn_version": 3,
+        },
+    }
+
+    async def fake_generate(prompt: str, ctx: dict) -> str:
+        assert "SYSTEM DIRECTIVE" in prompt
+        return "What dates?"
+
+    with patch.object(client, "_request", new_callable=AsyncMock) as mock_req:
+        mock_req.side_effect = [
+            httpx.Response(200, json=prepare_body),
+            httpx.Response(
+                200,
+                json={"status": "success", "ingested": True, "turn": {"turn_version": 4}},
+            ),
+        ]
+        result = await client.run_turn(
+            "book",
+            fake_generate,
+            session_id="s1",
+            filled_slots={"check_in": "2026-09-01"},
+            intent="provide_dates",
+        )
+    assert result["complete"]["turn"]["turn_version"] == 4
+    body = mock_req.await_args_list[1].kwargs["json_body"]
+    assert body["expected_version"] == 3
+    assert body["expected_step"] == "collect_dates"
+    assert body["filled_slots"]["check_in"] == "2026-09-01"
+    assert body["intent"] == "provide_dates"
+    assert body["assistant_text"] == "What dates?"
+    assert body["idempotency_key"]
 
 
 def test_parse_problem_error():

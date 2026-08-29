@@ -5,15 +5,18 @@ kernel:
   replicaCount: 1
   image:
     repository: soulos-kernel
-    tag: "0.2.0"
+    tag: "0.3.1"
     pullPolicy: IfNotPresent
   service:
     port: 8000
   resources: {}
   env:
+    # Production / public: set "1" and enable gateway (kernel rejects direct HTTP without gateway headers).
+    # Local/dev chart default stays "0".
     REQUIRE_AUTH: "0"
     GATEWAY_SECRET: "changeme_gateway_secret"
     INFERENCE_MODE: embeddings_only
+    # Set >0 and enable purgeCron for session + turn_session TTL cleanup.
     MEMORY_SESSION_TTL_SECONDS: "0"
     OTEL_EXPORTER_OTLP_ENDPOINT: ""
     SOULOS_OTEL_ENABLED: "0"
@@ -24,7 +27,7 @@ gateway:
   replicaCount: 1
   image:
     repository: soulos-gateway
-    tag: "0.2.0"
+    tag: "0.3.1"
     pullPolicy: IfNotPresent
   service:
     port: 8080
@@ -33,6 +36,11 @@ gateway:
     GATEWAY_SECRET: "changeme_gateway_secret"
     REDIS_URL: ""
     SOULOS_API_KEYS: ""
+
+# Hourly global purge when TTL is enabled (POST /memory/purge-expired with {}).
+purgeCron:
+  enabled: false
+  schedule: "15 * * * *"
 
 postgresql:
   enabled: true

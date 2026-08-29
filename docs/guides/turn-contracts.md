@@ -39,8 +39,11 @@ Per step, `transitions[intent]` runs first (e.g. `edit_dates` → `collect_dates
 |------|------|--------|
 | `TURN_CONTRACT_VIOLATION` | 422 | `remedial_prompt_hint` + re-prompt |
 | `TURN_REJECT_TOKEN` | 422 | Rewrite assistant text |
+| `TURN_STEP_MISMATCH` | 422 | Re-prepare; align `expected_step` |
 | `TURN_STATE_STALE` | 409 | Re-prepare; new key |
 | `TURN_SESSION_EXPIRED` | 404 | Reset; prepare again |
+
+**Surfaces:** Turn contracts are REST + SDK (`run_turn` / `complete_turn`). Soul Studio chat and MCP tools do **not** drive the contract loop — use hybrid HTTP/SDK.
 
 ## CI dialogues
 

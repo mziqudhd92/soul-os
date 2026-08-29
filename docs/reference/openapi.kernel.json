@@ -760,22 +760,24 @@
         },
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Complete succeeded (sync reflect or reflect skipped)",
             "content": {
               "application/json": {
                 "schema": {}
               }
             }
           },
+          "202": {
+            "description": "Accepted \u2014 async reflect"
+          },
+          "404": {
+            "description": "TURN_SESSION_EXPIRED \u2014 turn session missing or TTL-purged"
+          },
+          "409": {
+            "description": "TURN_STATE_STALE \u2014 expected_version mismatch (CAS lost race)"
+          },
           "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
+            "description": "TURN_CONTRACT_VIOLATION | TURN_REJECT_TOKEN | TURN_STEP_MISMATCH | request validation"
           }
         }
       }
@@ -1580,16 +1582,20 @@
       "MemoryPurgeExpired": {
         "properties": {
           "bot_id": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Bot Id"
           }
         },
         "type": "object",
-        "required": [
-          "bot_id"
-        ],
         "title": "MemoryPurgeExpired",
-        "description": "Purge session-scoped memories past MEMORY_SESSION_TTL_SECONDS for one bot."
+        "description": "Purge session-scoped memories past MEMORY_SESSION_TTL_SECONDS.\n\n``bot_id`` optional: omit to purge all bots (operator / CronJob; requires\nauth off or gateway without tenant account). When auth is enabled with an\naccount, ``bot_id`` is required."
       },
       "MemoryRetrieve": {
         "properties": {

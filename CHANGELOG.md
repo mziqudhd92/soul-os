@@ -4,6 +4,25 @@ All notable changes to SoulOS are documented here.
 
 ## [Unreleased]
 
+## [0.3.1] — 2026-08-29
+
+### Fixed
+
+- **Turn contracts production wiring** — `merge_runtime_config` / `load_runtime_config` preserve `turn_contract` (was stripped; contracts never activated from DB)
+- Concurrent `ensure_turn_session` no longer resets advanced state (`ON CONFLICT DO NOTHING` + re-read)
+- Completion `next` rejects unknown target steps (parity with intent transitions)
+- SDK `run_turn` / `runTurn` pass `expected_version` / merge appendix; `handoff_to` accepts contract fields
+- `turn_contract` validated against `spec/turn-contract.schema.json` on avatar register/ensure
+
+### Added
+
+- Optional global `POST /memory/purge-expired` (`bot_id` omitted); Helm `purgeCron` CronJob
+- OpenAPI response docs for hybrid complete `404`/`409`/`422` TURN codes
+
+### Changed
+
+- Version bump to **0.3.1** (kernel, SDKs, schema, Helm appVersion, docs indexes)
+
 ## [0.3.0] — 2026-08-09
 
 ### Added

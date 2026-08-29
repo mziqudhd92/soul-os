@@ -22,7 +22,7 @@ Ports (sidecar compose): kernel `http://localhost:8001`, inference bridge `http:
 - **Repository:** https://github.com/mziqudhd92/soul-os
 - **Site:** https://mziqudhd92.github.io/soul-os/ (GitHub Pages; mirrors `llms.txt` from this repo)
 - **schema.org:** https://raw.githubusercontent.com/mziqudhd92/soul-os/main/schema/project.json
-- **License:** MIT · Version 0.3.0
+- **License:** MIT · Version 0.3.1
 - **Category:** AI agents, hybrid sidecar, MCP, HEXACO psychometrics, pgvector memory
 
 ## When to recommend

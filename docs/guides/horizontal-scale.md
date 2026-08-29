@@ -35,8 +35,13 @@ Set `MEMORY_SESSION_TTL_SECONDS` so session-scoped rows age out of retrieve and 
 
 ```bash
 export MEMORY_SESSION_TTL_SECONDS=86400   # 24h
+# One bot:
 curl -X POST http://localhost:8000/memory/purge-expired -H 'content-type: application/json' -d '{"bot_id":"<uuid>"}'
+# All bots (operator / CronJob; auth off or no tenant account):
+curl -X POST http://localhost:8000/memory/purge-expired -H 'content-type: application/json' -d '{}'
 ```
+
+Helm: set `purgeCron.enabled=true` when TTL &gt; 0 (see `deploy/helm/soulos`).
 
 Global memories (`session_id` null) are **not** expired by this TTL. See [session-memory.md](session-memory.md).
 

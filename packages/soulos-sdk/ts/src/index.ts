@@ -10,6 +10,16 @@ export {
   type ContractContext,
 } from "./hybrid";
 
+export {
+  TURN_CONTRACT_VIOLATION,
+  TURN_REJECT_TOKEN,
+  TURN_STEP_MISMATCH,
+  TURN_STATE_STALE,
+  TURN_SESSION_EXPIRED,
+  TURN_ERROR_CODES,
+  type TurnErrorCode,
+} from "./codes";
+
 export type SoulOSClientConfig = {
   baseUrl?: string;
   apiKey?: string;

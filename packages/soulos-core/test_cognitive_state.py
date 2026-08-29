@@ -39,6 +39,23 @@ def test_cognitive_state_sse_format():
     assert data["system_1"]["confidence_score"] == 0.21
 
 
+def test_merge_runtime_config_preserves_turn_contract():
+    cfg = merge_runtime_config(
+        {
+            "dual_process": {"system1_threshold": 0.42},
+            "turn_contract": {
+                "id": "booking.v1",
+                "initial_step": "start",
+                "steps": [{"id": "start"}],
+            },
+            "source": {"id": "pack", "version": "1"},
+        }
+    )
+    assert cfg["dual_process"]["system1_threshold"] == 0.42
+    assert cfg["turn_contract"]["id"] == "booking.v1"
+    assert cfg["source"]["id"] == "pack"
+
+
 @pytest.mark.asyncio
 async def test_pipeline_load_runtime_config():
     class MockRow:
@@ -47,7 +64,12 @@ async def test_pipeline_load_runtime_config():
 
     class MockResult:
         def fetchone(self):
-            return MockRow({"dual_process": {"system1_threshold": 0.42}})
+            return MockRow(
+                {
+                    "dual_process": {"system1_threshold": 0.42},
+                    "turn_contract": {"id": "t", "initial_step": "a", "steps": [{"id": "a"}]},
+                }
+            )
 
     class MockDb:
         async def execute(self, query, params=None):
@@ -56,3 +78,4 @@ async def test_pipeline_load_runtime_config():
     pipeline = ChatPipeline()
     runtime = await pipeline.load_runtime_config(MockDb(), "bot-id")
     assert runtime["dual_process"]["system1_threshold"] == 0.42
+    assert runtime["turn_contract"]["id"] == "t"

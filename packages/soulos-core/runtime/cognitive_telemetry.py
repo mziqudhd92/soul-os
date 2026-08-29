@@ -31,6 +31,11 @@ def merge_runtime_config(raw: dict[str, Any] | None) -> dict[str, Any]:
         base["engine"] = raw["engine"]
     if raw.get("hybrid_prompt_template"):
         base["hybrid_prompt_template"] = raw["hybrid_prompt_template"]
+    # Preserve hybrid turn contracts and other opaque runtime keys used by prepare/complete.
+    if isinstance(raw.get("turn_contract"), dict):
+        base["turn_contract"] = raw["turn_contract"]
+    if isinstance(raw.get("source"), dict):
+        base["source"] = raw["source"]
     base["dual_process"] = dual
     return base
 

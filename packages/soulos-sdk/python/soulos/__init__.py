@@ -1,4 +1,12 @@
 from soulos.client import SoulOSClient
+from soulos.codes import (
+    TURN_CONTRACT_VIOLATION,
+    TURN_ERROR_CODES,
+    TURN_REJECT_TOKEN,
+    TURN_SESSION_EXPIRED,
+    TURN_STATE_STALE,
+    TURN_STEP_MISMATCH,
+)
 from soulos.handoff import (
     HandoffPacket,
     conversation_session_id,
@@ -18,4 +26,10 @@ __all__ = [
     "format_handoff_note",
     "handoff_to",
     "role_external_key",
+    "TURN_CONTRACT_VIOLATION",
+    "TURN_REJECT_TOKEN",
+    "TURN_STEP_MISMATCH",
+    "TURN_STATE_STALE",
+    "TURN_SESSION_EXPIRED",
+    "TURN_ERROR_CODES",
 ]

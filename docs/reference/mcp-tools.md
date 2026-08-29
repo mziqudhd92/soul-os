@@ -8,6 +8,8 @@ Transport: HTTP SSE at `/mcp/sse` (see [MCP guide](../guides/mcp.md)). Self-host
 
 **REST-only in v0.2 (no MCP tool):** `POST /memory/forget` and `DELETE /memory/session/{bot_id}/{session_id}` — call the kernel REST API (or SDK HTTP client) for GDPR / content-match deletes. See [api.md](api.md) and [session-memory.md](../guides/session-memory.md).
 
+**Turn contracts:** hybrid `prepare` / `complete` with `runtime_config.turn_contract` are REST + SDK only (not MCP / Studio chat). See [turn-contracts.md](../guides/turn-contracts.md).
+
 All tool responses are JSON strings in `TextContent`.
 
 ## `ingest_memory`

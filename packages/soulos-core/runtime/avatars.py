@@ -10,6 +10,19 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 
 from soul_validation import validate_soul_payload
 from runtime.persona_simple import apply_persona_mode
+from runtime.turn_contract import TurnContractError, validate_turn_contract
+
+
+def _validate_runtime_config(runtime_config: dict[str, Any] | None) -> None:
+    if not runtime_config:
+        return
+    contract = runtime_config.get("turn_contract")
+    if contract is None:
+        return
+    try:
+        validate_turn_contract(contract)
+    except TurnContractError as e:
+        raise ValueError(e.detail) from e
 
 
 async def get_bot_identity(conn: AsyncConnection, bot_id: str) -> dict[str, Any] | None:
@@ -51,6 +64,7 @@ async def register_avatar_record(
 ) -> dict[str, Any]:
     payload = apply_persona_mode(payload)
     soul = validate_soul_payload(payload)
+    _validate_runtime_config(runtime_config)
     msv_json = json.dumps(soul.baseline_msv.model_dump())
     capabilities_json = json.dumps(soul.capabilities) if soul.capabilities else None
     runtime_json = json.dumps(runtime_config or {})

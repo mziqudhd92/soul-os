@@ -1,6 +1,6 @@
 {
   "name": "soulos-monorepo",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "SoulOS — open-source runtime for persistent AI avatars (HEXACO MSV, episodic memory, MCP, Soul Studio)",
   "private": true,
   "license": "MIT",

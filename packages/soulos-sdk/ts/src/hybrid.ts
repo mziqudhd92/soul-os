@@ -253,6 +253,10 @@ export class SoulHybridClient {
       sessionId?: string;
       topK?: number;
       reflect?: boolean;
+      mergeContract?: boolean;
+      filledSlots?: Record<string, unknown> | null;
+      intent?: string;
+      advance?: boolean;
     } = {}
   ): Promise<{ reply: string; systemPrompt: string; prepare: HybridPrepareResponse; complete: HybridCompleteResponse | null }> {
     if (options.externalKey && options.soul) {
@@ -265,15 +269,31 @@ export class SoulHybridClient {
     if (!prepared) {
       throw new Error("prepare_turn returned no context");
     }
-    const reply = await generate(prepared.system_prompt, prepared);
+    const mergeContract = options.mergeContract !== false;
+    const systemPrompt = mergeContract
+      ? mergeContractIntoSystemPrompt(prepared)
+      : prepared.system_prompt;
+    const reply = await generate(systemPrompt, prepared);
+    const ctx = prepared.contract_context;
     const completed = await this.completeTurn(reply.slice(0, 2000), {
       userMessage: query,
       sessionId: options.sessionId,
       reflect: options.reflect ?? true,
+      assistantText: reply,
+      advance: options.advance ?? true,
+      raiseOnError: true,
+      ...(ctx?.turn_version !== undefined
+        ? {
+            expectedVersion: ctx.turn_version,
+            expectedStep: ctx.expected_step,
+          }
+        : {}),
+      ...(options.filledSlots !== undefined ? { filledSlots: options.filledSlots } : {}),
+      ...(options.intent !== undefined ? { intent: options.intent } : {}),
     });
     return {
       reply,
-      systemPrompt: prepared.system_prompt,
+      systemPrompt,
       prepare: prepared,
       complete: completed,
     };

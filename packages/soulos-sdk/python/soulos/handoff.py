@@ -83,11 +83,20 @@ async def handoff_to(
     user_message: str | None = None,
     payload: dict[str, Any] | None = None,
     reflect: bool = False,
+    expected_version: int | None = None,
+    filled_slots: dict[str, Any] | None = None,
+    intent: str | None = None,
+    expected_step: str | None = None,
+    advance: bool = True,
 ) -> dict[str, Any]:
     """Complete the source bot and seed the destination bot with a handoff note.
 
     Caller should then ``prepare_turn`` on ``to_bot_id`` with the same
     ``conversation_session_id(conversation_id)``.
+
+    When the source avatar has an active turn contract, pass ``expected_version``
+    (from the last prepare ``contract_context.turn_version``) and any slot/intent
+    fields required to complete that step.
     """
     if from_bot_id == to_bot_id:
         raise ValueError("from_bot_id and to_bot_id must differ")
@@ -101,14 +110,25 @@ async def handoff_to(
         payload=dict(payload or {}),
     )
     note = format_handoff_note(packet)
-    completed = await client.complete_turn(
-        summary=summary,
-        user_message=user_message or f"Handoff to {to_role}: {reason}",
-        bot_id=from_bot_id,
-        session_id=session_id,
-        reflect=reflect,
-        reflect_async=True,
-    )
+    complete_kwargs: dict[str, Any] = {
+        "summary": summary,
+        "user_message": user_message or f"Handoff to {to_role}: {reason}",
+        "bot_id": from_bot_id,
+        "session_id": session_id,
+        "reflect": reflect,
+        "reflect_async": True,
+        "advance": advance,
+        "raise_on_error": True,
+    }
+    if expected_version is not None:
+        complete_kwargs["expected_version"] = expected_version
+    if filled_slots is not None:
+        complete_kwargs["filled_slots"] = filled_slots
+    if intent is not None:
+        complete_kwargs["intent"] = intent
+    if expected_step is not None:
+        complete_kwargs["expected_step"] = expected_step
+    completed = await client.complete_turn(**complete_kwargs)
     ingested = await client.ingest_memory(
         bot_id=to_bot_id,
         content=note,

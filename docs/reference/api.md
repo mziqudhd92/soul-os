@@ -167,16 +167,16 @@ Content-match delete (ILIKE). **REST-only** — not exposed via MCP in v0.2.
 
 ### `DELETE /memory/session/{bot_id}/{session_id}`
 
-Delete all memories for a session (GDPR / conversation teardown). **REST-only** — not exposed via MCP in v0.2.
+Delete all memories for a session (GDPR / conversation teardown). Also deletes the matching `turn_sessions` row when turn contracts are in use. **REST-only** — not exposed via MCP in v0.2.
 
-- **Response:** `{"status": "success", "deleted": N, "bot_id": "...", "session_id": "..."}`
+- **Response:** `{"status": "success", "deleted": N, "turn_sessions_deleted": N, "bot_id": "...", "session_id": "..."}`
 
 ### `POST /memory/purge-expired`
 
-Delete **session-scoped** memories older than `MEMORY_SESSION_TTL_SECONDS` for one bot (no-op when TTL is `0`). Global rows are never purged by this endpoint.
+Delete **session-scoped** memories and expired `turn_sessions` older than `MEMORY_SESSION_TTL_SECONDS` (no-op when TTL is `0`). Global memory rows are never purged by this endpoint.
 
-- **Payload:** `{"bot_id": "uuid"}`
-- **Response:** `{"status": "success", "deleted": N, "bot_id": "..."}`
+- **Payload:** `{"bot_id": "uuid"}` or `{}` to purge all bots (operator / CronJob; under tenant auth `bot_id` is required)
+- **Response:** `{"status": "success", "deleted": N, "turn_sessions_deleted": N, "bot_id": "..."}`
 
 ### `POST /state/update`
 
@@ -205,14 +205,14 @@ Request/response detail: [hybrid-api.md](hybrid-api.md#get-ready).
 Single call for hybrid orchestrator pre-turn context.
 
 - **Payload:** `{"bot_id", "query", "top_k?", "session_id?"}`
-- **Response:** `identity`, `memories`, `system_prompt`, `inner_monologue`
+- **Response:** `identity`, `memories`, `system_prompt`, `inner_monologue`, optional `contract_context` when `runtime_config.turn_contract` is set and `session_id` is provided
 
 ### `POST /hybrid/complete`
 
-Post-turn ingest + optional reflect.
+Post-turn ingest + optional reflect. With an active turn contract, validates slots / advances the state machine before ingest.
 
-- **Payload:** `{"bot_id", "summary", "user_message?", "session_id?", "reflect": true, "reflect_async": true}`
-- **Response:** `200` with reflect result, or `202` when `reflect_async` is true
+- **Payload:** `{"bot_id", "summary", "user_message?", "session_id?", "reflect": true, "reflect_async": true, "filled_slots?", "intent?", "assistant_text?", "expected_version?", "idempotency_key?", "advance?", "expected_step?"}`
+- **Response:** `200` with reflect result (and optional `turn`), or `202` when `reflect_async` is true; `404`/`409`/`422` for `TURN_*` codes (see [hybrid-api.md](hybrid-api.md))
 
 ### `POST /v1/avatars/ensure`
 
@@ -221,7 +221,8 @@ Idempotent avatar registration by `external_key`.
 - **Payload:** `{"external_key": "string", "soul": { ... }, "runtime_config?": { ... }}`
 - **Response:** same as `POST /v1/avatars`
 
-`runtime_config.hybrid_prompt_template` — optional string template with `{name}`, `{role}`, `{description}`, `{inner_monologue}`, `{memories}`.
+`runtime_config.hybrid_prompt_template` — optional string template with `{name}`, `{role}`, `{description}`, `{inner_monologue}`, `{memories}`.  
+`runtime_config.turn_contract` — optional turn contract (validated against [`spec/turn-contract.schema.json`](../../spec/turn-contract.schema.json)).
 
 Hybrid prepare/complete JSON shapes: [hybrid-api.md](hybrid-api.md).
 

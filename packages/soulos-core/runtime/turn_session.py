@@ -195,17 +195,37 @@ async def ensure_turn_session(
     session_id: str,
     initial_step: str,
 ) -> dict[str, Any]:
+    """Return existing turn session, or insert once without resetting races.
+
+    Uses ``ON CONFLICT DO NOTHING`` so a concurrent prepare cannot wipe an
+    advanced session back to ``turn_version=0`` / empty slots.
+    """
     existing = await get_turn_session(db, bot_id, session_id)
     if existing:
         return existing
-    await upsert_turn_session(
-        db,
-        bot_id=bot_id,
-        session_id=session_id,
-        current_step=initial_step,
-        slots={},
-        turn_version=0,
+    await db.execute(
+        text(
+            """
+            INSERT INTO turn_sessions (
+                bot_id, session_id, current_step, slots, turn_version,
+                last_idempotency_key, last_success_response, updated_at
+            ) VALUES (
+                :bot_id, :session_id, :current_step, CAST(:slots AS jsonb), 0,
+                NULL, NULL, CURRENT_TIMESTAMP
+            )
+            ON CONFLICT (bot_id, session_id) DO NOTHING
+            """
+        ),
+        {
+            "bot_id": bot_id,
+            "session_id": session_id,
+            "current_step": initial_step,
+            "slots": json.dumps({}),
+        },
     )
+    existing = await get_turn_session(db, bot_id, session_id)
+    if existing:
+        return existing
     return {
         "current_step": initial_step,
         "slots": {},

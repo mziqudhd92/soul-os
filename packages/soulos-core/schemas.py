@@ -31,9 +31,14 @@ class MemoryForget(BaseModel):
 
 
 class MemoryPurgeExpired(BaseModel):
-    """Purge session-scoped memories past MEMORY_SESSION_TTL_SECONDS for one bot."""
+    """Purge session-scoped memories past MEMORY_SESSION_TTL_SECONDS.
 
-    bot_id: str
+    ``bot_id`` optional: omit to purge all bots (operator / CronJob; requires
+    auth off or gateway without tenant account). When auth is enabled with an
+    account, ``bot_id`` is required.
+    """
+
+    bot_id: str | None = None
 
 
 class ChatRequest(BaseModel):

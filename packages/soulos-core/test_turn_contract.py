@@ -262,3 +262,46 @@ def test_unknown_transition_target_rejected():
     )
     assert not result.ok
     assert "unknown" in (result.detail or "").lower() or "missing_step" in (result.detail or "")
+
+
+def test_unknown_next_target_rejected():
+    bad = {
+        "id": "bad-next.v1",
+        "initial_step": "a",
+        "steps": [
+            {
+                "id": "a",
+                "required_slots": ["x"],
+                "slot_schemas": {"x": {"type": "string"}},
+                "next": "nope",
+                "completion": {"all_required_slots": True},
+            }
+        ],
+    }
+    result = apply_turn(
+        bad,
+        current_step="a",
+        slots={},
+        filled_slots={"x": "ok"},
+        advance=True,
+    )
+    assert not result.ok
+    assert "Unknown next step" in (result.detail or "")
+
+
+def test_validate_turn_contract_schema_and_graph():
+    from runtime.turn_contract import validate_turn_contract
+
+    validate_turn_contract(BOOKING_CONTRACT)
+    with pytest.raises(TurnContractError):
+        validate_turn_contract({"id": "x", "initial_step": "missing", "steps": [{"id": "a"}]})
+    with pytest.raises(TurnContractError):
+        validate_turn_contract(
+            {
+                "id": "x",
+                "initial_step": "a",
+                "steps": [
+                    {"id": "a", "next": "gone", "completion": {"all_required_slots": True}}
+                ],
+            }
+        )

@@ -117,4 +117,52 @@ describe("SoulHybridClient", () => {
     expect(body.idempotency_key).toBeTruthy();
     expect(body.expected_version).toBe(0);
   });
+
+  it("runTurn merges contract appendix and passes expectedVersion", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          bot_id: "bot-1",
+          identity: {},
+          memories: [],
+          inner_monologue: "",
+          system_prompt: "You are Concierge.",
+          contract_context: {
+            expected_step: "collect_dates",
+            missing_slots: [],
+            filled_slots: {},
+            reject_tokens: [],
+            ui_progress: { step_index: 0, step_count: 1, label: "collect_dates" },
+            allowed_intents: [],
+            prompt_appendix: "[SYSTEM DIRECTIVE: Step collect_dates.]",
+            turn_version: 2,
+          },
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ status: "success", ingested: true, turn: { turn_version: 3 } }),
+      });
+    vi.stubGlobal("fetch", fetchMock);
+    const client = new SoulHybridClient({
+      baseUrl: "http://kernel.test",
+      botId: "bot-1",
+    });
+    const result = await client.runTurn(
+      "book",
+      async (prompt) => {
+        expect(prompt).toContain("[SYSTEM DIRECTIVE");
+        return "What dates?";
+      },
+      { sessionId: "s1", filledSlots: { check_in: "2026-09-01" }, intent: "provide_dates" }
+    );
+    expect(result.complete?.turn?.turn_version).toBe(3);
+    const body = JSON.parse(fetchMock.mock.calls[1][1].body);
+    expect(body.expected_version).toBe(2);
+    expect(body.expected_step).toBe("collect_dates");
+    expect(body.filled_slots.check_in).toBe("2026-09-01");
+    expect(body.assistant_text).toBe("What dates?");
+  });
 });
