@@ -22,7 +22,7 @@ Planned **SoulPacks** (in-repo persona packages) are authored under the same **M
 
 ## Web fonts (GitHub Pages / Studio CSS)
 
-The project site CSS may load **Figtree** and **Fraunces** from Google Fonts under the **SIL Open Font License 1.1 (OFL-1.1)**.
+The project site CSS may load **Sora** and **Source Sans 3** from Google Fonts under the **SIL Open Font License 1.1 (OFL-1.1)**.
 
 - CDN use for rendering HTML pages does not require vendoring font binaries into this repository.
 - **If font files are ever vendored** under `site-src/`, `packages/soulos-studio/`, or elsewhere in-tree, ship the OFL copyright notice and license text next to those files (do not relicense the fonts as MIT).

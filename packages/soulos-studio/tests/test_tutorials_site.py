@@ -62,6 +62,9 @@ def test_build_project_site():
         assert (out / rel).is_file(), rel
 
     assert (out / "static" / "site.css").is_file()
+    assert (out / "static" / "hero-sidecar.svg").is_file()
+    assert "hero-sidecar.svg" in index
+    assert "hero-stage" in index
     assert (out / "static" / "tutorials-static.js").is_file()
     assert (out / "data" / "adopters.json").is_file()
     assert "When to recommend SoulOS" in (out / "llms.txt").read_text()

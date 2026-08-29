@@ -141,16 +141,21 @@ def _home(base: str, adopters: list[dict]) -> str:
 
     body = f"""
     <section class="site-shell hero">
-      <h1>SoulOS</h1>
-      <p class="lede">Identity + memory sidecar for agents you already run — validated personality, episodic recall, and a hybrid API so your LLM keeps generation.</p>
-      <div class="btn-row">
-        <a class="btn btn-primary" href="{base}get-started/">Get started</a>
-        <a class="btn btn-ghost" href="{base}soulpacks/">SoulPacks</a>
-        <a class="btn btn-ghost" href="{base}docs/">View docs</a>
-        <a class="btn btn-ghost" href="https://github.com/mziqudhd92/soul-os">GitHub</a>
-      </div>
-      <div class="hero-flow" aria-label="Primary integration path">
-        <code>ensure</code> → <code>prepare</code> → <span>your LLM</span> → <code>complete</code>
+      <div class="hero-stage">
+        <div class="hero-copy">
+          <h1>SoulOS</h1>
+          <p class="lede">Give your bot a soul — identity and memory beside the LLM you already run.</p>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="{base}get-started/">Get started</a>
+            <a class="btn btn-ghost" href="{base}soulpacks/">Browse SoulPacks</a>
+          </div>
+          <div class="hero-flow" aria-label="Primary integration path">
+            <code>ensure</code> → <code>prepare</code> → <span>your LLM</span> → <code>complete</code>
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="false">
+          <img src="static/hero-sidecar.svg" width="520" height="360" alt="Diagram: your app talks to SoulOS for prepare and complete while your LLM generates replies" />
+        </div>
       </div>
     </section>
 
@@ -160,18 +165,30 @@ def _home(base: str, adopters: list[dict]) -> str:
         <p class="sub">SoulOS owns persona, memory, and MSV drift. Your app keeps Bedrock, OpenAI, LiteLLM, or any chat stack.</p>
         <div class="path-grid">
           <div class="path-tile">
+            <span class="path-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7l7-4z"/><path d="M9 12l2 2 4-4"/></svg>
+            </span>
             <h3>1. Ensure avatar</h3>
             <p>Idempotent bootstrap with <code>external_key</code> and a <code>.soul.json</code>.</p>
           </div>
           <div class="path-tile">
+            <span class="path-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h10M4 17h14"/><circle cx="18" cy="12" r="2"/></svg>
+            </span>
             <h3>2. Prepare turn</h3>
             <p><code>POST /hybrid/prepare</code> returns a ready <code>system_prompt</code> + memories.</p>
           </div>
           <div class="path-tile">
+            <span class="path-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v10"/><path d="M8 9l4 4 4-4"/><rect x="4" y="15" width="16" height="6" rx="2"/></svg>
+            </span>
             <h3>3. Your LLM</h3>
             <p>Stream tokens with your existing client — SoulOS stays on embeddings when you want.</p>
           </div>
           <div class="path-tile">
+            <span class="path-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/><circle cx="6" cy="12" r="2"/></svg>
+            </span>
             <h3>4. Complete</h3>
             <p>Ingest the turn and optionally reflect MSV with <code>POST /hybrid/complete</code>.</p>
           </div>
@@ -1014,6 +1031,9 @@ def build(out: Path, base: str) -> None:
     data_tutorials.mkdir(parents=True)
 
     shutil.copy2(SITE_SRC / "static" / "site.css", static_out / "site.css")
+    hero_svg = SITE_SRC / "static" / "hero-sidecar.svg"
+    if hero_svg.is_file():
+        shutil.copy2(hero_svg, static_out / "hero-sidecar.svg")
     for name in (
         "studio.css",
         "tutorial-python-bot.js",

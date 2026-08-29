@@ -12,6 +12,7 @@
 # python
 .venv/
 **/.venv/
+.venv-site/
 __pycache__/
 **/__pycache__/
 *.py[cod]
