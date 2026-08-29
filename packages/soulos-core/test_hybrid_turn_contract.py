@@ -424,3 +424,29 @@ async def test_complete_oversized_filled_slots_rejected_at_api(contract_app):
         )
         assert stale.status_code == 409
         assert stale.json()["code"] == "TURN_STATE_STALE"
+
+
+@pytest.mark.asyncio
+async def test_complete_step_mismatch_returns_422(contract_app):
+    async with AsyncClient(
+        transport=ASGITransport(app=contract_app), base_url="http://test"
+    ) as ac:
+        await ac.post(
+            "/hybrid/prepare",
+            json={"bot_id": BOT_ID, "query": "book", "session_id": "sess-step"},
+        )
+        r = await ac.post(
+            "/hybrid/complete",
+            json={
+                "bot_id": BOT_ID,
+                "summary": "ok",
+                "session_id": "sess-step",
+                "reflect": False,
+                "filled_slots": {"check_in": "2026-09-01", "check_out": "2026-09-05"},
+                "intent": "provide_dates",
+                "expected_version": 0,
+                "expected_step": "confirm",
+            },
+        )
+    assert r.status_code == 422
+    assert r.json()["code"] == "TURN_STEP_MISMATCH"

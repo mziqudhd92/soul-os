@@ -1,5 +1,6 @@
 import pytest
 from httpx import AsyncClient, ASGITransport
+from unittest.mock import patch
 from dependencies import get_db, get_embedder, get_llm_service
 from main import app
 
@@ -208,13 +209,16 @@ async def test_forget_memory_route():
 @pytest.mark.asyncio
 async def test_delete_session_memories_route():
     bot_id = "123e4567-e89b-12d3-a456-426614174000"
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-        response = await ac.delete(f"/memory/session/{bot_id}/sess-xyz")
+    with patch("main.delete_turn_session", return_value=1) as mock_turn_delete:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+            response = await ac.delete(f"/memory/session/{bot_id}/sess-xyz")
     assert response.status_code == 200
     body = response.json()
     assert body["status"] == "success"
     assert body["deleted"] == 2
+    assert body["turn_sessions_deleted"] == 1
     assert body["session_id"] == "sess-xyz"
+    mock_turn_delete.assert_awaited_once()
 
 
 @pytest.mark.asyncio
