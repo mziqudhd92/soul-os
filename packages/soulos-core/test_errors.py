@@ -40,7 +40,7 @@ def test_problem_body_shape():
 async def test_hybrid_prepare_bot_not_found_problem():
     from unittest.mock import AsyncMock, patch
 
-    with patch("main.fetch_bot_identity", new_callable=AsyncMock, return_value=None):
+    with patch("routes.hybrid.fetch_bot_identity", new_callable=AsyncMock, return_value=None):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
             response = await ac.post(
                 "/hybrid/prepare",

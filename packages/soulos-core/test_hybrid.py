@@ -33,7 +33,7 @@ async def test_ensure_avatar():
         "baseline_msv": VALID_SOUL["baseline_msv"],
         "current_msv": VALID_SOUL["baseline_msv"],
     }
-    with patch("main.ensure_avatar_record", new_callable=AsyncMock) as mock_ensure:
+    with patch("routes.avatars.ensure_avatar_record", new_callable=AsyncMock) as mock_ensure:
         mock_ensure.return_value = record
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
             response = await ac.post(

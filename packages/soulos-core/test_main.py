@@ -209,7 +209,7 @@ async def test_forget_memory_route():
 @pytest.mark.asyncio
 async def test_delete_session_memories_route():
     bot_id = "123e4567-e89b-12d3-a456-426614174000"
-    with patch("main.delete_turn_session", return_value=1) as mock_turn_delete:
+    with patch("routes.memory.delete_turn_session", return_value=1) as mock_turn_delete:
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
             response = await ac.delete(f"/memory/session/{bot_id}/sess-xyz")
     assert response.status_code == 200
@@ -252,3 +252,18 @@ async def test_chat_generate():
 
     assert response.status_code == 200
     assert "Mock response" in response.text
+
+
+def test_kernel_route_modules_mounted():
+    paths = {getattr(route, "path", "") for route in app.routes}
+    for expected in (
+        "/health",
+        "/ready",
+        "/hybrid/prepare",
+        "/hybrid/complete",
+        "/v1/avatars",
+        "/memory/ingest",
+        "/chat/generate",
+        "/mcp/sse",
+    ):
+        assert expected in paths, f"missing route {expected}"

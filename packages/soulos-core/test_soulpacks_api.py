@@ -79,7 +79,7 @@ async def test_import_persist_true_ensure():
         "baseline_msv": {},
         "current_msv": {},
     }
-    with patch("main.ensure_avatar_record", new_callable=AsyncMock, return_value=fake):
+    with patch("routes.avatars.ensure_avatar_record", new_callable=AsyncMock, return_value=fake):
         async with AsyncClient(
             transport=ASGITransport(app=app), base_url="http://test"
         ) as ac:

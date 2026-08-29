@@ -39,8 +39,8 @@
     <circle cx="382" cy="128" r="28" fill="#ffffff" opacity="0.22"/>
     <text x="382" y="136" text-anchor="middle" font-family="system-ui,sans-serif" font-size="28" font-weight="700" fill="#ffffff">S</text>
     <text x="382" y="178" text-anchor="middle" font-family="system-ui,sans-serif" font-size="16" font-weight="700" fill="#ffffff">SoulOS</text>
-    <text x="382" y="202" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#d8f4ef">persona · memory</text>
-    <text x="382" y="222" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#d8f4ef">prepare · complete</text>
+    <text x="382" y="202" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#d8f4ef">persona &#183; memory</text>
+    <text x="382" y="222" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#d8f4ef">prepare &#183; complete</text>
   </g>
 
   <!-- Bridge arrows -->

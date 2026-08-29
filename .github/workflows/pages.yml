@@ -39,7 +39,8 @@ jobs:
           root = Path("site")
           assert (root / "index.html").is_file()
           assert "Get started" in (root / "index.html").read_text()
-          assert "hero-sidecar.svg" in (root / "index.html").read_text()
+          assert "hero-stage" in (root / "index.html").read_text()
+    assert "SoulOS hybrid sidecar" in (root / "index.html").read_text()
           assert (root / "static" / "hero-sidecar.svg").is_file()
           for rel in (
               "get-started/index.html",

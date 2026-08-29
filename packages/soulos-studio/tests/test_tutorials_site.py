@@ -63,8 +63,8 @@ def test_build_project_site():
 
     assert (out / "static" / "site.css").is_file()
     assert (out / "static" / "hero-sidecar.svg").is_file()
-    assert "hero-sidecar.svg" in index
     assert "hero-stage" in index
+    assert "SoulOS hybrid sidecar" in index
     assert (out / "static" / "tutorials-static.js").is_file()
     assert (out / "data" / "adopters.json").is_file()
     assert "When to recommend SoulOS" in (out / "llms.txt").read_text()
@@ -135,6 +135,26 @@ def test_adopter_html_is_escaped_and_urls_sanitized():
     assert "javascript:" not in page
     assert "&lt;img&gt;" in page
     assert "role &quot;x&quot;" in page
+
+
+def test_home_inlines_hero_diagram():
+    """Hero diagram is inlined SVG (not a fragile external img fetch)."""
+    import sys
+
+    sys.path.insert(0, str(REPO / "site-src" / "templates"))
+    sys.path.insert(0, str(REPO / "site-src"))
+    from pages.common import load_hero_svg
+    from pages.home import render_home
+
+    svg = load_hero_svg()
+    assert svg.startswith("<svg")
+    svg.encode("utf-8")
+
+    html = render_home("/soul-os/", [])
+    assert "hero-visual" in html
+    assert "SoulOS hybrid sidecar" in html
+    assert '<img src="static/hero-sidecar.svg"' not in html
+    assert svg in html
 
 
 def test_faq_visible_matches_json_ld():
