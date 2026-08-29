@@ -22,7 +22,7 @@ def main() -> int:
     committed = json.loads(COMMITTED.read_text(encoding="utf-8"))
     if live != committed:
         print(
-            "ERROR: OpenAPI drift — run: python3 scripts/export-openapi.py",
+            "ERROR: OpenAPI drift — run: npm run openapi:export",
             file=sys.stderr,
         )
         return 1

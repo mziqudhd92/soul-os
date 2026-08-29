@@ -7,6 +7,9 @@
   "paths": {
     "/health": {
       "get": {
+        "tags": [
+          "health"
+        ],
         "summary": "Health Check",
         "operationId": "health_check_health_get",
         "responses": {
@@ -23,6 +26,9 @@
     },
     "/ready": {
       "get": {
+        "tags": [
+          "health"
+        ],
         "summary": "Ready Check",
         "operationId": "ready_check_ready_get",
         "responses": {
@@ -39,6 +45,9 @@
     },
     "/v1/avatars": {
       "post": {
+        "tags": [
+          "avatars"
+        ],
         "summary": "Register Avatar",
         "operationId": "register_avatar_v1_avatars_post",
         "parameters": [
@@ -99,6 +108,9 @@
     },
     "/v1/avatars/ensure": {
       "post": {
+        "tags": [
+          "avatars"
+        ],
         "summary": "Ensure Avatar",
         "operationId": "ensure_avatar_v1_avatars_ensure_post",
         "parameters": [
@@ -169,6 +181,9 @@
     },
     "/v1/soulpacks": {
       "get": {
+        "tags": [
+          "avatars"
+        ],
         "summary": "Get Soulpacks",
         "operationId": "get_soulpacks_v1_soulpacks_get",
         "parameters": [
@@ -213,6 +228,9 @@
     },
     "/v1/avatars/import-soulpack": {
       "post": {
+        "tags": [
+          "avatars"
+        ],
         "summary": "Import Soulpack Avatar",
         "operationId": "import_soulpack_avatar_v1_avatars_import_soulpack_post",
         "parameters": [
@@ -283,6 +301,9 @@
     },
     "/memory/ingest": {
       "post": {
+        "tags": [
+          "memory"
+        ],
         "summary": "Ingest Memory",
         "operationId": "ingest_memory_memory_ingest_post",
         "parameters": [
@@ -353,6 +374,9 @@
     },
     "/memory/retrieve": {
       "post": {
+        "tags": [
+          "memory"
+        ],
         "summary": "Retrieve Memory",
         "operationId": "retrieve_memory_memory_retrieve_post",
         "parameters": [
@@ -423,6 +447,9 @@
     },
     "/memory/forget": {
       "post": {
+        "tags": [
+          "memory"
+        ],
         "summary": "Forget Memory Route",
         "operationId": "forget_memory_route_memory_forget_post",
         "parameters": [
@@ -493,6 +520,9 @@
     },
     "/memory/session/{bot_id}/{session_id}": {
       "delete": {
+        "tags": [
+          "memory"
+        ],
         "summary": "Delete Session Memories Route",
         "operationId": "delete_session_memories_route_memory_session__bot_id___session_id__delete",
         "parameters": [
@@ -571,6 +601,9 @@
     },
     "/memory/purge-expired": {
       "post": {
+        "tags": [
+          "memory"
+        ],
         "summary": "Purge Expired Memories Route",
         "description": "Delete session-scoped memories and turn_sessions past MEMORY_SESSION_TTL_SECONDS.",
         "operationId": "purge_expired_memories_route_memory_purge_expired_post",
@@ -640,8 +673,84 @@
         }
       }
     },
+    "/memory/sync": {
+      "post": {
+        "tags": [
+          "memory"
+        ],
+        "summary": "Sync Memory",
+        "operationId": "sync_memory_memory_sync_post",
+        "parameters": [
+          {
+            "name": "X-SoulOS-Account-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Soulos-Account-Id"
+            }
+          },
+          {
+            "name": "X-SoulOS-Gateway-Secret",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Soulos-Gateway-Secret"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemorySync"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/hybrid/prepare": {
       "post": {
+        "tags": [
+          "hybrid"
+        ],
         "summary": "Hybrid Prepare",
         "operationId": "hybrid_prepare_hybrid_prepare_post",
         "parameters": [
@@ -712,6 +821,9 @@
     },
     "/hybrid/complete": {
       "post": {
+        "tags": [
+          "hybrid"
+        ],
         "summary": "Hybrid Complete",
         "operationId": "hybrid_complete_hybrid_complete_post",
         "parameters": [
@@ -782,78 +894,11 @@
         }
       }
     },
-    "/memory/sync": {
-      "post": {
-        "summary": "Sync Memory",
-        "operationId": "sync_memory_memory_sync_post",
-        "parameters": [
-          {
-            "name": "X-SoulOS-Account-Id",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Soulos-Account-Id"
-            }
-          },
-          {
-            "name": "X-SoulOS-Gateway-Secret",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Soulos-Gateway-Secret"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MemorySync"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/chat/generate": {
       "post": {
+        "tags": [
+          "chat"
+        ],
         "summary": "Chat Generate",
         "operationId": "chat_generate_chat_generate_post",
         "parameters": [
@@ -924,6 +969,9 @@
     },
     "/state/update": {
       "post": {
+        "tags": [
+          "chat"
+        ],
         "summary": "Update State",
         "operationId": "update_state_state_update_post",
         "parameters": [
@@ -994,6 +1042,9 @@
     },
     "/state/reflect": {
       "post": {
+        "tags": [
+          "chat"
+        ],
         "summary": "Reflect State",
         "description": "Run System 2 reflector for hybrid integrations that skip /chat/generate.",
         "operationId": "reflect_state_state_reflect_post",
@@ -1065,6 +1116,9 @@
     },
     "/bot/{bot_id}/identity": {
       "get": {
+        "tags": [
+          "chat"
+        ],
         "summary": "Get Bot Identity Route",
         "operationId": "get_bot_identity_route_bot__bot_id__identity_get",
         "parameters": [
@@ -1134,6 +1188,9 @@
     },
     "/bot/{bot_id}/memories": {
       "get": {
+        "tags": [
+          "chat"
+        ],
         "summary": "Get Bot Memories",
         "operationId": "get_bot_memories_bot__bot_id__memories_get",
         "parameters": [
@@ -1229,6 +1286,9 @@
     },
     "/mcp/sse": {
       "get": {
+        "tags": [
+          "mcp"
+        ],
         "summary": "Handle Sse",
         "operationId": "handle_sse_mcp_sse_get",
         "responses": {
@@ -1245,6 +1305,9 @@
     },
     "/mcp/messages": {
       "post": {
+        "tags": [
+          "mcp"
+        ],
         "summary": "Handle Messages",
         "operationId": "handle_messages_mcp_messages_post",
         "responses": {
