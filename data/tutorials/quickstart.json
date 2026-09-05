@@ -1,0 +1,190 @@
+{
+  "tutorial_id": "quickstart",
+  "title": "15-minute quickstart",
+  "category": "Getting started",
+  "duration": "15 min",
+  "format": "interactive_terminal",
+  "nerd_fact_default": "One kernel \u00b7 many souls \u00b7 POST /v1/avatars compiles .soul on the fly.",
+  "steps": [
+    {
+      "id": "boot",
+      "label": "Boot",
+      "title": "Start the stack",
+      "subtitle": "Kernel + Postgres + Ollama via Docker Compose.",
+      "nerd_fact": "soulos-kernel :8000 \u00b7 Studio optional :8765",
+      "script": [
+        {
+          "type": "comment",
+          "text": "# prerequisites: Docker installed"
+        },
+        {
+          "type": "run",
+          "cmd": "git clone https://github.com/mziqudhd92/soul-os.git && cd soul-os",
+          "output": [
+            "Cloning into 'soul-os'... done."
+          ]
+        },
+        {
+          "type": "run",
+          "cmd": "docker compose up --build",
+          "output": [
+            "\u2714 Container senticore-soulos-kernel  Started",
+            "\u2714 Kernel listening on http://localhost:8000",
+            "\u2714 Studio optional \u2192 http://localhost:8765"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "health",
+      "label": "Health",
+      "title": "Verify kernel",
+      "subtitle": "Smoke test before registering souls.",
+      "script": [
+        {
+          "type": "run",
+          "cmd": "curl -s -o /dev/null -w '%{http_code}' http://localhost:8000/health",
+          "output": [
+            "200"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "support-register",
+      "label": "Support",
+      "title": "Path A \u2014 Register support agent",
+      "subtitle": "Same API accepts .soul (markdown) or .soul.json.",
+      "path": "A",
+      "script": [
+        {
+          "type": "run",
+          "cmd": "curl -s -X POST http://localhost:8000/v1/avatars \\n  -H 'Content-Type: application/json' \\n  -d @examples/support-bot/support-bot.soul.json \\n  | tee /tmp/support-register.json",
+          "output": [
+            "{",
+            "  \"id\": \"7f3a9c2e-8b1d-4e5f-9a0c-1d2e3f4a5b6c\",",
+            "  \"name\": \"Site Support\",",
+            "  \"role\": \"Customer Support Agent\",",
+            "  \"baseline_msv\": { \"hexaco\": { \"H\": 0.95, \"A\": 0.92, ... } }",
+            "}"
+          ]
+        },
+        {
+          "type": "run",
+          "cmd": "export SUPPORT_ID=$(python3 -c \"import json; print(json.load(open('/tmp/support-register.json'))['id'])\")",
+          "output": [
+            "bot_id=7f3a9c2e-8b1d-4e5f-9a0c-1d2e3f4a5b6c"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "support-memory",
+      "label": "Memory",
+      "title": "Teach refund policy",
+      "subtitle": "Facts live in pgvector \u2014 not in a giant system prompt.",
+      "path": "A",
+      "script": [
+        {
+          "type": "run",
+          "cmd": "curl -X POST http://localhost:8000/memory/ingest \\n  -H 'Content-Type: application/json' \\n  -d '{\"bot_id\":\"7f3a9c2e-8b1d-4e5f-9a0c-1d2e3f4a5b6c\",\"content\":\"Full refunds within 30 days of purchase.\"}'",
+          "output": [
+            "{\"status\":\"success\",\"memory_id\":\"mem_01h...\"}"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "support-chat",
+      "label": "Chat",
+      "title": "Stream SSE chat",
+      "subtitle": "Watch message chunks + msv_update + cognitive_state.",
+      "path": "A",
+      "script": [
+        {
+          "type": "run",
+          "cmd": "curl -N -X POST http://localhost:8000/chat/generate \\n  -H 'Content-Type: application/json' \\n  -d '{\"bot_id\":\"7f3a9c2e-8b1d-4e5f-9a0c-1d2e3f4a5b6c\",\"message\":\"Can I get a refund after 20 days?\"}'",
+          "output": [
+            "event: cognitive_state",
+            "data: {\"current_path\":\"system_1_heuristic\",\"system_1\":{\"confidence_score\":0.85,\"latency_ms\":38}}",
+            "",
+            "event: message",
+            "data: {\"text\":\"Yes \u2014 refunds are available within \"}",
+            "",
+            "event: message",
+            "data: {\"text\":\"30 days of purchase.\"}",
+            "",
+            "event: msv_update",
+            "data: {\"epistemic_uncertainty\":0.11,\"inner_monologue\":\"Policy recall succeeded.\"}"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dev-register",
+      "label": "Dev twin",
+      "title": "Path B \u2014 Register dev twin",
+      "subtitle": "Same kernel, different soul file + memory.",
+      "path": "B",
+      "script": [
+        {
+          "type": "run",
+          "cmd": "curl -s -X POST http://localhost:8000/v1/avatars \\n  -d @examples/dev-twin/dev-twin.soul.json | tee /tmp/dev-register.json",
+          "output": [
+            "{",
+            "  \"id\": \"2c8e1f4a-9b3d-5e6f-7a8b-9c0d1e2f3a4b\",",
+            "  \"name\": \"Dev Twin\",",
+            "  \"role\": \"Senior Engineer Assistant\",",
+            "}"
+          ]
+        },
+        {
+          "type": "run",
+          "cmd": "curl -X POST http://localhost:8000/memory/ingest -d '{\"bot_id\":\"2c8e1f4a-9b3d-5e6f-7a8b-9c0d1e2f3a4b\",\"content\":\"POST /v1/avatars registers validated HEXACO souls.\"}'",
+          "output": [
+            "{\"status\":\"success\"}"
+          ]
+        },
+        {
+          "type": "run",
+          "cmd": "curl -N -X POST http://localhost:8000/chat/generate -d '{\"bot_id\":\"2c8e1f4a-9b3d-5e6f-7a8b-9c0d1e2f3a4b\",\"message\":\"How do I register an avatar?\"}'",
+          "output": [
+            "event: message",
+            "data: {\"text\":\"Use POST /v1/avatars with .soul or .soul.json \u2014 returns id for chat.\"}"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "done",
+      "label": "Done",
+      "title": "You proved the model",
+      "subtitle": "Two avatars, one kernel \u2014 only soul + memory differ.",
+      "script": [
+        {
+          "type": "comment",
+          "text": "# Path A  support-bot.soul.json  + FAQ memory  \u2192 empathetic refunds"
+        },
+        {
+          "type": "comment",
+          "text": "# Path B  dev-twin.soul.json   + API facts   \u2192 technical answers"
+        },
+        {
+          "type": "comment",
+          "text": "# Next: Python bot guide or Soul Studio \u2192 Deploy"
+        },
+        {
+          "type": "run",
+          "cmd": "echo 'ready for production wiring'",
+          "output": [
+            "\u2713 avatar_id persisted",
+            "\u2713 episodic memory ingested",
+            "\u2713 SSE telemetry observed",
+            "",
+            "\u2192 https://mziqudhd92.github.io/soul-os/?tutorial=python-bot"
+          ]
+        }
+      ]
+    }
+  ]
+}

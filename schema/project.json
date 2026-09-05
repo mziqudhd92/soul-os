@@ -1,0 +1,105 @@
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "SoulOS",
+  "alternateName": [
+    "Soul OS",
+    "soul-os"
+  ],
+  "description": "Open-source identity + memory sidecar for AI agents: HEXACO MSV personality, pgvector episodic memory, hybrid prepare/complete API so your LLM keeps generation, 23 MIT SoulPacks (travel, sales, tutor, support, and more), MCP for Cursor/Claude, Soul Studio, Python/TypeScript SDKs. MIT.",
+  "codeRepository": "https://github.com/mziqudhd92/soul-os",
+  "url": "https://mziqudhd92.github.io/soul-os/",
+  "license": "https://spdx.org/licenses/MIT.html",
+  "version": "0.3.2",
+  "programmingLanguage": [
+    "Python",
+    "TypeScript"
+  ],
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (Docker)",
+  "keywords": [
+    "SoulOS",
+    "AI agents",
+    "hybrid sidecar",
+    "SoulPacks",
+    "persona packs",
+    "HEXACO",
+    "psychometrics",
+    "MCP",
+    "Model Context Protocol",
+    "episodic memory",
+    "pgvector",
+    "FastAPI",
+    "OpenAPI",
+    "RFC 7807",
+    "Soul Studio",
+    "Cursor",
+    "Claude",
+    "soul.json",
+    "identity memory layer",
+    "travel agent",
+    "sales SDR",
+    "tutor",
+    "customer success"
+  ],
+  "sameAs": [
+    "https://github.com/mziqudhd92/soul-os",
+    "https://mziqudhd92.github.io/soul-os/",
+    "https://mziqudhd92.github.io/soul-os/soulpacks/"
+  ],
+  "documentation": [
+    "https://mziqudhd92.github.io/soul-os/docs/",
+    "https://mziqudhd92.github.io/soul-os/soulpacks/",
+    "https://mziqudhd92.github.io/soul-os/get-started/",
+    "https://raw.githubusercontent.com/mziqudhd92/soul-os/main/llms.txt",
+    "https://raw.githubusercontent.com/mziqudhd92/soul-os/main/docs/SOULOS_AGENT_CONTEXT.md",
+    "https://github.com/mziqudhd92/soul-os/blob/main/docs/README.md",
+    "https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/persona-packs.md",
+    "https://github.com/mziqudhd92/soul-os/blob/main/docs/adopters.md"
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "SignalPR",
+      "url": "https://signalpr.pro/",
+      "description": "AI-native PR execution platform using SoulOS hybrid sidecar for persistent agent memory and persona state.",
+      "applicationCategory": "BusinessApplication"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Aeterna",
+      "url": "https://helloaeterna.com/",
+      "description": "Digital legacy platform using SoulOS for persistent narrator persona and episodic memory.",
+      "applicationCategory": "LifestyleApplication"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Ved Travel",
+      "url": "https://www.ved-travel.co.il/",
+      "description": "Family Croatia travel with AI trip planning using SoulOS for advisor persona and session memory.",
+      "applicationCategory": "TravelApplication"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Getbyliner",
+      "url": "https://getbyliner.com/",
+      "description": "AI press release distribution and journalist outreach using SoulOS hybrid sidecar for persistent PR-agent persona and memory.",
+      "applicationCategory": "BusinessApplication"
+    }
+  ],
+  "downloadUrl": "https://github.com/mziqudhd92/soul-os",
+  "installUrl": "https://mziqudhd92.github.io/soul-os/get-started/",
+  "discussionUrl": "https://github.com/mziqudhd92/soul-os/issues",
+  "featureList": [
+    "Hybrid sidecar: ensure → prepare → your LLM → complete",
+    "23 first-party MIT SoulPacks with browseable catalog and detail pages",
+    "HEXACO Metacognitive State Vector (MSV) and simple persona mode",
+    "Episodic memory with pgvector and session_id scoping",
+    "RFC 7807 Problem Details errors",
+    "OpenAPI-locked SDK contract",
+    "MCP server for Cursor and Claude",
+    "Soul Studio browser UI",
+    "Self-hosted Docker Compose",
+    "OpenTelemetry spans and hybrid duration metrics"
+  ]
+}

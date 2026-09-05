@@ -1,0 +1,93 @@
+{
+  "tutorial_id": "python-bot",
+  "title": "Python bot integration",
+  "category": "Guides",
+  "duration": "25 min",
+  "format": "interactive",
+  "steps": [
+    {
+      "id": "intro",
+      "label": "Why",
+      "title": "Why SoulOS?",
+      "subtitle": "Replace fragile system prompts with a validated soul + memory.",
+      "kind": "intro",
+      "arch_focus": [
+        "bot",
+        "sdk",
+        "kernel",
+        "db"
+      ]
+    },
+    {
+      "id": "soul",
+      "label": "Soul",
+      "title": "Create a soul file",
+      "subtitle": "Export `.soul` or `.soul.json` from Studio or copy an example.",
+      "kind": "code",
+      "code": "---\nname: Acme Support\nrole: Customer Support Agent\nattachment_style: Secure\npsychology:\n  hexaco:\n    honesty_humility: 0.9\n    agreeableness: 0.9\n  epistemic_uncertainty: 0.15\n  inner_monologue: Ready to help with clarity.\n---\n\nYou help with orders and refunds. Be concise and empathetic.",
+      "language": "markdown",
+      "action": "open_studio",
+      "arch_focus": [
+        "bot"
+      ],
+      "nerd_fact": "YAML front matter compiles to validated soul dict \u2014 same schema as .soul.json."
+    },
+    {
+      "id": "register",
+      "label": "Register",
+      "title": "Register once",
+      "subtitle": "Persist `avatar_id` \u2014 do not register on every message.",
+      "kind": "code",
+      "code": "import asyncio\nfrom soulos.client import SoulOSClient\n\nasync def bootstrap():\n    soul = SoulOSClient(base_url=\"http://localhost:8000\")\n    avatar = await soul.register_avatar(\"my-bot.soul\")\n    print(f\"avatar_id={avatar['id']}\")\n    return avatar[\"id\"]\n\nasyncio.run(bootstrap())",
+      "language": "python",
+      "action": "check_kernel",
+      "arch_focus": [
+        "bot",
+        "sdk",
+        "kernel"
+      ],
+      "nerd_fact": "POST /v1/avatars accepts raw .soul bodies \u2014 compiler runs server-side."
+    },
+    {
+      "id": "memory",
+      "label": "Memory",
+      "title": "Teach the bot",
+      "subtitle": "Ingest facts via API or commit `.soul-memory/` and sync.",
+      "kind": "memory_playground",
+      "code": "await soul.ingest_memory(avatar_id, \"Refunds within 30 days.\")\n\n# Git ledger (team repos)\n# soulos memory-append \"Refunds within 30 days.\"\n# await soul.sync_memory(avatar_id, \"/path/to/project\")",
+      "arch_focus": [
+        "kernel",
+        "db"
+      ],
+      "nerd_fact": "pgvector cosine search + optional .soul-memory/ git ledger sync."
+    },
+    {
+      "id": "chat",
+      "label": "SSE",
+      "title": "Stream chat + telemetry",
+      "subtitle": "Handle `message`, `msv_update`, and `cognitive_state` events.",
+      "kind": "sse_playground",
+      "arch_focus": [
+        "bot",
+        "sdk",
+        "kernel",
+        "db"
+      ],
+      "nerd_fact": "Dual-process pipeline emits cognitive_state alongside token chunks."
+    },
+    {
+      "id": "wire",
+      "label": "Wire",
+      "title": "Wire your bot loop",
+      "subtitle": "Swap your LLM call for `send_message` in Discord, FastAPI, or REPL.",
+      "kind": "code",
+      "code": "async def handle_user_message(text: str) -> str:\n    parts = []\n    async for event in soul.send_message(AVATAR_ID, text):\n        if event[\"type\"] == \"message\":\n            parts.append(event[\"text\"])\n    return \"\".join(parts)",
+      "language": "python",
+      "action": "complete",
+      "arch_focus": [
+        "bot"
+      ],
+      "nerd_fact": "Same async iterator pattern works for Discord, Telegram, FastAPI SSE proxies."
+    }
+  ]
+}

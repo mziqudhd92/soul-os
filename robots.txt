@@ -1,0 +1,9 @@
+# SoulOS — allow crawlers & AI agents; truth stays in the GitHub repo
+User-agent: *
+Allow: /
+
+Sitemap: https://mziqudhd92.github.io/soul-os/sitemap.xml
+
+# Agent / GEO indexes (mirrored from repo root on each deploy)
+# https://raw.githubusercontent.com/mziqudhd92/soul-os/main/llms.txt
+# https://mziqudhd92.github.io/soul-os/llms.txt

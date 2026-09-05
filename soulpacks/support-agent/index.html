@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Site Support — SoulPack — SoulOS</title>
+  <meta name="description" content="Site Support (support-agent): Customer Support Agent. First-party MIT SoulPack for SoulOS." />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <link rel="canonical" href="https://mziqudhd92.github.io/soul-os/soulpacks/support-agent/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="SoulOS" />
+  <meta property="og:title" content="Site Support — SoulPack — SoulOS" />
+  <meta property="og:description" content="Site Support (support-agent): Customer Support Agent. First-party MIT SoulPack for SoulOS." />
+  <meta property="og:url" content="https://mziqudhd92.github.io/soul-os/soulpacks/support-agent/" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Site Support — SoulPack — SoulOS" />
+  <meta name="twitter:description" content="Site Support (support-agent): Customer Support Agent. First-party MIT SoulPack for SoulOS." />
+  <link rel="alternate" type="text/plain" title="llms.txt" href="https://mziqudhd92.github.io/soul-os/llms.txt" />
+  <link rel="alternate" type="text/plain" title="llms-full.txt" href="https://mziqudhd92.github.io/soul-os/llms-full.txt" />
+  <link rel="describedby" href="https://mziqudhd92.github.io/soul-os/schema/project.json" />
+  <base href="/soul-os/" />
+  <link rel="stylesheet" href="static/site.css" />
+  
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CreativeWork",
+  "name": "Site Support",
+  "alternateName": "support-agent",
+  "description": "Customer Support Agent. First-party MIT SoulPack for SoulOS hybrid sidecar.",
+  "license": "https://spdx.org/licenses/MIT.html",
+  "url": "https://mziqudhd92.github.io/soul-os/soulpacks/support-agent/",
+  "isPartOf": {
+    "@type": "CollectionPage",
+    "name": "SoulOS SoulPacks",
+    "url": "https://mziqudhd92.github.io/soul-os/soulpacks/"
+  },
+  "keywords": [
+    "support",
+    "billing",
+    "customer"
+  ],
+  "codeRepository": "https://github.com/mziqudhd92/soul-os/tree/main/packs/soulpacks/support-agent"
+}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-shell site-header-inner">
+      <a class="brand" href="/soul-os/">
+        <span class="brand-mark">S</span>
+        SoulOS
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="/soul-os/get-started/">Get started</a>
+        <a href="/soul-os/soulpacks/" aria-current="page">SoulPacks</a>
+        <a href="/soul-os/docs/">Docs</a>
+        <a href="/soul-os/tutorials/" class="hide-sm">Tutorials</a>
+        <a href="/soul-os/adopters/" class="hide-sm">Adopters</a>
+        <a href="/soul-os/agents/" class="hide-sm">Agents</a>
+        <a href="/soul-os/community/" class="hide-sm">Community</a>
+        <a class="btn btn-ghost" style="padding:0.4rem 0.85rem" href="https://github.com/mziqudhd92/soul-os" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="site-shell page-hero">
+      <p class="sub"><a href="/soul-os/soulpacks/">← All SoulPacks</a></p>
+      <h1>Site Support</h1>
+      <p>Customer Support Agent</p>
+      <p class="sub" style="margin-top:0.75rem"><code>support-agent</code> · v1.0.0 · MIT · support, billing, customer</p>
+      <div class="btn-row" style="margin-top:1.25rem">
+        <a class="btn btn-primary" href="/soul-os/get-started/">Use with sidecar</a>
+        <a class="btn btn-ghost" href="https://github.com/mziqudhd92/soul-os/tree/main/packs/soulpacks/support-agent">Source on GitHub</a>
+      </div>
+    </section>
+
+    <section class="site-shell prose-block">
+      <h2>What this pack is for</h2>
+      <div class="pack-doc" style="white-space:pre-wrap;line-height:1.55;margin:1rem 0 2rem">You help users with billing, refunds, and product questions.
+Escalate to a human when epistemic uncertainty is high or policy is unclear.</div>
+
+      <h2>Identity</h2>
+      <div class="pack-doc" style="white-space:pre-wrap;line-height:1.55;margin:1rem 0 2rem"># Identity
+
+You are Site Support — a Customer Support Agent for product and billing help.</div>
+
+      <h2>Style</h2>
+      <div class="pack-doc" style="white-space:pre-wrap;line-height:1.55;margin:1rem 0 2rem"># Style
+
+Be concise and empathetic. Prefer short paragraphs and clear next steps.</div>
+
+      <h2>Import</h2>
+      <pre><code>curl -s -X POST http://localhost:8000/v1/avatars/import-soulpack \
+  -H 'content-type: application/json' \
+  -d '{"pack_id":"support-agent","persist":true}'</code></pre>
+      <p>Or Studio → <strong>SoulPacks</strong> → Open / Deploy. Guide:
+      <a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/persona-packs.md">persona-packs.md</a>.</p>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-shell site-footer-inner">
+      <div>SoulOS — MIT · v0.3.2 · Identity + memory sidecar for agents you already run</div>
+      <div class="footer-links">
+        <a href="/soul-os/docs/">Docs</a>
+        <a href="/soul-os/soulpacks/">SoulPacks</a>
+        <a href="/soul-os/tutorials/">Tutorials</a>
+        <a href="/soul-os/agents/">Agents / GEO</a>
+        <a href="/soul-os/llms.txt">llms.txt</a>
+        <a href="/soul-os/sitemap.xml">Sitemap</a>
+        <a href="https://github.com/mziqudhd92/soul-os/blob/main/CHANGELOG.md">Changelog</a>
+        <a href="https://github.com/mziqudhd92/soul-os/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</a>
+        <a href="https://github.com/mziqudhd92/soul-os">GitHub</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

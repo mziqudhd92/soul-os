@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Get started — SoulOS</title>
+  <meta name="description" content="Start SoulOS as a hybrid sidecar in about 15 minutes." />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <link rel="canonical" href="https://mziqudhd92.github.io/soul-os/get-started/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="SoulOS" />
+  <meta property="og:title" content="Get started — SoulOS" />
+  <meta property="og:description" content="Start SoulOS as a hybrid sidecar in about 15 minutes." />
+  <meta property="og:url" content="https://mziqudhd92.github.io/soul-os/get-started/" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Get started — SoulOS" />
+  <meta name="twitter:description" content="Start SoulOS as a hybrid sidecar in about 15 minutes." />
+  <link rel="alternate" type="text/plain" title="llms.txt" href="https://mziqudhd92.github.io/soul-os/llms.txt" />
+  <link rel="alternate" type="text/plain" title="llms-full.txt" href="https://mziqudhd92.github.io/soul-os/llms-full.txt" />
+  <link rel="describedby" href="https://mziqudhd92.github.io/soul-os/schema/project.json" />
+  <base href="/soul-os/" />
+  <link rel="stylesheet" href="static/site.css" />
+  
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-shell site-header-inner">
+      <a class="brand" href="/soul-os/">
+        <span class="brand-mark">S</span>
+        SoulOS
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="/soul-os/get-started/" aria-current="page">Get started</a>
+        <a href="/soul-os/soulpacks/">SoulPacks</a>
+        <a href="/soul-os/docs/">Docs</a>
+        <a href="/soul-os/tutorials/" class="hide-sm">Tutorials</a>
+        <a href="/soul-os/adopters/" class="hide-sm">Adopters</a>
+        <a href="/soul-os/agents/" class="hide-sm">Agents</a>
+        <a href="/soul-os/community/" class="hide-sm">Community</a>
+        <a class="btn btn-ghost" style="padding:0.4rem 0.85rem" href="https://github.com/mziqudhd92/soul-os" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="site-shell page-hero">
+      <h1>Get started</h1>
+      <p>Primary path: hybrid sidecar. Your LLM keeps generation; SoulOS owns persona and memory.</p>
+    </section>
+    <section class="site-shell prose-block">
+      <h2>1. Start the sidecar stack</h2>
+      <pre><code>git clone https://github.com/mziqudhd92/soul-os.git
+cd soul-os
+docker compose -f docker-compose.sidecar.yml --profile bridge-mock up -d</code></pre>
+      <p>Kernel listens on <code>http://localhost:8001</code> in the sidecar compose file (or :8000 for full stack).</p>
+
+      <h2>2. Smoke test</h2>
+      <pre><code>npm run smoke:hybrid</code></pre>
+      <p>Runs ensure → doctor → prepare and prints the system prompt.</p>
+
+      <h2>3. Wire your app</h2>
+      <ul>
+        <li><a href="/soul-os/tutorials/?tutorial=my-first-sidecar">Tutorial: My first sidecar</a> (15 min)</li>
+        <li><a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/sidecar-integration.md">Sidecar integration guide</a></li>
+        <li><a href="https://github.com/mziqudhd92/soul-os/tree/main/examples/fastapi-hybrid">examples/fastapi-hybrid</a></li>
+        <li><a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/reference/hybrid-api.md">Hybrid API reference</a></li>
+      </ul>
+
+      <h2>4. Optional — start from a SoulPack</h2>
+      <p>Import a first-party MIT persona, then run hybrid turns.</p>
+      <pre><code>curl -s -X POST http://localhost:8000/v1/avatars/import-soulpack \
+  -H 'content-type: application/json' \
+  -d '{"pack_id":"support-agent","persist":true}'</code></pre>
+      <p>Details: <a href="/soul-os/soulpacks/">SoulPacks</a> · <a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/persona-packs.md">guide</a>.</p>
+
+      <h2>Secondary paths</h2>
+      <ul>
+        <li><a href="/soul-os/soulpacks/">SoulPacks</a> — MIT persona packages</li>
+        <li><a href="/soul-os/tutorials/?tutorial=python-bot">Full-chat Python bot</a> — SoulOS streams SSE</li>
+        <li><a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/mcp.md">MCP for Cursor / Claude</a></li>
+        <li><a href="https://github.com/mziqudhd92/soul-os#quickstart">Run Soul Studio locally</a> on :8765</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-shell site-footer-inner">
+      <div>SoulOS — MIT · v0.3.2 · Identity + memory sidecar for agents you already run</div>
+      <div class="footer-links">
+        <a href="/soul-os/docs/">Docs</a>
+        <a href="/soul-os/soulpacks/">SoulPacks</a>
+        <a href="/soul-os/tutorials/">Tutorials</a>
+        <a href="/soul-os/agents/">Agents / GEO</a>
+        <a href="/soul-os/llms.txt">llms.txt</a>
+        <a href="/soul-os/sitemap.xml">Sitemap</a>
+        <a href="https://github.com/mziqudhd92/soul-os/blob/main/CHANGELOG.md">Changelog</a>
+        <a href="https://github.com/mziqudhd92/soul-os/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</a>
+        <a href="https://github.com/mziqudhd92/soul-os">GitHub</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

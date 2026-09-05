@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SoulOS — identity + memory sidecar for agents</title>
+  <meta name="description" content="SoulOS is an open-source identity and episodic memory sidecar: HEXACO MSV, hybrid prepare/complete API, MCP, and Soul Studio." />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <link rel="canonical" href="https://mziqudhd92.github.io/soul-os/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="SoulOS" />
+  <meta property="og:title" content="SoulOS — identity + memory sidecar for agents" />
+  <meta property="og:description" content="SoulOS is an open-source identity and episodic memory sidecar: HEXACO MSV, hybrid prepare/complete API, MCP, and Soul Studio." />
+  <meta property="og:url" content="https://mziqudhd92.github.io/soul-os/" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="SoulOS — identity + memory sidecar for agents" />
+  <meta name="twitter:description" content="SoulOS is an open-source identity and episodic memory sidecar: HEXACO MSV, hybrid prepare/complete API, MCP, and Soul Studio." />
+  <link rel="alternate" type="text/plain" title="llms.txt" href="https://mziqudhd92.github.io/soul-os/llms.txt" />
+  <link rel="alternate" type="text/plain" title="llms-full.txt" href="https://mziqudhd92.github.io/soul-os/llms-full.txt" />
+  <link rel="describedby" href="https://mziqudhd92.github.io/soul-os/schema/project.json" />
+  <base href="/soul-os/" />
+  <link rel="stylesheet" href="static/site.css" />
+  
+  <script>
+    (function () {
+      var q = new URLSearchParams(location.search).get("tutorial");
+      if (q) {
+        var base = document.querySelector("base");
+        var root = base ? base.href : "/";
+        location.replace(root + "tutorials/?tutorial=" + encodeURIComponent(q));
+      }
+    })();
+  </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "SoulOS",
+  "alternateName": [
+    "Soul OS",
+    "soul-os"
+  ],
+  "description": "Open-source identity + memory sidecar for AI agents: HEXACO MSV personality, pgvector episodic memory, hybrid prepare/complete API so your LLM keeps generation, 23 MIT SoulPacks (travel, sales, tutor, support, and more), MCP for Cursor/Claude, Soul Studio, Python/TypeScript SDKs. MIT.",
+  "codeRepository": "https://github.com/mziqudhd92/soul-os",
+  "url": "https://mziqudhd92.github.io/soul-os/",
+  "license": "https://spdx.org/licenses/MIT.html",
+  "version": "0.3.2",
+  "programmingLanguage": [
+    "Python",
+    "TypeScript"
+  ],
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows (Docker)",
+  "keywords": [
+    "SoulOS",
+    "AI agents",
+    "hybrid sidecar",
+    "SoulPacks",
+    "persona packs",
+    "HEXACO",
+    "psychometrics",
+    "MCP",
+    "Model Context Protocol",
+    "episodic memory",
+    "pgvector",
+    "FastAPI",
+    "OpenAPI",
+    "RFC 7807",
+    "Soul Studio",
+    "Cursor",
+    "Claude",
+    "soul.json",
+    "identity memory layer",
+    "travel agent",
+    "sales SDR",
+    "tutor",
+    "customer success"
+  ],
+  "sameAs": [
+    "https://github.com/mziqudhd92/soul-os",
+    "https://mziqudhd92.github.io/soul-os/",
+    "https://mziqudhd92.github.io/soul-os/soulpacks/"
+  ],
+  "documentation": [
+    "https://mziqudhd92.github.io/soul-os/docs/",
+    "https://mziqudhd92.github.io/soul-os/soulpacks/",
+    "https://mziqudhd92.github.io/soul-os/get-started/",
+    "https://raw.githubusercontent.com/mziqudhd92/soul-os/main/llms.txt",
+    "https://raw.githubusercontent.com/mziqudhd92/soul-os/main/docs/SOULOS_AGENT_CONTEXT.md",
+    "https://github.com/mziqudhd92/soul-os/blob/main/docs/README.md",
+    "https://github.com/mziqudhd92/soul-os/blob/main/docs/guides/persona-packs.md",
+    "https://github.com/mziqudhd92/soul-os/blob/main/docs/adopters.md"
+  ],
+  "mentions": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "SignalPR",
+      "url": "https://signalpr.pro/",
+      "description": "AI-native PR execution platform using SoulOS hybrid sidecar for persistent agent memory and persona state.",
+      "applicationCategory": "BusinessApplication"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Aeterna",
+      "url": "https://helloaeterna.com/",
+      "description": "Digital legacy platform using SoulOS for persistent narrator persona and episodic memory.",
+      "applicationCategory": "LifestyleApplication"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Ved Travel",
+      "url": "https://www.ved-travel.co.il/",
+      "description": "Family Croatia travel with AI trip planning using SoulOS for advisor persona and session memory.",
+      "applicationCategory": "TravelApplication"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "Getbyliner",
+      "url": "https://getbyliner.com/",
+      "description": "AI press release distribution and journalist outreach using SoulOS hybrid sidecar for persistent PR-agent persona and memory.",
+      "applicationCategory": "BusinessApplication"
+    }
+  ],
+  "downloadUrl": "https://github.com/mziqudhd92/soul-os",
+  "installUrl": "https://mziqudhd92.github.io/soul-os/get-started/",
+  "discussionUrl": "https://github.com/mziqudhd92/soul-os/issues",
+  "featureList": [
+    "Hybrid sidecar: ensure \u2192 prepare \u2192 your LLM \u2192 complete",
+    "23 first-party MIT SoulPacks with browseable catalog and detail pages",
+    "HEXACO Metacognitive State Vector (MSV) and simple persona mode",
+    "Episodic memory with pgvector and session_id scoping",
+    "RFC 7807 Problem Details errors",
+    "OpenAPI-locked SDK contract",
+    "MCP server for Cursor and Claude",
+    "Soul Studio browser UI",
+    "Self-hosted Docker Compose",
+    "OpenTelemetry spans and hybrid duration metrics"
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "SoulOS",
+  "url": "https://mziqudhd92.github.io/soul-os/",
+  "description": "Identity + memory sidecar for agents you already run.",
+  "publisher": {
+    "@type": "Organization",
+    "name": "SoulOS",
+    "url": "https://mziqudhd92.github.io/soul-os/"
+  }
+}
+  </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is SoulOS?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "SoulOS is an open-source identity and episodic memory sidecar for AI agents. It provides HEXACO MSV personality, pgvector memory, and a hybrid prepare/complete API so your existing LLM keeps generation."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When should I use SoulOS?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Use SoulOS when you need persistent persona beyond a static system prompt, episodic memory across sessions, a hybrid sidecar next to Bedrock/OpenAI/LiteLLM/OpenRouter, MCP tools for memory and identity in Cursor or Claude, or ready MIT SoulPack personas (travel, sales, tutor, support, and more)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the primary integration path?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ensure_avatar \u2192 POST /hybrid/prepare \u2192 your LLM \u2192 POST /hybrid/complete. See the sidecar integration guide and npm run smoke:hybrid."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is SoulOS free and open source?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. The kernel, SDK, Studio, SoulPacks, and examples are MIT-licensed. The project site is free on GitHub Pages and synced from the same repository."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are SoulPacks?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "SoulPacks are 23 first-party MIT persona packages in packs/soulpacks/ (travel, SDR, tutor, tech support, developer coach, exec assistant, research, customer success, security, PM, data, recruiter, content, and more). List with GET /v1/soulpacks, import with POST /v1/avatars/import-soulpack, or use the Studio SoulPacks tab."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Where can I browse SoulPacks?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "On the GitHub Pages catalog at /soulpacks/ \u2014 search by name, role, or tag, then open a detail page for SOUL, identity, style, and a copy-paste import example. Each pack is also listed in the site sitemap for crawlers."
+      }
+    }
+  ]
+}
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-shell site-header-inner">
+      <a class="brand" href="/soul-os/">
+        <span class="brand-mark">S</span>
+        SoulOS
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="/soul-os/get-started/">Get started</a>
+        <a href="/soul-os/soulpacks/">SoulPacks</a>
+        <a href="/soul-os/docs/">Docs</a>
+        <a href="/soul-os/tutorials/" class="hide-sm">Tutorials</a>
+        <a href="/soul-os/adopters/" class="hide-sm">Adopters</a>
+        <a href="/soul-os/agents/" class="hide-sm">Agents</a>
+        <a href="/soul-os/community/" class="hide-sm">Community</a>
+        <a class="btn btn-ghost" style="padding:0.4rem 0.85rem" href="https://github.com/mziqudhd92/soul-os" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="site-shell hero">
+      <div class="hero-stage">
+        <div class="hero-copy">
+          <h1>SoulOS</h1>
+          <p class="lede">Give your bot a soul — identity and memory beside the LLM you already run.</p>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="/soul-os/get-started/">Get started</a>
+            <a class="btn btn-ghost" href="/soul-os/soulpacks/">Browse SoulPacks</a>
+          </div>
+          <div class="hero-flow" aria-label="Primary integration path">
+            <code>ensure</code> → <code>prepare</code> → <span>your LLM</span> → <code>complete</code>
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="false">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 360" role="img" aria-labelledby="heroTitle heroDesc">
+  <title id="heroTitle">SoulOS hybrid sidecar</title>
+  <desc id="heroDesc">Your app and LLM stay in control while SoulOS provides identity and memory beside them.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#dff7f2"/>
+      <stop offset="55%" stop-color="#e8f3f8"/>
+      <stop offset="100%" stop-color="#fff6ec"/>
+    </linearGradient>
+    <linearGradient id="soul" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#12b39e"/>
+      <stop offset="100%" stop-color="#0c8f7e"/>
+    </linearGradient>
+    <linearGradient id="app" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f0f5f7"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0c8f7e" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+  <rect x="16" y="24" width="488" height="312" rx="28" fill="url(#sky)"/>
+  <circle cx="430" cy="70" r="36" fill="#ffffff" opacity="0.55"/>
+  <circle cx="78" cy="286" r="28" fill="#12b39e" opacity="0.12"/>
+
+  <!-- Your app -->
+  <g filter="url(#soft)">
+    <rect x="48" y="88" width="168" height="168" rx="22" fill="url(#app)" stroke="#d5e1e6" stroke-width="2"/>
+    <text x="132" y="128" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" font-weight="700" fill="#14202a">Your app</text>
+    <rect x="72" y="148" width="120" height="12" rx="6" fill="#d8e7ec"/>
+    <rect x="72" y="172" width="96" height="12" rx="6" fill="#e4eef2"/>
+    <rect x="72" y="196" width="108" height="12" rx="6" fill="#e4eef2"/>
+    <rect x="72" y="220" width="72" height="18" rx="9" fill="#c97b3a" opacity="0.85"/>
+  </g>
+
+  <!-- SoulOS sidecar -->
+  <g filter="url(#soft)">
+    <rect x="292" y="72" width="180" height="200" rx="24" fill="url(#soul)"/>
+    <circle cx="382" cy="128" r="28" fill="#ffffff" opacity="0.22"/>
+    <text x="382" y="136" text-anchor="middle" font-family="system-ui,sans-serif" font-size="28" font-weight="700" fill="#ffffff">S</text>
+    <text x="382" y="178" text-anchor="middle" font-family="system-ui,sans-serif" font-size="16" font-weight="700" fill="#ffffff">SoulOS</text>
+    <text x="382" y="202" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#d8f4ef">persona &#183; memory</text>
+    <text x="382" y="222" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#d8f4ef">prepare &#183; complete</text>
+  </g>
+
+  <!-- Bridge arrows -->
+  <path d="M226 150 H278" stroke="#0c8f7e" stroke-width="3" stroke-linecap="round"/>
+  <path d="M268 142 L282 150 L268 158" fill="none" stroke="#0c8f7e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M278 190 H226" stroke="#c97b3a" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+  <path d="M238 182 L224 190 L238 198" fill="none" stroke="#c97b3a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+
+  <text x="252" y="138" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#0c8f7e">prepare</text>
+  <text x="252" y="214" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#a35f28">complete</text>
+</svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="site-shell">
+        <h2>How it works</h2>
+        <p class="sub">SoulOS owns persona, memory, and MSV drift. Your app keeps Bedrock, OpenAI, LiteLLM, or any chat stack.</p>
+        <div class="path-grid">
+          <div class="path-tile">
+            <span class="path-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7l7-4z"/><path d="M9 12l2 2 4-4"/></svg>
+            </span>
+            <h3>1. Ensure avatar</h3>
+            <p>Idempotent bootstrap with <code>external_key</code> and a <code>.soul.json</code>.</p>
+          </div>
+          <div class="path-tile">
+            <span class="path-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h10M4 17h14"/><circle cx="18" cy="12" r="2"/></svg>
+            </span>
+            <h3>2. Prepare turn</h3>
+            <p><code>POST /hybrid/prepare</code> returns a ready <code>system_prompt</code> + memories.</p>
+          </div>
+          <div class="path-tile">
+            <span class="path-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v10"/><path d="M8 9l4 4 4-4"/><rect x="4" y="15" width="16" height="6" rx="2"/></svg>
+            </span>
+            <h3>3. Your LLM</h3>
+            <p>Stream tokens with your existing client — SoulOS stays on embeddings when you want.</p>
+          </div>
+          <div class="path-tile">
+            <span class="path-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/><circle cx="6" cy="12" r="2"/></svg>
+            </span>
+            <h3>4. Complete</h3>
+            <p>Ingest the turn and optionally reflect MSV with <code>POST /hybrid/complete</code>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="site-shell">
+        <h2>Start here</h2>
+        <p class="sub">Pick the path that matches your stack.</p>
+        <div class="path-grid">
+          <article class="path-tile">
+            <a href="/soul-os/get-started/">
+              <h3>Hybrid sidecar</h3>
+              <p>Recommended — add SoulOS beside an existing LLM app (~15 min).</p>
+            </a>
+          </article>
+          <article class="path-tile">
+            <a href="/soul-os/soulpacks/">
+              <h3>SoulPacks</h3>
+              <p>23 first-party MIT personas — browse, search, and import ready roles.</p>
+            </a>
+          </article>
+          <article class="path-tile">
+            <a href="/soul-os/tutorials/?tutorial=python-bot">
+              <h3>Full-chat Python bot</h3>
+              <p>Let SoulOS stream chat end-to-end with SSE.</p>
+            </a>
+          </article>
+          <article class="path-tile">
+            <a href="/soul-os/tutorials/">
+              <h3>Interactive tutorials</h3>
+              <p>Offline walkthroughs for Studio, quickstart, and more.</p>
+            </a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="site-shell">
+        <h2>Used in production</h2>
+        <p class="sub">Independent products use SoulOS for persistent persona and episodic memory. Listing is factual, not endorsement.</p>
+        <div class="adopter-grid">
+
+        <article class="adopter-card">
+          <a href="https://signalpr.pro/" rel="noopener">
+            <h3>SignalPR</h3>
+            <p>AI-native PR execution platform for founders: real-time media event radar, newsjacking angle generation, journalist vector RAG matching, and outreach sync to Instantly, Smartlead, and Apollo.</p>
+          </a>
+        </article>
+
+        <article class="adopter-card">
+          <a href="https://helloaeterna.com/" rel="noopener">
+            <h3>Aeterna</h3>
+            <p>Interactive digital legacy platform: AI-guided life-story interviews, encrypted voice archives, family natural-language Q&amp;A, and a digital twin that answers from the narrator&#x27;s own recordings.</p>
+          </a>
+        </article>
+
+        <article class="adopter-card">
+          <a href="https://www.ved-travel.co.il/" rel="noopener">
+            <h3>Ved Travel</h3>
+            <p>Family Croatia travel expert: kid-friendly itineraries, hidden beaches, islands, national parks, and AI trip planning curated by Vedrana.</p>
+          </a>
+        </article>
+
+        <article class="adopter-card">
+          <a href="https://getbyliner.com/" rel="noopener">
+            <h3>Getbyliner</h3>
+            <p>AI press release distribution and journalist outreach for founders: match live reporter requests (Qwoted, HARO, and more), draft newsroom-ready releases, and distribute to press sites without an agency retainer.</p>
+          </a>
+        </article>
+        </div>
+        <p style="margin-top:1.25rem"><a href="/soul-os/adopters/">All adopters →</a></p>
+      </div>
+    </section>
+
+    <section class="section" id="faq" aria-labelledby="faq-heading">
+      <div class="site-shell">
+        <h2 id="faq-heading">FAQ</h2>
+        <p class="sub">Common questions for humans and answer engines — same content as the FAQPage structured data.</p>
+        <div class="faq-list">
+
+          <details class="faq-item">
+            <summary>What is SoulOS?</summary>
+            <p>SoulOS is an open-source identity and episodic memory sidecar for AI agents. It provides HEXACO MSV personality, pgvector memory, and a hybrid prepare/complete API so your existing LLM keeps generation.</p>
+          </details>
+
+          <details class="faq-item">
+            <summary>When should I use SoulOS?</summary>
+            <p>Use SoulOS when you need persistent persona beyond a static system prompt, episodic memory across sessions, a hybrid sidecar next to Bedrock/OpenAI/LiteLLM/OpenRouter, MCP tools for memory and identity in Cursor or Claude, or ready MIT SoulPack personas (travel, sales, tutor, support, and more).</p>
+          </details>
+
+          <details class="faq-item">
+            <summary>What is the primary integration path?</summary>
+            <p>ensure_avatar → POST /hybrid/prepare → your LLM → POST /hybrid/complete. See the sidecar integration guide and npm run smoke:hybrid.</p>
+          </details>
+
+          <details class="faq-item">
+            <summary>Is SoulOS free and open source?</summary>
+            <p>Yes. The kernel, SDK, Studio, SoulPacks, and examples are MIT-licensed. The project site is free on GitHub Pages and synced from the same repository.</p>
+          </details>
+
+          <details class="faq-item">
+            <summary>What are SoulPacks?</summary>
+            <p>SoulPacks are 23 first-party MIT persona packages in packs/soulpacks/ (travel, SDR, tutor, tech support, developer coach, exec assistant, research, customer success, security, PM, data, recruiter, content, and more). List with GET /v1/soulpacks, import with POST /v1/avatars/import-soulpack, or use the Studio SoulPacks tab.</p>
+          </details>
+
+          <details class="faq-item">
+            <summary>Where can I browse SoulPacks?</summary>
+            <p>On the GitHub Pages catalog at /soulpacks/ — search by name, role, or tag, then open a detail page for SOUL, identity, style, and a copy-paste import example. Each pack is also listed in the site sitemap for crawlers.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="site-shell">
+        <h2>Trust</h2>
+        <p class="sub">Open-source MIT kernel you can inspect, fork, and self-host.</p>
+        <div class="trust-grid">
+          <div class="trust-tile"><strong>License</strong><p>MIT</p></div>
+          <div class="trust-tile"><strong>CI</strong><p><a href="https://github.com/mziqudhd92/soul-os/actions/workflows/ci.yml">Tests on every push</a></p></div>
+          <div class="trust-tile"><strong>Security</strong><p><a href="https://github.com/mziqudhd92/soul-os/blob/main/SECURITY.md">SECURITY.md</a></p></div>
+          <div class="trust-tile"><strong>Conduct</strong><p><a href="https://github.com/mziqudhd92/soul-os/blob/main/CODE_OF_CONDUCT.md">Contributor Covenant</a></p></div>
+          <div class="trust-tile"><strong>Agents</strong><p><a href="/soul-os/llms.txt">llms.txt</a> · <a href="/soul-os/agents/">GEO guide</a></p></div>
+          <div class="trust-tile"><strong>API</strong><p><a href="https://github.com/mziqudhd92/soul-os/blob/main/docs/reference/openapi.kernel.json">OpenAPI artifact</a></p></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-shell site-footer-inner">
+      <div>SoulOS — MIT · v0.3.2 · Identity + memory sidecar for agents you already run</div>
+      <div class="footer-links">
+        <a href="/soul-os/docs/">Docs</a>
+        <a href="/soul-os/soulpacks/">SoulPacks</a>
+        <a href="/soul-os/tutorials/">Tutorials</a>
+        <a href="/soul-os/agents/">Agents / GEO</a>
+        <a href="/soul-os/llms.txt">llms.txt</a>
+        <a href="/soul-os/sitemap.xml">Sitemap</a>
+        <a href="https://github.com/mziqudhd92/soul-os/blob/main/CHANGELOG.md">Changelog</a>
+        <a href="https://github.com/mziqudhd92/soul-os/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</a>
+        <a href="https://github.com/mziqudhd92/soul-os">GitHub</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
