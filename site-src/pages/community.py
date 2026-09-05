@@ -53,7 +53,7 @@ def render_community(base: str) -> str:
         <article class="doc-card">
           <a href="https://github.com/mziqudhd92/soul-os/blob/main/CHANGELOG.md">
             <h3>Changelog</h3>
-            <p>What shipped in v0.2.0 and how to migrate.</p>
+            <p>What shipped in the latest release and how to migrate.</p>
           </a>
         </article>
       </div>

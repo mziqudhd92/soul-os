@@ -98,7 +98,11 @@ async def test_health_check():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         response = await ac.get("/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "service": "soulos-kernel"}
+    body = response.json()
+    assert body["status"] == "ok"
+    assert body["service"] == "soulos-kernel"
+    assert "version" in body
+    assert body["version"]
 
 
 @pytest.mark.asyncio

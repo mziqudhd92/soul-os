@@ -4,10 +4,22 @@ from __future__ import annotations
 
 import json
 from html import escape
+from pathlib import Path
 
 SITE_ORIGIN = "https://mziqudhd92.github.io"
 # Path prefix including trailing slash, e.g. /soul-os/
 DEFAULT_BASE = "/soul-os/"
+
+
+def product_version() -> str:
+    """Read repo-root VERSION for site footer / JSON-LD."""
+    root = Path(__file__).resolve().parents[2]
+    path = root / "VERSION"
+    if not path.is_file():
+        return ""
+    line = path.read_text(encoding="utf-8").strip().splitlines()[0].strip()
+    return line[1:] if line.startswith("v") else line
+
 
 NAV_ITEMS = [
     ("get-started/", "Get started"),
@@ -61,6 +73,8 @@ def page(
     desc = escape(description, quote=True)
     title_esc = escape(title, quote=True)
     robots_esc = escape(robots, quote=True)
+    ver = product_version()
+    ver_label = f" · v{escape(ver)}" if ver else ""
     ld_blocks = ""
     for obj in json_ld or []:
         payload = json.dumps(obj, ensure_ascii=True, indent=2)
@@ -111,7 +125,7 @@ def page(
 
   <footer class="site-footer">
     <div class="site-shell site-footer-inner">
-      <div>SoulOS — MIT · Identity + memory sidecar for agents you already run</div>
+      <div>SoulOS — MIT{ver_label} · Identity + memory sidecar for agents you already run</div>
       <div class="footer-links">
         <a href="{base}docs/">Docs</a>
         <a href="{base}soulpacks/">SoulPacks</a>

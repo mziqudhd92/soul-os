@@ -49,6 +49,7 @@ only-include = [
     "soul_validation.py",
     "soul_compile.py",
     "cli.py",
+    "versioning.py",
     "routes",
     "runtime",
 ]

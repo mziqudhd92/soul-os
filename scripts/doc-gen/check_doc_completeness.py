@@ -11,6 +11,14 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def package_version() -> str:
+    """Prefer repo-root VERSION; fall back to package.json."""
+    version_file = ROOT / "VERSION"
+    if version_file.is_file():
+        line = version_file.read_text(encoding="utf-8").strip().splitlines()[0].strip()
+        if line.startswith("v"):
+            line = line[1:]
+        if line:
+            return line
     data = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
     return str(data.get("version", "")).strip()
 

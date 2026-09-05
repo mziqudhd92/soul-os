@@ -62,6 +62,9 @@ npm run test:studio
 npm run test:sdk
 npm run doc:check         # hybrid drift + OpenAPI lock + doc completeness
 npm run openapi:export    # regenerate docs/reference/openapi.kernel.json
+npm run version:sync      # after editing VERSION — sync all mirrors
+npm run version:check     # CI: VERSION matches packages/docs/schema/OpenAPI
+npm run doc:check         # includes version + OpenAPI drift checks
 npm run smoke:hybrid      # sidecar prepare → mock reply → complete
 ```
 
@@ -86,8 +89,11 @@ Python packages need **3.12+**. Kernel tests use `packages/soulos-core/.venv` if
 
 ### Release checklist (maintainers)
 
-1. Bump `package.json` / SDK versions
-2. Finalize CHANGELOG date + tag
+1. Bump the single source of truth: root [`VERSION`](VERSION) (semver, no `v` prefix)
+2. Run `npm run version:sync` (updates package manifests, schema, Helm `appVersion`, llms indexes, example app)
+3. Run `npm run openapi:export` (OpenAPI `info.version` comes from the kernel FastAPI app)
+4. Finalize CHANGELOG date + tag
+5. `npm run version:check` / `npm run doc:check` must pass
 3. Run `npm run doc:check` + `npm run test:all`
 4. Verify README badges and [adopters](docs/adopters.md) unchanged unless intentional
 

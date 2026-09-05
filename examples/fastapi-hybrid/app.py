@@ -10,7 +10,7 @@ from pydantic import BaseModel
 
 from soulos.hybrid import SoulHybridClient
 
-app = FastAPI(title="SoulOS FastAPI Hybrid Example", version="0.2.0")
+app = FastAPI(title="SoulOS FastAPI Hybrid Example", version="0.3.1")
 
 KERNEL_URL = os.getenv("SOULOS_KERNEL_URL", "http://localhost:8001").rstrip("/")
 EXTERNAL_KEY = os.getenv("SOULOS_EXTERNAL_KEY", "fastapi-hybrid-demo")

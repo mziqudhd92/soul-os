@@ -7,13 +7,18 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 from dependencies import get_db
 from runtime.errors import READY_DEGRADED, problem_response
 from runtime.readiness import build_ready_payload
+from versioning import get_product_version
 
 router = APIRouter(tags=["health"])
 
 
 @router.get("/health")
 async def health_check():
-    return {"status": "ok", "service": "soulos-kernel"}
+    return {
+        "status": "ok",
+        "service": "soulos-kernel",
+        "version": get_product_version(),
+    }
 
 
 @router.get("/ready")

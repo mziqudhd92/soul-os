@@ -1,6 +1,6 @@
 [project]
 name = "soulos-gateway"
-version = "0.1.0"
+version = "0.3.1"
 description = "SoulOS Cloud API gateway — API keys, rate limits, proxy to kernel"
 requires-python = ">=3.12"
 license = { text = "MIT" }

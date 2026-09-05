@@ -15,6 +15,7 @@ from runtime.boot_memory import sync_memory_on_boot
 from runtime.bootstrap import init_database, pull_model, wait_for_ollama
 from runtime.errors import SoulOSProblem, problem_response, register_exception_handlers
 from routes import avatars, chat, health, hybrid, mcp, memory
+from versioning import get_product_version
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -66,7 +67,11 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down SoulOS Kernel...")
 
 
-app = FastAPI(lifespan=lifespan, title="SoulOS Kernel")
+app = FastAPI(
+    lifespan=lifespan,
+    title="SoulOS Kernel",
+    version=get_product_version(),
+)
 register_exception_handlers(app)
 app.add_middleware(McpAuthMiddleware)
 
