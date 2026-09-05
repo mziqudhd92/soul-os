@@ -120,8 +120,8 @@ async def run_script(path: Path) -> list[str]:
 
     patches = [
         patch("routes.hybrid.ensure_turn_session", _mem_ensure),
-        patch("routes.hybrid.get_turn_session", _mem_get),
-        patch("routes.hybrid.advance_turn_session", _mem_advance),
+        patch("runtime.hybrid_complete.get_turn_session", _mem_get),
+        patch("runtime.hybrid_complete.advance_turn_session", _mem_advance),
         patch("routes.hybrid.store_turn_success_response", _mem_store_success),
     ]
     for p in patches:

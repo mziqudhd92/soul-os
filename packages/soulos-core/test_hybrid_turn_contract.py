@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from copy import deepcopy
-from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -13,48 +11,15 @@ from dependencies import get_db, get_embedder, get_llm_service
 from main import app
 from test_main import MockEmbedder, MockLLMService, mock_get_db
 
-BOOKING_CONTRACT = {
-    "id": "booking.v1",
-    "initial_step": "collect_dates",
-    "reject_tokens": ["IGNORE PREVIOUS"],
-    "steps": [
-        {
-            "id": "collect_dates",
-            "required_slots": ["check_in", "check_out"],
-            "slot_schemas": {
-                "check_in": {"type": "string", "format": "date"},
-                "check_out": {"type": "string", "format": "date"},
-            },
-            "clear_slots_on_entry": ["user_agreed_to_terms", "payment_method"],
-            "allowed_intents": ["provide_dates", "clarify", "cancel"],
-            "transitions": {"cancel": "cancelled"},
-            "next": "confirm",
-            "completion": {"all_required_slots": True},
-        },
-        {
-            "id": "confirm",
-            "required_slots": ["user_agreed_to_terms"],
-            "slot_schemas": {
-                "check_in": {"type": "string", "format": "date"},
-                "check_out": {"type": "string", "format": "date"},
-                "user_agreed_to_terms": {"type": "boolean"},
-                "payment_method": {"type": "string"},
-            },
-            "allowed_intents": ["confirm_booking", "edit_dates", "cancel"],
-            "transitions": {
-                "confirm_booking": "completed",
-                "edit_dates": "collect_dates",
-                "cancel": "cancelled",
-            },
-            "next": "completed",
-            "completion": {"all_required_slots": True},
-        },
-        {"id": "completed"},
-        {"id": "cancelled"},
-    ],
-}
-
-BOT_ID = "123e4567-e89b-12d3-a456-426614174000"
+from turn_contract_fixtures import (
+    BOOKING_CONTRACT,
+    BOT_ID,
+    clear_turn_store,
+    mem_advance,
+    mem_ensure,
+    mem_get,
+    mem_store_success,
+)
 
 
 class ContractLLMService(MockLLMService):
@@ -62,81 +27,17 @@ class ContractLLMService(MockLLMService):
         return {"turn_contract": BOOKING_CONTRACT}
 
 
-_STORE: dict[tuple[str, str], dict[str, Any]] = {}
-
-
-async def _mem_get(db, bot_id: str, session_id: str):
-    row = _STORE.get((bot_id, session_id))
-    return deepcopy(row) if row else None
-
-
-async def _mem_advance(
-    db,
-    *,
-    bot_id: str,
-    session_id: str,
-    expected_version: int,
-    current_step: str,
-    slots: dict,
-    turn_version: int,
-    last_idempotency_key: str | None = None,
-    last_success_response: dict | None = None,
-):
-    row = _STORE.get((bot_id, session_id))
-    if not row or row["turn_version"] != expected_version:
-        return False
-    row["current_step"] = current_step
-    row["slots"] = deepcopy(slots)
-    row["turn_version"] = turn_version
-    if last_idempotency_key is not None:
-        row["last_idempotency_key"] = last_idempotency_key
-    if last_success_response is not None:
-        row["last_success_response"] = deepcopy(last_success_response)
-    return True
-
-
-async def _mem_store_success(
-    db,
-    *,
-    bot_id: str,
-    session_id: str,
-    turn_version: int,
-    last_idempotency_key: str | None,
-    last_success_response: dict,
-):
-    row = _STORE.get((bot_id, session_id))
-    if not row or row["turn_version"] != turn_version:
-        return
-    if last_idempotency_key is not None:
-        row["last_idempotency_key"] = last_idempotency_key
-    row["last_success_response"] = deepcopy(last_success_response)
-
-
-async def _mem_ensure(db, *, bot_id: str, session_id: str, initial_step: str):
-    existing = await _mem_get(db, bot_id, session_id)
-    if existing:
-        return existing
-    _STORE[(bot_id, session_id)] = {
-        "current_step": initial_step,
-        "slots": {},
-        "turn_version": 0,
-        "last_idempotency_key": None,
-        "last_success_response": None,
-    }
-    return await _mem_get(db, bot_id, session_id)
-
-
 @pytest.fixture
 def contract_app():
-    _STORE.clear()
+    clear_turn_store()
     app.dependency_overrides[get_db] = mock_get_db
     app.dependency_overrides[get_embedder] = MockEmbedder
     app.dependency_overrides[get_llm_service] = lambda: ContractLLMService()
     patches = [
-        patch("routes.hybrid.ensure_turn_session", _mem_ensure),
-        patch("routes.hybrid.get_turn_session", _mem_get),
-        patch("routes.hybrid.advance_turn_session", _mem_advance),
-        patch("routes.hybrid.store_turn_success_response", _mem_store_success),
+        patch("routes.hybrid.ensure_turn_session", mem_ensure),
+        patch("runtime.hybrid_complete.get_turn_session", mem_get),
+        patch("runtime.hybrid_complete.advance_turn_session", mem_advance),
+        patch("routes.hybrid.store_turn_success_response", mem_store_success),
     ]
     for p in patches:
         p.start()
@@ -144,7 +45,7 @@ def contract_app():
     for p in patches:
         p.stop()
     app.dependency_overrides[get_llm_service] = lambda: MockLLMService()
-    _STORE.clear()
+    clear_turn_store()
 
 
 @pytest.mark.asyncio

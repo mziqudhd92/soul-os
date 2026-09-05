@@ -18,9 +18,9 @@ def faq_items() -> list[tuple[str, str]]:
         (
             "When should I use SoulOS?",
             "Use SoulOS when you need persistent persona beyond a static system prompt, "
-            "episodic memory across sessions, a hybrid sidecar next to Bedrock/OpenAI/LiteLLM, "
-            "MCP tools for memory and identity in Cursor or Claude, or ready MIT SoulPack personas "
-            "(travel, sales, tutor, support, and more).",
+            "episodic memory across sessions, a hybrid sidecar next to Bedrock/OpenAI/LiteLLM/"
+            "OpenRouter, MCP tools for memory and identity in Cursor or Claude, or ready MIT "
+            "SoulPack personas (travel, sales, tutor, support, and more).",
         ),
         (
             "What is the primary integration path?",

@@ -72,7 +72,7 @@ services:
       context: .
       dockerfile: packages/soulos-inference-bridge/Dockerfile
     container_name: senticore-inference-bridge
-    profiles: ["bridge-mock", "bridge-aws", "bridge-vertex"]
+    profiles: ["bridge-mock", "bridge-aws", "bridge-vertex", "bridge-openrouter"]
     ports:
       - "11434:11434"
     environment:
@@ -85,6 +85,12 @@ services:
       - VERTEX_LOCATION=${VERTEX_LOCATION:-us-central1}
       - VERTEX_CHAT_MODEL=${VERTEX_CHAT_MODEL:-gemini-2.0-flash-001}
       - VERTEX_EMBED_MODEL=${VERTEX_EMBED_MODEL:-text-embedding-004}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - OPENROUTER_BASE_URL=${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
+      - OPENROUTER_CHAT_MODEL=${OPENROUTER_CHAT_MODEL:-openai/gpt-4o-mini}
+      - OPENROUTER_EMBED_MODEL=${OPENROUTER_EMBED_MODEL:-}
+      - OPENROUTER_HTTP_REFERER=${OPENROUTER_HTTP_REFERER:-https://github.com/mziqudhd92/soul-os}
+      - OPENROUTER_APP_TITLE=${OPENROUTER_APP_TITLE:-SoulOS}
     networks:
       - senticore_net
 

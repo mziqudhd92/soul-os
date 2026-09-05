@@ -1,0 +1,146 @@
+/* —— Docs —— */
+
+.content-layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .content-layout { grid-template-columns: 1fr; }
+}
+
+.sidebar {
+  max-height: calc(100vh - var(--header-height) - 3rem);
+  overflow-y: auto;
+}
+
+.docs-section { margin-bottom: 1rem; }
+
+.docs-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 0 0 0.4rem;
+  padding: 0 0.5rem;
+}
+
+.docs-link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 0.45rem 0.55rem;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  line-height: 1.35;
+}
+
+.docs-link:hover { background: var(--input-bg); }
+.docs-link.active {
+  background: var(--violet-soft);
+  color: var(--violet);
+  font-weight: 500;
+}
+
+.prose-panel {
+  max-height: calc(100vh - var(--header-height) - 3rem);
+  overflow-y: auto;
+}
+
+.prose {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.prose h1 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  margin: 0 0 0.75rem;
+  line-height: 1.2;
+}
+
+.prose h2 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 1.75rem 0 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.prose h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.4rem;
+}
+
+.prose p,
+.prose ul,
+.prose ol { margin: 0 0 0.9rem; }
+
+.prose ul,
+.prose ol { padding-left: 1.25rem; }
+.prose li { margin-bottom: 0.35rem; }
+
+.prose a {
+  color: var(--violet);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.prose a:hover { text-decoration: underline; }
+
+.prose code {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--input-bg);
+  padding: 0.12rem 0.4rem;
+  border-radius: 4px;
+  color: var(--code-color);
+}
+
+.prose pre {
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 0 0 1rem;
+}
+
+.prose pre code {
+  background: none;
+  padding: 0;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 1rem;
+  font-size: 14px;
+}
+
+.prose th,
+.prose td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.65rem;
+  text-align: left;
+}
+
+.prose th {
+  background: var(--input-bg);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+

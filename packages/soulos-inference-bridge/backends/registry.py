@@ -17,4 +17,8 @@ def get_backend() -> InferenceBackend:
         from backends.vertex import VertexBackend
 
         return VertexBackend()
+    if mode == "openrouter":
+        from backends.openrouter import OpenRouterBackend
+
+        return OpenRouterBackend()
     raise ValueError(f"Unknown BRIDGE_MODE: {mode}")

@@ -1,0 +1,85 @@
+/* SoulOS Studio — light default, 2026-style product UI */
+
+:root {
+  --bg: #f4f6fa;
+  --panel: #ffffff;
+  --border: #e2e8f0;
+  --text: #0f172a;
+  --muted: #64748b;
+  --input-bg: #f8fafc;
+  --header-bg: rgba(255, 255, 255, 0.82);
+  --code-color: #6d28d9;
+  --json-bg: #f1f5f9;
+  --json-text: #5b21b6;
+  --chat-bg: #f8fafc;
+  --violet: #6d28d9;
+  --violet-soft: #ede9fe;
+  --violet-glow: rgba(109, 40, 217, 0.1);
+  --emerald: #059669;
+  --emerald-soft: rgba(5, 150, 105, 0.1);
+  --cyan: #0891b2;
+  --primary-bg: #6d28d9;
+  --primary-text: #ffffff;
+  --primary-hover: #5b21b6;
+  --user-chat: #6d28d9;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.06);
+  --modal-overlay: rgba(15, 23, 42, 0.4);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+  --mono: "SF Mono", "Fira Code", ui-monospace, monospace;
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --header-height: 60px;
+}
+
+html[data-theme="dark"] {
+  --bg: #09090b;
+  --panel: #121218;
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #f4f4f5;
+  --muted: #a1a1aa;
+  --input-bg: #18181b;
+  --header-bg: rgba(9, 9, 11, 0.85);
+  --code-color: #c4b5fd;
+  --json-bg: #18181b;
+  --json-text: #c4b5fd;
+  --chat-bg: #18181b;
+  --violet: #a78bfa;
+  --violet-soft: rgba(167, 139, 250, 0.12);
+  --violet-glow: rgba(167, 139, 250, 0.15);
+  --emerald: #34d399;
+  --emerald-soft: rgba(52, 211, 153, 0.12);
+  --cyan: #22d3ee;
+  --primary-bg: #7c3aed;
+  --primary-text: #ffffff;
+  --primary-hover: #6d28d9;
+  --user-chat: #a78bfa;
+  --shadow-sm: none;
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --modal-overlay: rgba(0, 0, 0, 0.65);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.bg-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 0% 0%, var(--violet-glow), transparent 50%),
+    radial-gradient(ellipse 40% 40% at 100% 100%, rgba(5, 150, 105, 0.05), transparent 45%);
+}
+

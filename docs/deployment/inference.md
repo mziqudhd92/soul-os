@@ -21,6 +21,7 @@ Setting `INFERENCE_API_URL=https://.../v1` (OpenAI or Bedrock Mantle) **will not
 | Bridge mock | `mock` | `768` | `INFERENCE_SKIP_PULL=1` |
 | AWS Bedrock | `bedrock` | `1024` (Titan V2) | `AWS_REGION`, `BEDROCK_*_MODEL_ID` |
 | GCP Vertex | `vertex` | `768` (`text-embedding-004`) | `VERTEX_PROJECT_ID`, `VERTEX_LOCATION` |
+| OpenRouter | `openrouter` | `768` (local hash) or remote embed dim | `OPENROUTER_API_KEY`, `OPENROUTER_CHAT_MODEL` |
 
 Kernel env (align with backend):
 
@@ -46,7 +47,12 @@ docker compose --profile bridge-aws up soulos-kernel db soulos-inference-bridge
 
 # GCP Vertex (requires VERTEX_PROJECT_ID + ADC)
 docker compose --profile bridge-vertex up soulos-kernel db soulos-inference-bridge
+
+# OpenRouter (requires OPENROUTER_API_KEY)
+docker compose --profile bridge-openrouter up soulos-kernel db soulos-inference-bridge
 ```
+
+Hybrid apps that keep chat in the app layer can call OpenRouter with any OpenAI-compatible SDK after `POST /hybrid/prepare` — no bridge needed for that path. Use `BRIDGE_MODE=openrouter` when the **kernel** should generate (`/chat/generate`, Studio, LLM reflect).
 
 See [.env.example](../../.env.example) for full variable sets.
 

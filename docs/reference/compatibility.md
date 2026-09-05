@@ -6,8 +6,9 @@ SoulOS kernel expects an **Ollama-compatible** inference plug-in at `INFERENCE_A
 |---------|-----------------|------|------------|-------|
 | **bridge-mock** | `bridge-mock` | Mock | Deterministic 768-dim | CI / hybrid smoke default |
 | **Ollama** | `ollama` | Yes | `nomic-embed-text` | Local dev full stack |
-| **AWS Bedrock** | `bridge-aws` | Yes | Titan embed v2 | Set `BRIDGE_MODE=aws` |
+| **AWS Bedrock** | `bridge-aws` | Yes | Titan embed v2 | Set `BRIDGE_MODE=bedrock` |
 | **GCP Vertex** | `bridge-vertex` | Yes | text-embedding-004 | Set `BRIDGE_MODE=vertex` |
+| **OpenRouter** | `bridge-openrouter` | Yes | Local hash 768-dim (or `OPENROUTER_EMBED_MODEL`) | Set `BRIDGE_MODE=openrouter` + `OPENROUTER_API_KEY` |
 
 ## Environment variables
 

@@ -9,16 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 from auth import AccountContext, get_account_context
 from dependencies import get_db, get_embedder, get_llm_service
 from runtime.avatars import fetch_bot_identity
-from runtime.errors import (
-    BOT_NOT_FOUND,
-    TURN_CONTRACT_VIOLATION,
-    TURN_REJECT_TOKEN,
-    TURN_SESSION_EXPIRED,
-    TURN_STATE_STALE,
-    TURN_STEP_MISMATCH,
-    SoulOSProblem,
-)
+from runtime.errors import BOT_NOT_FOUND, SoulOSProblem
 from runtime.hybrid import build_hybrid_system_prompt, extract_inner_monologue
+from runtime.hybrid_complete import resolve_turn_on_complete
 from runtime.hybrid_tasks import run_reflect_background
 from runtime.memory import ingest_memory as ingest_memory_record
 from runtime.memory import retrieve_memories
@@ -28,7 +21,7 @@ from runtime.telemetry import (
     hybrid_prepare_span,
     record_hybrid_duration,
 )
-from runtime.turn_contract import apply_turn, build_contract_context
+from runtime.turn_contract import build_contract_context
 from runtime.turn_session import (
     advance_turn_session,
     ensure_turn_session,
@@ -39,6 +32,17 @@ from schemas import HybridCompleteRequest, HybridPrepareRequest
 from tenant import verify_bot_access
 
 router = APIRouter(tags=["hybrid"])
+
+# Re-export for test patches targeting routes.hybrid.*
+__all__ = [
+    "router",
+    "hybrid_prepare",
+    "hybrid_complete",
+    "ensure_turn_session",
+    "get_turn_session",
+    "advance_turn_session",
+    "store_turn_success_response",
+]
 
 
 @router.post("/hybrid/prepare")
@@ -134,122 +138,13 @@ async def hybrid_complete(
 
     if isinstance(contract, dict) and payload.session_id:
         contract_session_id = payload.session_id
-        session = await get_turn_session(db, payload.bot_id, payload.session_id)
-        if session is None:
-            raise SoulOSProblem(
-                TURN_SESSION_EXPIRED,
-                404,
-                f"Turn session expired or missing: {payload.session_id}",
-                extra={"session_id": payload.session_id},
-            )
-        if (
-            payload.idempotency_key
-            and session.get("last_idempotency_key") == payload.idempotency_key
-            and session.get("last_success_response")
-        ):
-            cached = dict(session["last_success_response"])
+        resolved = await resolve_turn_on_complete(db, contract=contract, payload=payload)
+        if resolved and "_cached_response" in resolved:
+            cached = resolved["_cached_response"]
             record_hybrid_duration("complete", time.perf_counter() - t0)
             status = 202 if cached.get("status") == "accepted" else 200
             return JSONResponse(status_code=status, content=cached)
-
-        if payload.expected_version is None:
-            raise SoulOSProblem(
-                TURN_CONTRACT_VIOLATION,
-                422,
-                "expected_version is required when a turn contract is active",
-                extra={"turn_version": session["turn_version"]},
-            )
-        if payload.expected_version != session["turn_version"]:
-            raise SoulOSProblem(
-                TURN_STATE_STALE,
-                409,
-                "expected_version does not match session turn_version",
-                extra={
-                    "turn_version": session["turn_version"],
-                    "expected_step": session["current_step"],
-                    "filled_slots": session["slots"],
-                },
-            )
-        if (
-            payload.expected_step
-            and payload.expected_step != session["current_step"]
-        ):
-            raise SoulOSProblem(
-                TURN_STEP_MISMATCH,
-                422,
-                "expected_step does not match session current_step",
-                extra={
-                    "expected_step": session["current_step"],
-                    "turn_version": session["turn_version"],
-                },
-            )
-
-        result = apply_turn(
-            contract,
-            current_step=session["current_step"],
-            slots=session["slots"],
-            filled_slots=payload.filled_slots,
-            intent=payload.intent,
-            assistant_text=payload.assistant_text,
-            advance=payload.advance,
-        )
-        if not result.ok:
-            code = result.code or TURN_CONTRACT_VIOLATION
-            if code == TURN_REJECT_TOKEN:
-                raise SoulOSProblem(
-                    TURN_REJECT_TOKEN,
-                    422,
-                    result.detail or "Reject token detected",
-                    extra={
-                        "expected_step": session["current_step"],
-                        "turn_version": session["turn_version"],
-                        "remedial_prompt_hint": result.remedial_prompt_hint,
-                    },
-                )
-            raise SoulOSProblem(
-                TURN_CONTRACT_VIOLATION,
-                422,
-                result.detail or "Turn contract violation",
-                extra={
-                    "invalid_slots": result.invalid_slots,
-                    "missing_slots": result.missing_slots,
-                    "expected_step": session["current_step"],
-                    "turn_version": session["turn_version"],
-                    "remedial_prompt_hint": result.remedial_prompt_hint,
-                },
-            )
-
-        new_version = session["turn_version"] + 1
-        claimed = await advance_turn_session(
-            db,
-            bot_id=payload.bot_id,
-            session_id=payload.session_id,
-            expected_version=session["turn_version"],
-            current_step=result.step,
-            slots=result.slots,
-            turn_version=new_version,
-            last_idempotency_key=payload.idempotency_key,
-            last_success_response=None,
-        )
-        if not claimed:
-            raise SoulOSProblem(
-                TURN_STATE_STALE,
-                409,
-                "expected_version does not match session turn_version",
-                extra={
-                    "turn_version": session["turn_version"],
-                    "expected_step": session["current_step"],
-                    "filled_slots": session["slots"],
-                },
-            )
-        turn_payload = {
-            "step": result.step,
-            "slots": result.slots,
-            "advanced": result.advanced,
-            "turn_version": new_version,
-        }
-    elif isinstance(contract, dict) and not payload.session_id:
-        pass
+        turn_payload = resolved
 
     with hybrid_complete_span(payload.bot_id, payload.session_id, payload.summary) as span:
         await ingest_memory_record(
