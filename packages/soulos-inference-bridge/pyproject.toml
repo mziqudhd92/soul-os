@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "soulos-inference-bridge"
-version = "0.3.1"
+version = "0.3.2"
 description = "Ollama-compatible inference bridge for SoulOS (mock, AWS Bedrock, GCP Vertex)"
 requires-python = ">=3.11"
 license = { text = "MIT" }

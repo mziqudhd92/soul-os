@@ -9,10 +9,10 @@ from pathlib import Path
 @lru_cache(maxsize=1)
 def get_product_version() -> str:
     """Read repo-root VERSION; fall back to installed package metadata."""
-    here = Path(__file__).resolve().parent
+    here = Path(__file__).resolve().parent  # packages/soulos-core
     for candidate in (
-        here.parent.parent.parent / "VERSION",  # packages/soulos-core → repo
-        here.parent.parent / "VERSION",
+        here.parent.parent / "VERSION",  # monorepo root
+        here.parent / "VERSION",
         Path.cwd() / "VERSION",
     ):
         if candidate.is_file():

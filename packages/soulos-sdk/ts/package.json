@@ -1,7 +1,7 @@
 {
   "name": "@soulos/sdk",
-  "version": "0.3.1",
-  "description": "TypeScript client for SoulOS — avatars, episodic memory, SSE chat (@soulos/sdk)",
+  "version": "0.3.2",
+  "description": "TypeScript client for SoulOS \u2014 avatars, episodic memory, SSE chat (@soulos/sdk)",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mziqudhd92/soul-os.git",

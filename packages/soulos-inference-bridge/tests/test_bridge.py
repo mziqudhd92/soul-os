@@ -59,3 +59,22 @@ async def test_generate_non_stream():
         )
     assert resp.status_code == 200
     assert "response" in resp.json()
+
+
+@pytest.mark.asyncio
+async def test_bridge_auth_required_when_token_set(monkeypatch):
+    monkeypatch.setenv("BRIDGE_AUTH_TOKEN", "secret-token")
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        denied = await client.post(
+            "/api/embeddings",
+            json={"model": "m", "prompt": "x"},
+        )
+        assert denied.status_code == 401
+        ok = await client.post(
+            "/api/embeddings",
+            headers={"Authorization": "Bearer secret-token"},
+            json={"model": "m", "prompt": "x"},
+        )
+        assert ok.status_code == 200
+        health = await client.get("/")
+        assert health.status_code == 200

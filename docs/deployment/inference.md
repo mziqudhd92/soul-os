@@ -32,6 +32,16 @@ Kernel env (align with backend):
 | `INFERENCE_SKIP_PULL` | `0` | Set `1` for bridge / cloud (no Ollama pull) |
 | `MODEL_NAME` | `llama3` | Passed to `/api/generate` |
 | `EMBED_MODEL_NAME` | `nomic-embed-text` | Passed to `/api/embeddings` |
+| `INFERENCE_BRIDGE_TOKEN` / `BRIDGE_AUTH_TOKEN` | _(empty)_ | Shared secret for bridge `/api/*` when set |
+
+## Security (bridge)
+
+Compose publishes the bridge as **`127.0.0.1:11434`** so only the host loopback can reach it from outside Docker (containers still use the internal network). For OpenRouter / Bedrock / Vertex:
+
+1. Set `BRIDGE_AUTH_TOKEN` to a long random secret (compose passes it to the bridge and kernel).
+2. Do not publish `11434` on a public interface in production — keep the bridge on a private network.
+3. Leave `OPENROUTER_EMBED_MODEL` unset unless you intentionally want remote embeddings; otherwise the bridge uses a local hash so the kernel’s default `EMBED_MODEL_NAME` does not hit OpenRouter.
+4. Chat: request models without a `/` (e.g. kernel default `llama3`) are remapped to `OPENROUTER_CHAT_MODEL`. Set `MODEL_NAME=openai/...` only when you want an explicit OpenRouter id.
 
 ## Docker profiles
 

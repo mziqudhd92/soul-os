@@ -10,9 +10,17 @@ import urllib.error
 import urllib.request
 
 
-def fetch_json(url: str, method: str = "GET", payload: dict | None = None) -> tuple[int, dict | str]:
+def fetch_json(
+    url: str,
+    method: str = "GET",
+    payload: dict | None = None,
+    *,
+    bearer_token: str = "",
+) -> tuple[int, dict | str]:
     data = None
     headers = {"Content-Type": "application/json"}
+    if bearer_token:
+        headers["Authorization"] = f"Bearer {bearer_token}"
     if payload is not None:
         data = json.dumps(payload).encode()
     req = urllib.request.Request(url, data=data, headers=headers, method=method)
@@ -39,7 +47,13 @@ def main() -> int:
     parser.add_argument("--inference", default="http://localhost:11434")
     parser.add_argument("--embedding-dimension", type=int, default=768)
     parser.add_argument("--bot-id", default="", help="Optional bot_id for hybrid/prepare smoke")
+    parser.add_argument(
+        "--bridge-token",
+        default="",
+        help="Bearer token when inference bridge BRIDGE_AUTH_TOKEN is set",
+    )
     args = parser.parse_args()
+    bridge_token = args.bridge_token.strip()
 
     errors: list[str] = []
     kernel = args.kernel.rstrip("/")
@@ -94,6 +108,7 @@ def main() -> int:
         embed_url,
         method="POST",
         payload={"model": "doctor-check", "prompt": "soulos doctor"},
+        bearer_token=bridge_token,
     )
     if status != 200:
         errors.append(f"embeddings failed ({status}): {body}")

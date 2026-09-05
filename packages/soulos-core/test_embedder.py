@@ -65,3 +65,13 @@ async def test_embedder_success():
     with patch("runtime.embedder.httpx.AsyncClient", return_value=mock_client):
         result = await embedder.get_embedding("hello")
     assert result == vec
+    assert mock_client.post.call_args.kwargs.get("headers") == {}
+
+
+def test_inference_headers_bearer(monkeypatch):
+    import config as config_mod
+
+    monkeypatch.setattr(config_mod, "INFERENCE_BRIDGE_TOKEN", "tok-abc")
+    assert config_mod.inference_headers() == {"Authorization": "Bearer tok-abc"}
+    monkeypatch.setattr(config_mod, "INFERENCE_BRIDGE_TOKEN", "")
+    assert config_mod.inference_headers() == {}

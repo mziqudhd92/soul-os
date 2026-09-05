@@ -18,6 +18,7 @@ services:
       - INFERENCE_MODE=${INFERENCE_MODE:-full}
       - MODEL_NAME=${MODEL_NAME:-llama3}
       - EMBED_MODEL_NAME=${EMBED_MODEL_NAME:-nomic-embed-text}
+      - INFERENCE_BRIDGE_TOKEN=${BRIDGE_AUTH_TOKEN:-}
     depends_on:
       soulos-db:
         condition: service_healthy
@@ -60,9 +61,10 @@ services:
     container_name: soulos-sidecar-bridge
     profiles: ["bridge-mock", "bridge-aws", "bridge-vertex", "bridge-openrouter"]
     ports:
-      - "11434:11434"
+      - "127.0.0.1:11434:11434"
     environment:
       - BRIDGE_MODE=${BRIDGE_MODE:-mock}
+      - BRIDGE_AUTH_TOKEN=${BRIDGE_AUTH_TOKEN:-}
       - EMBEDDING_DIMENSION=${EMBEDDING_DIMENSION:-768}
       - AWS_REGION=${AWS_REGION:-us-east-1}
       - BEDROCK_CHAT_MODEL_ID=${BEDROCK_CHAT_MODEL_ID:-amazon.nova-lite-v1:0}

@@ -11,7 +11,7 @@ from sqlalchemy import text
 
 from runtime.boot_memory import sync_memory_on_boot
 from runtime.crystallization import apply_crystallization_if_needed
-from config import INFERENCE_API_URL, INFERENCE_MODE, MODEL_NAME, engine
+from config import INFERENCE_API_URL, INFERENCE_MODE, MODEL_NAME, engine, inference_headers
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +78,7 @@ async def run_system_2_reflector(
                     "format": "json",
                     "stream": False,
                 },
+                headers=inference_headers(),
                 timeout=30.0,
             )
             latency_ms = int((time.monotonic() - started) * 1000)

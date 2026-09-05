@@ -6,6 +6,7 @@ from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from backends.registry import get_backend
 
@@ -18,6 +19,25 @@ def backend():
     if _backend is None:
         _backend = get_backend()
     return _backend
+
+
+class BridgeAuthMiddleware(BaseHTTPMiddleware):
+    """Optional shared-secret gate for /api/* when BRIDGE_AUTH_TOKEN is set.
+
+    Health (GET /) stays open for readiness probes. Paid backends (OpenRouter,
+    Bedrock, Vertex) should set a token and avoid publishing the port publicly.
+    """
+
+    async def dispatch(self, request: Request, call_next):
+        token = os.getenv("BRIDGE_AUTH_TOKEN", "").strip()
+        if token and request.url.path.startswith("/api/"):
+            auth = request.headers.get("Authorization", "")
+            if auth != f"Bearer {token}":
+                return JSONResponse(status_code=401, content={"error": "unauthorized"})
+        return await call_next(request)
+
+
+app.add_middleware(BridgeAuthMiddleware)
 
 
 @app.get("/")
@@ -60,5 +80,6 @@ async def api_generate(payload: dict[str, Any]):
 
 
 @app.exception_handler(Exception)
-async def unhandled(exc: Exception):
-    return JSONResponse(status_code=500, content={"error": str(exc)})
+async def unhandled(_: Request, exc: Exception):
+    # Avoid leaking upstream provider error bodies to anonymous clients.
+    return JSONResponse(status_code=500, content={"error": "inference_bridge_error"})

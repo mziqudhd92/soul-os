@@ -20,7 +20,7 @@ Services:
 | `soulos-studio` | 8765 | Soul Builder UI (optional) |
 | `db` | 5432 | PostgreSQL + pgvector |
 | `ollama` | 11434 | Local inference (default stack) |
-| `soulos-inference-bridge` | 11434 | Ollama-compatible bridge (profiles: `bridge-mock`, `bridge-aws`, `bridge-vertex`) |
+| `soulos-inference-bridge` | 127.0.0.1:11434 | Ollama-compatible bridge (profiles: `bridge-mock`, `bridge-aws`, `bridge-vertex`, `bridge-openrouter`) |
 
 Plug-in guide: [guides/plug-in-soulos.md](../guides/plug-in-soulos.md) · Inference: [inference.md](inference.md)
 

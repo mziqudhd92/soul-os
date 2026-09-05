@@ -13,6 +13,7 @@ from config import (
     EMBEDDING_DIMENSION,
     INFERENCE_API_URL,
     MODEL_NAME,
+    inference_headers,
 )
 
 logger = logging.getLogger(__name__)
@@ -143,6 +144,7 @@ async def pull_model(model_name: str) -> None:
         resp = await client.post(
             f"{INFERENCE_API_URL}/api/pull",
             json={"name": model_name},
+            headers=inference_headers(),
             timeout=600.0,
         )
         if resp.status_code == 200:

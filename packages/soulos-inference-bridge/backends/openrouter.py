@@ -18,6 +18,14 @@ import httpx
 from backends.base import InferenceBackend
 
 
+def _openrouter_model_id(requested: str, configured: str) -> str:
+    """Prefer OpenRouter-style ``provider/model`` ids over Ollama names."""
+    requested = (requested or "").strip()
+    if requested and "/" in requested:
+        return requested
+    return configured
+
+
 class OpenRouterBackend(InferenceBackend):
     def __init__(self) -> None:
         self.api_key = os.getenv("OPENROUTER_API_KEY", "").strip()
@@ -36,13 +44,26 @@ class OpenRouterBackend(InferenceBackend):
         )
         self.app_title = os.getenv("OPENROUTER_APP_TITLE", "SoulOS")
         self._timeout = float(os.getenv("OPENROUTER_TIMEOUT_S", "120"))
+        self._http: httpx.AsyncClient | None = None
+
+    def _client(self) -> httpx.AsyncClient:
+        if self._http is None:
+            self._http = httpx.AsyncClient(timeout=self._timeout)
+        return self._http
+
+    async def aclose(self) -> None:
+        if self._http is not None:
+            await self._http.aclose()
+            self._http = None
 
     def _headers(self) -> dict[str, str]:
+        # HTTP-Referer + both title headers (legacy X-Title and current X-OpenRouter-Title).
         return {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
             "HTTP-Referer": self.http_referer,
             "X-Title": self.app_title,
+            "X-OpenRouter-Title": self.app_title,
         }
 
     def _local_embed(self, text: str, model: str) -> list[float]:
@@ -50,56 +71,58 @@ class OpenRouterBackend(InferenceBackend):
         return [(digest[i % len(digest)] / 255.0) * 0.1 for i in range(self.dimension)]
 
     async def embed(self, text: str, model: str) -> list[float]:
-        model_id = model or self.embed_model
-        if not model_id:
+        # Kernel always sends EMBED_MODEL_NAME (often an Ollama id). Remote
+        # embeddings are used only when OPENROUTER_EMBED_MODEL is configured;
+        # otherwise keep the documented local-hash fallback.
+        if not self.embed_model:
             return self._local_embed(text, model or "local-hash")
-        async with httpx.AsyncClient(timeout=self._timeout) as client:
-            resp = await client.post(
-                f"{self.base_url}/embeddings",
-                headers=self._headers(),
-                json={"model": model_id, "input": text},
-            )
-            resp.raise_for_status()
-            data = resp.json()
+        model_id = _openrouter_model_id(model, self.embed_model)
+        resp = await self._client().post(
+            f"{self.base_url}/embeddings",
+            headers=self._headers(),
+            json={"model": model_id, "input": text},
+        )
+        resp.raise_for_status()
+        data = resp.json()
         items = data.get("data") or []
         if not items or "embedding" not in items[0]:
             raise RuntimeError(f"Unexpected OpenRouter embed response: {data}")
         return items[0]["embedding"]
 
     async def generate_stream(self, prompt: str, model: str) -> AsyncIterator[str]:
-        model_id = model or self.chat_model
-        async with httpx.AsyncClient(timeout=self._timeout) as client:
-            async with client.stream(
-                "POST",
-                f"{self.base_url}/chat/completions",
-                headers=self._headers(),
-                json={
-                    "model": model_id,
-                    "stream": True,
-                    "messages": [{"role": "user", "content": prompt}],
-                },
-            ) as resp:
-                resp.raise_for_status()
-                async for line in resp.aiter_lines():
-                    if not line or not line.startswith("data:"):
-                        continue
-                    payload = line[5:].strip()
-                    if payload == "[DONE]":
-                        break
-                    try:
-                        chunk = json.loads(payload)
-                    except json.JSONDecodeError:
-                        continue
-                    choices = chunk.get("choices") or []
-                    if not choices:
-                        continue
-                    delta = choices[0].get("delta") or {}
-                    text = delta.get("content")
-                    if text:
-                        yield text
+        model_id = _openrouter_model_id(model, self.chat_model)
+        async with self._client().stream(
+            "POST",
+            f"{self.base_url}/chat/completions",
+            headers=self._headers(),
+            json={
+                "model": model_id,
+                "stream": True,
+                "messages": [{"role": "user", "content": prompt}],
+            },
+        ) as resp:
+            resp.raise_for_status()
+            async for line in resp.aiter_lines():
+                # Skip keepalives / SSE comments (lines starting with ":").
+                if not line or not line.startswith("data:"):
+                    continue
+                payload = line[5:].strip()
+                if payload == "[DONE]":
+                    break
+                try:
+                    chunk = json.loads(payload)
+                except json.JSONDecodeError:
+                    continue
+                choices = chunk.get("choices") or []
+                if not choices:
+                    continue
+                delta = choices[0].get("delta") or {}
+                text = delta.get("content")
+                if text:
+                    yield text
 
     async def generate(self, prompt: str, model: str, format_json: bool = False) -> str:
-        model_id = model or self.chat_model
+        model_id = _openrouter_model_id(model, self.chat_model)
         body: dict = {
             "model": model_id,
             "stream": False,
@@ -107,14 +130,13 @@ class OpenRouterBackend(InferenceBackend):
         }
         if format_json:
             body["response_format"] = {"type": "json_object"}
-        async with httpx.AsyncClient(timeout=self._timeout) as client:
-            resp = await client.post(
-                f"{self.base_url}/chat/completions",
-                headers=self._headers(),
-                json=body,
-            )
-            resp.raise_for_status()
-            data = resp.json()
+        resp = await self._client().post(
+            f"{self.base_url}/chat/completions",
+            headers=self._headers(),
+            json=body,
+        )
+        resp.raise_for_status()
+        data = resp.json()
         choices = data.get("choices") or []
         if not choices:
             raise RuntimeError(f"Unexpected OpenRouter chat response: {data}")

@@ -2,7 +2,12 @@
 
 import httpx
 
-from config import EMBED_MODEL_NAME, EMBEDDING_DIMENSION, INFERENCE_API_URL
+from config import (
+    EMBED_MODEL_NAME,
+    EMBEDDING_DIMENSION,
+    INFERENCE_API_URL,
+    inference_headers,
+)
 from runtime.errors import INFERENCE_DOWN, MEMORY_DIM_MISMATCH, SoulOSProblem
 
 
@@ -12,6 +17,7 @@ class Embedder:
             resp = await client.post(
                 f"{INFERENCE_API_URL}/api/embeddings",
                 json={"model": EMBED_MODEL_NAME, "prompt": text_content},
+                headers=inference_headers(),
                 timeout=30.0,
             )
             if resp.status_code != 200:

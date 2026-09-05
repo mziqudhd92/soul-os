@@ -4,6 +4,31 @@ All notable changes to SoulOS are documented here.
 
 ## [Unreleased]
 
+## [0.3.2] — 2026-09-05
+
+### Added
+
+- OpenRouter inference bridge (`BRIDGE_MODE=openrouter`) with compose profile, docs, and tests
+- Optional `BRIDGE_AUTH_TOKEN` / `INFERENCE_BRIDGE_TOKEN` shared-secret gate for bridge `/api/*`
+- `soulos-doctor --bridge-token` for authenticated inference preflight
+- Single source of truth: root `VERSION` + `npm run version:sync` / `version:check`
+- OpenRouter attribution headers: `HTTP-Referer`, `X-Title`, and `X-OpenRouter-Title`
+
+### Changed
+
+- Priority 2 maintainability: `turn_contract` package split, hybrid complete helper, Studio CSS modules
+- OpenRouter uses a shared `httpx` client; Ollama-style chat model ids remap to `OPENROUTER_CHAT_MODEL`
+- Inference bridge host port bound to `127.0.0.1` (Docker network unchanged)
+- Site hero diagram inlined; Pages workflow YAML fix
+- Version bump to **0.3.2** across packages, Helm `appVersion`, OpenAPI, schema.org, and docs indexes
+
+### Fixed
+
+- OpenRouter embed: honor local-hash fallback when `OPENROUTER_EMBED_MODEL` is unset (ignore kernel Ollama model id)
+- OpenRouter chat: remap non-`provider/model` ids (e.g. `llama3`) to `OPENROUTER_CHAT_MODEL`
+- Bridge unhandled errors no longer echo provider exception text to clients
+- Kernel `versioning.py` resolves repo-root `VERSION` from the correct path
+
 ## [0.3.1] — 2026-08-29
 
 ### Fixed

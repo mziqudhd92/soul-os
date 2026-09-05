@@ -21,6 +21,18 @@ INFERENCE_SKIP_PULL = os.getenv("INFERENCE_SKIP_PULL", "0").lower() in (
     "yes",
 )
 INFERENCE_MODE = os.getenv("INFERENCE_MODE", "full").lower()
+# Shared secret for inference bridge /api/* when BRIDGE_AUTH_TOKEN is set on the bridge.
+INFERENCE_BRIDGE_TOKEN = (
+    os.getenv("INFERENCE_BRIDGE_TOKEN", "").strip()
+    or os.getenv("BRIDGE_AUTH_TOKEN", "").strip()
+)
+
+
+def inference_headers() -> dict[str, str]:
+    """Authorization headers for the Ollama-compatible inference plug-in."""
+    if not INFERENCE_BRIDGE_TOKEN:
+        return {}
+    return {"Authorization": f"Bearer {INFERENCE_BRIDGE_TOKEN}"}
 
 # Cloud: gateway injects account id; kernel rejects direct public access when enabled.
 REQUIRE_AUTH = os.getenv("REQUIRE_AUTH", "0").lower() in ("1", "true", "yes")

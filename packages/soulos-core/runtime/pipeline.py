@@ -9,7 +9,7 @@ import httpx
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from config import INFERENCE_API_URL, MODEL_NAME
+from config import INFERENCE_API_URL, MODEL_NAME, inference_headers
 from soul_validation import default_msv_dict
 from runtime.cognitive_telemetry import (
     confidence_from_msv,
@@ -109,6 +109,7 @@ class ChatPipeline:
                 "POST",
                 f"{INFERENCE_API_URL}/api/generate",
                 json={"model": MODEL_NAME, "prompt": prompt},
+                headers=inference_headers(),
                 timeout=60.0,
             ) as response:
                 if response.status_code != 200:

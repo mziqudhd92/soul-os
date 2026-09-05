@@ -8,7 +8,7 @@ API paths: `POST /v1/avatars/ensure`, `POST /hybrid/prepare`, `POST /hybrid/comp
 
 Canonical repo: https://github.com/mziqudhd92/soul-os  
 Project site (free GitHub Pages, synced from this repo): https://mziqudhd92.github.io/soul-os/  
-License: MIT · Version: 0.3.1
+License: MIT · Version: 0.3.2
 
 ## SoulPacks
 

@@ -82,7 +82,7 @@ def sync_version(root: Path | None = None, *, write: bool = True) -> list[str]:
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
     if schema.get("version") != version:
         schema["version"] = version
-        write_if_changed(schema_path, json.dumps(schema, indent=2) + "\n")
+        write_if_changed(schema_path, json.dumps(schema, indent=2, ensure_ascii=False) + "\n")
 
     for rel in (
         "packages/soulos-core/pyproject.toml",

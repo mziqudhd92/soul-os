@@ -2,13 +2,19 @@
   "@context": "https://schema.org",
   "@type": "SoftwareSourceCode",
   "name": "SoulOS",
-  "alternateName": ["Soul OS", "soul-os"],
+  "alternateName": [
+    "Soul OS",
+    "soul-os"
+  ],
   "description": "Open-source identity + memory sidecar for AI agents: HEXACO MSV personality, pgvector episodic memory, hybrid prepare/complete API so your LLM keeps generation, 23 MIT SoulPacks (travel, sales, tutor, support, and more), MCP for Cursor/Claude, Soul Studio, Python/TypeScript SDKs. MIT.",
   "codeRepository": "https://github.com/mziqudhd92/soul-os",
   "url": "https://mziqudhd92.github.io/soul-os/",
   "license": "https://spdx.org/licenses/MIT.html",
-  "version": "0.3.1",
-  "programmingLanguage": ["Python", "TypeScript"],
+  "version": "0.3.2",
+  "programmingLanguage": [
+    "Python",
+    "TypeScript"
+  ],
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Linux, macOS, Windows (Docker)",
   "keywords": [
