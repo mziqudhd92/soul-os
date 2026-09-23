@@ -4,29 +4,42 @@ All notable changes to SoulOS are documented here.
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-09-23
+
+Production hardening release: schema migrations, MCP↔REST parity, gateway security defaults, and an 85% coverage gate.
+
 ### Added
 
 - Versioned Postgres schema migrations (`soulos_schema_migrations`, `soulos db status|migrate`)
 - MCP tools parity with REST: `forget_memory`, `delete_session`, `ensure_avatar`, `hybrid_prepare`, `hybrid_complete`
 - Gateway Redis sliding-window rate limits; refuse multi-replica without `REDIS_URL`
-- Hashed API keys at rest (`sha256:…`); request body size caps (`MAX_MEMORY_CONTENT_CHARS`)
+- Request body size caps (`MAX_MEMORY_CONTENT_CHARS`) on REST and MCP memory tools
 - CI lint/typecheck, Python 3.12/3.13 matrix, pgvector integration job, Dependabot, pre-commit (ruff)
 - `npm run setup` / `clean` / `lint` / `test:coverage` / `test:integration`; SDK OpenAPI coverage check
-- Request `X-Request-Id` + structured access logs; Docker non-root user + pinned `requirements.txt`
-- TypeScript SDK core client tests; backup/restore notes in self-hosted docs
+- Request `X-Request-Id` + structured JSON access logs
+- Docker non-root user + pinned `requirements.txt` in production images
+- TypeScript SDK core client tests; backup/restore and upgrade notes in self-hosted docs
 - **≥85% line coverage gate** for kernel, gateway, inference-bridge, studio, and Python SDK (`npm run test:coverage` / CI)
+
+### Security
+
+- Hashed API keys at rest (`sha256:…`); plaintext keys in the store are hashed on load with a warning
+- Redis rate limiter fail-closed when `GATEWAY_REPLICAS > 1` (no in-memory fallback across replicas)
+- `forget_memory` escapes SQL `ILIKE` wildcards (`%`, `_`)
 
 ### Changed
 
-- Compose/network/default DB renamed `senticore*` → `soulos*` (see self-hosted upgrade note for existing volumes)
+- Compose/network/default DB renamed `senticore*` → `soulos*` — existing volumes need a one-time DB rename or env override ([self-hosted upgrade](docs/deployment/self-hosted.md#upgrading-from-senticore-database-name))
 - Pytest moved to package `[dev]` extras (not installed in production images)
 - Kernel fails closed if database init/migration fails at boot
 - MCP hybrid errors return structured `{code, status, detail}` JSON
+- Version bump to **0.5.0** across packages, Helm `appVersion`, OpenAPI, schema.org, and docs indexes
 
 ### Fixed
 
-- `forget_memory` escapes SQL `ILIKE` wildcards (`%`, `_`)
+- MCP memory tools enforce the same content length caps as REST (no tool-path bypass)
 
+## [0.3.2] — 2026-09-05
 
 ### Added
 
@@ -116,3 +129,10 @@ All notable changes to SoulOS are documented here.
 ### Changed
 
 - Hybrid sidecar positioned as primary integration path
+
+[Unreleased]: https://github.com/mziqudhd92/soul-os/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/mziqudhd92/soul-os/compare/v0.3.2...v0.5.0
+[0.3.2]: https://github.com/mziqudhd92/soul-os/compare/v0.3.1...v0.3.2
+[0.3.1]: https://github.com/mziqudhd92/soul-os/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/mziqudhd92/soul-os/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/mziqudhd92/soul-os/releases/tag/v0.2.0
