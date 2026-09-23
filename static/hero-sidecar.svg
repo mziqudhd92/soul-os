@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 360" role="img" aria-labelledby="heroTitle heroDesc">
+  <title id="heroTitle">SoulOS hybrid sidecar</title>
+  <desc id="heroDesc">Your app and LLM stay in control while SoulOS provides identity and memory beside them.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#dff7f2"/>
+      <stop offset="55%" stop-color="#e8f3f8"/>
+      <stop offset="100%" stop-color="#fff6ec"/>
+    </linearGradient>
+    <linearGradient id="soul" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#12b39e"/>
+      <stop offset="100%" stop-color="#0c8f7e"/>
+    </linearGradient>
+    <linearGradient id="app" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f0f5f7"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#0c8f7e" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+  <rect x="16" y="24" width="488" height="312" rx="28" fill="url(#sky)"/>
+  <circle cx="430" cy="70" r="36" fill="#ffffff" opacity="0.55"/>
+  <circle cx="78" cy="286" r="28" fill="#12b39e" opacity="0.12"/>
+
+  <!-- Your app -->
+  <g filter="url(#soft)">
+    <rect x="48" y="88" width="168" height="168" rx="22" fill="url(#app)" stroke="#d5e1e6" stroke-width="2"/>
+    <text x="132" y="128" text-anchor="middle" font-family="system-ui,sans-serif" font-size="15" font-weight="700" fill="#14202a">Your app</text>
+    <rect x="72" y="148" width="120" height="12" rx="6" fill="#d8e7ec"/>
+    <rect x="72" y="172" width="96" height="12" rx="6" fill="#e4eef2"/>
+    <rect x="72" y="196" width="108" height="12" rx="6" fill="#e4eef2"/>
+    <rect x="72" y="220" width="72" height="18" rx="9" fill="#c97b3a" opacity="0.85"/>
+  </g>
+
+  <!-- SoulOS sidecar -->
+  <g filter="url(#soft)">
+    <rect x="292" y="72" width="180" height="200" rx="24" fill="url(#soul)"/>
+    <circle cx="382" cy="128" r="28" fill="#ffffff" opacity="0.22"/>
+    <text x="382" y="136" text-anchor="middle" font-family="system-ui,sans-serif" font-size="28" font-weight="700" fill="#ffffff">S</text>
+    <text x="382" y="178" text-anchor="middle" font-family="system-ui,sans-serif" font-size="16" font-weight="700" fill="#ffffff">SoulOS</text>
+    <text x="382" y="202" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#d8f4ef">persona &#183; memory</text>
+    <text x="382" y="222" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" fill="#d8f4ef">prepare &#183; complete</text>
+  </g>
+
+  <!-- Bridge arrows -->
+  <path d="M226 150 H278" stroke="#0c8f7e" stroke-width="3" stroke-linecap="round"/>
+  <path d="M268 142 L282 150 L268 158" fill="none" stroke="#0c8f7e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M278 190 H226" stroke="#c97b3a" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+  <path d="M238 182 L224 190 L238 198" fill="none" stroke="#c97b3a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+
+  <text x="252" y="138" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#0c8f7e">prepare</text>
+  <text x="252" y="214" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="600" fill="#a35f28">complete</text>
+</svg>

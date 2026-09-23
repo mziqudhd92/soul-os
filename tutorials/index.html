@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tutorials — SoulOS</title>
+  <base href="/soul-os/" />
+  <link rel="stylesheet" href="static/site.css" />
+  <link rel="stylesheet" href="static/studio.css" />
+  <meta name="description" content="Interactive SoulOS tutorials — sidecar, Python bot, quickstart, Soul Builder, MCP." />
+</head>
+<body class="tutorials-site">
+  <header class="site-header">
+    <div class="site-shell site-header-inner">
+      <a class="brand" href="/soul-os/">
+        <span class="brand-mark">S</span>
+        SoulOS
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="/soul-os/get-started/">Get started</a>
+        <a href="/soul-os/soulpacks/">SoulPacks</a>
+        <a href="/soul-os/docs/">Docs</a>
+        <a href="/soul-os/tutorials/" aria-current="page">Tutorials</a>
+        <a class="hide-sm" href="/soul-os/adopters/">Adopters</a>
+        <a class="hide-sm" href="/soul-os/agents/">Agents</a>
+        <a class="hide-sm" href="/soul-os/community/">Community</a>
+        <a class="btn btn-ghost" style="padding:0.4rem 0.85rem" href="https://github.com/mziqudhd92/soul-os" rel="noopener">GitHub</a>
+        <button type="button" id="btn-theme" class="btn btn-ghost" style="padding:0.4rem 0.7rem" title="Toggle theme" aria-label="Toggle theme">☾</button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="page-shell site-shell" style="padding:1.5rem 0 3rem">
+    <div id="view-tutorial" class="view view-active">
+      <div class="tutorial-wrap">
+        <div id="tutorial-list-view">
+          <header class="page-intro page-hero" style="padding-top:0.5rem">
+            <h1>Tutorials</h1>
+            <p>Step-by-step guides for hybrid sidecar, Studio, and deployment. Interactive walkthroughs work offline; run Docker locally for live kernel checks.</p>
+          </header>
+          <div id="tutorial-grid" class="tutorial-grid"></div>
+        </div>
+        <div id="tutorial-detail-view" class="hidden">
+          <button type="button" id="tutorial-back" class="btn btn-ghost" style="padding:0.4rem 0.85rem">← All tutorials</button>
+          <article class="panel prose-panel flat">
+            <div id="tutorial-meta" class="tutorial-meta"></div>
+            <div id="tutorial-content" class="prose"></div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="static/tutorial-python-bot.js"></script>
+  <script src="static/tutorial-terminal.js"></script>
+  <script src="static/tutorial-soul-builder.js"></script>
+  <script>
+    window.STUDIO_STATIC = true;
+    window.STUDIO_BASE = "/soul-os/";
+  </script>
+  <script src="static/tutorials-static.js"></script>
+</body>
+</html>
