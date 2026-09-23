@@ -1,0 +1,12 @@
+[run]
+source = soulos
+omit =
+    */__pycache__/*
+
+[report]
+precision = 1
+show_missing = true
+exclude_lines =
+    pragma: no cover
+    if TYPE_CHECKING:
+fail_under = 85

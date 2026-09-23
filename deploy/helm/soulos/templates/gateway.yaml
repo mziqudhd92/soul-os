@@ -1,4 +1,7 @@
 {{- if .Values.gateway.enabled }}
+{{- if and (gt (int .Values.gateway.replicaCount) 1) (not .Values.gateway.env.REDIS_URL) }}
+{{- fail "gateway.replicaCount > 1 requires gateway.env.REDIS_URL (rate limits must be shared across replicas)" }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,6 +35,8 @@ spec:
               value: {{ .Values.gateway.env.GATEWAY_SECRET | quote }}
             - name: REDIS_URL
               value: {{ .Values.gateway.env.REDIS_URL | quote }}
+            - name: GATEWAY_REPLICAS
+              value: {{ .Values.gateway.replicaCount | quote }}
             - name: SOULOS_API_KEYS
               value: {{ .Values.gateway.env.SOULOS_API_KEYS | quote }}
           readinessProbe:

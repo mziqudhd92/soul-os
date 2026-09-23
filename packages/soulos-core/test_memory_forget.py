@@ -30,6 +30,17 @@ async def test_forget_memory_uses_ilike_pattern():
     assert len(conn.deletes) == 1
     assert conn.deletes[0][1]["pattern"] == "%refund%"
     assert conn.deletes[0][1]["bot_id"] == "bot-1"
+    assert "ESCAPE" in conn.deletes[0][0]
+
+
+@pytest.mark.asyncio
+async def test_forget_memory_escapes_like_wildcards():
+    conn = MemoryDeleteConnection()
+    conn.rowcount = 1
+    deleted = await forget_memory(conn, "bot-1", r"100%_off\sale")
+    assert deleted == 1
+    assert conn.deletes[0][1]["pattern"] == r"%100\%\_off\\sale%"
+    assert "ESCAPE" in conn.deletes[0][0]
 
 
 @pytest.mark.asyncio

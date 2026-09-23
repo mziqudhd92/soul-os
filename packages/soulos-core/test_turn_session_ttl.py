@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -25,7 +25,7 @@ async def test_purge_turn_sessions_deletes(monkeypatch):
     monkeypatch.setattr(
         turn_mod,
         "session_ttl_cutoff",
-        lambda: datetime.now(timezone.utc) - timedelta(seconds=60),
+        lambda: datetime.now(UTC) - timedelta(seconds=60),
     )
     db = AsyncMock()
     result = MagicMock()
@@ -41,9 +41,9 @@ async def test_get_turn_session_lazy_expires(monkeypatch):
     monkeypatch.setattr(
         turn_mod,
         "session_ttl_cutoff",
-        lambda: datetime.now(timezone.utc),
+        lambda: datetime.now(UTC),
     )
-    old = datetime.now(timezone.utc) - timedelta(hours=2)
+    old = datetime.now(UTC) - timedelta(hours=2)
     row = MagicMock()
     row.current_step = "collect_dates"
     row.slots = {}

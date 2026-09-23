@@ -6,12 +6,11 @@ import argparse
 import asyncio
 import json
 import os
-import sys
 from pathlib import Path
 
 import httpx
 
-from runtime.memory_ledger import append_episode_line, export_memory_json, memory_root
+from runtime.memory_ledger import append_episode_line, export_memory_json
 from runtime.soulpacks import compile_pack, export_pack, list_packs
 
 
@@ -101,6 +100,30 @@ def cmd_pack_export(args: argparse.Namespace) -> None:
     print(f"Exported SoulPack to {out}")
 
 
+async def cmd_db_migrate(args: argparse.Namespace) -> None:
+    from runtime.bootstrap import init_database
+
+    applied = await init_database()
+    print(f"Applied migrations: {applied}" if applied else "Schema up to date.")
+
+
+async def cmd_db_status(args: argparse.Namespace) -> None:
+    from sqlalchemy.ext.asyncio import create_async_engine
+
+    from config import DATABASE_URL
+    from runtime.migrations import migration_status
+
+    engine = create_async_engine(DATABASE_URL)
+    try:
+        async with engine.connect() as conn:
+            rows = await migration_status(conn)
+    finally:
+        await engine.dispose()
+    for row in rows:
+        mark = "applied" if row["applied"] else "pending"
+        print(f"{row['version']:03d}_{row['name']}\t{mark}")
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="soulos", description="SoulOS kernel utilities")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -149,6 +172,15 @@ def main(argv: list[str] | None = None) -> None:
     pack_export.add_argument("pack_id")
     pack_export.add_argument("-o", "--output", required=True, help="Output pack directory")
     pack_export.set_defaults(func=cmd_pack_export)
+
+    db_p = sub.add_parser("db", help="Database schema migrations (uses DATABASE_URL)")
+    db_sub = db_p.add_subparsers(dest="db_command", required=True)
+    db_sub.add_parser("migrate", help="Apply pending migrations").set_defaults(
+        func=lambda a: asyncio.run(cmd_db_migrate(a))
+    )
+    db_sub.add_parser("status", help="List applied / pending migrations").set_defaults(
+        func=lambda a: asyncio.run(cmd_db_status(a))
+    )
 
     args = parser.parse_args(argv)
     if args.command == "memory-sync":

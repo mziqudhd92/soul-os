@@ -8,9 +8,9 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from soul_validation import validate_soul_payload
 from runtime.persona_simple import apply_persona_mode
 from runtime.turn_contract import TurnContractError, validate_turn_contract
+from soul_validation import validate_soul_payload
 
 
 def _validate_runtime_config(runtime_config: dict[str, Any] | None) -> None:

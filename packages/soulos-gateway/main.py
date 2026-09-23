@@ -1,24 +1,62 @@
 """SoulOS Cloud gateway — validates API keys and proxies to soulos-kernel."""
 
+import json
 import logging
+import time
+import uuid
 
 import httpx
-from fastapi import FastAPI, HTTPException, Request, Response
-from fastapi.responses import StreamingResponse
-
 from config import (
     ACCOUNT_ID_HEADER,
     GATEWAY_SECRET,
     GATEWAY_SECRET_HEADER,
     KERNEL_URL,
 )
-from keys import lookup_api_key
+from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi.responses import StreamingResponse
+from keys import hash_api_key, lookup_api_key
 from rate_limit import rate_limiter
+from starlette.middleware.base import BaseHTTPMiddleware
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+access_logger = logging.getLogger("soulos.gateway.access")
+
+REQUEST_ID_HEADER = "X-Request-Id"
 
 app = FastAPI(title="SoulOS Cloud Gateway")
+
+
+class RequestIdMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        request_id = request.headers.get(REQUEST_ID_HEADER) or str(uuid.uuid4())
+        request.state.request_id = request_id
+        started = time.perf_counter()
+        response = None
+        status = 500
+        try:
+            response = await call_next(request)
+            status = response.status_code
+            response.headers[REQUEST_ID_HEADER] = request_id
+            return response
+        finally:
+            access_logger.info(
+                "%s",
+                json.dumps(
+                    {
+                        "request_id": request_id,
+                        "method": request.method,
+                        "path": request.url.path,
+                        "status": status,
+                        "latency_ms": round((time.perf_counter() - started) * 1000, 2),
+                        "account_id": request.headers.get(ACCOUNT_ID_HEADER),
+                    },
+                    separators=(",", ":"),
+                ),
+            )
+
+
+app.add_middleware(RequestIdMiddleware)
 
 HOP_HEADERS = frozenset(
     {
@@ -83,7 +121,7 @@ async def proxy(full_path: str, request: Request):
     if not record:
         raise HTTPException(status_code=401, detail="Invalid API key")
 
-    if not rate_limiter.allow(token, record):
+    if not rate_limiter.allow(hash_api_key(token), record):
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
 
     upstream_path = f"/{full_path}" if full_path else "/"

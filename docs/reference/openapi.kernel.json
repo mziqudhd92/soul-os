@@ -1333,6 +1333,7 @@
           },
           "message": {
             "type": "string",
+            "maxLength": 32768,
             "title": "Message"
           }
         },
@@ -1395,12 +1396,14 @@
           },
           "summary": {
             "type": "string",
+            "maxLength": 32768,
             "title": "Summary"
           },
           "user_message": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 32768
               },
               {
                 "type": "null"
@@ -1455,7 +1458,8 @@
           "assistant_text": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 32768
               },
               {
                 "type": "null"
@@ -1517,6 +1521,7 @@
           },
           "query": {
             "type": "string",
+            "maxLength": 32768,
             "title": "Query"
           },
           "top_k": {
@@ -1603,6 +1608,7 @@
           },
           "content_match": {
             "type": "string",
+            "maxLength": 32768,
             "title": "Content Match"
           }
         },
@@ -1621,6 +1627,7 @@
           },
           "content": {
             "type": "string",
+            "maxLength": 32768,
             "title": "Content"
           },
           "session_id": {
@@ -1668,6 +1675,7 @@
           },
           "query": {
             "type": "string",
+            "maxLength": 32768,
             "title": "Query"
           },
           "top_k": {
@@ -1720,6 +1728,7 @@
           },
           "message": {
             "type": "string",
+            "maxLength": 32768,
             "title": "Message"
           },
           "reflect_async": {

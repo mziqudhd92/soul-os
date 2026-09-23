@@ -17,6 +17,7 @@ PAGES = SITE_SRC / "pages"
 sys.path.insert(0, str(TEMPLATES))
 sys.path.insert(0, str(PAGES.parent))
 
+from _shell import absolute_url  # noqa: E402
 from pages import (  # noqa: E402
     ensure_base,
     load_soulpack_catalog,
@@ -32,20 +33,19 @@ from pages import (  # noqa: E402
     render_tutorials_page,
     write,
 )
-from _shell import absolute_url  # noqa: E402
 
 # Back-compat for tests that import private helpers from this module.
-from pages.faq import faq_items as _faq_items  # noqa: E402
-from pages.home import render_home as _home  # noqa: E402
-from pages.adopters import render_adopters as _adopters  # noqa: E402
-from pages.not_found import render_not_found as _not_found  # noqa: E402
+from pages.adopters import render_adopters as _adopters  # noqa: F401
+from pages.faq import faq_items as _faq_items  # noqa: F401
+from pages.home import render_home as _home  # noqa: F401
+from pages.not_found import render_not_found as _not_found  # noqa: F401
 
 
 def build(out: Path, base: str) -> None:
     os.environ["SOULOS_DOCS_ROOT"] = str(ROOT / "docs")
 
-    from soulos_studio.tutorials import TUTORIALS
     from soulos_studio.docs_reader import get_tutorial_content, get_tutorials_catalog
+    from soulos_studio.tutorials import TUTORIALS
 
     base = ensure_base(base)
     static_studio = ROOT / "packages/soulos-studio/soulos_studio/static"

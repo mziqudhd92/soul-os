@@ -53,6 +53,10 @@ Full blast-radius table and Anthropic MCP alignment notes: see Phase 4 section b
 | `register_avatar` | `bots` | Insert | Tool — high privilege; gate behind auth |
 | `list_avatars` | `bots` | Read list | Tool — tenant-scoped when auth on |
 | `update_cognitive_state` | `current_msv` | Update | Tool — equivalent to `/state/update` |
+| `forget_memory` | Episodic store | Delete by content match | Tool — GDPR-style erase |
+| `delete_session` | Session memories + turn_sessions | Delete | Tool — session wipe |
+| `ensure_avatar` | `bots` | Insert if missing | Tool — idempotent bootstrap |
+| `hybrid_prepare` / `hybrid_complete` | Identity + memory + optional reflect | Read + write | Tool — same privilege as REST hybrid |
 | `memory://episodic/{bot_id}` | Memories | Read resource | Resource URI pattern |
 | Chat streaming | — | **Not on MCP** | Use REST/SDK — intentional gap |
 

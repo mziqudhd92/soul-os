@@ -11,7 +11,7 @@ services:
       - "${SOULOS_KERNEL_PORT:-8001}:8000"
     environment:
       - PYTHONUNBUFFERED=1
-      - DATABASE_URL=postgresql+asyncpg://postgres:changeme_local_dev@soulos-db:5432/senticore
+      - DATABASE_URL=postgresql+asyncpg://postgres:changeme_local_dev@soulos-db:5432/soulos
       - INFERENCE_API_URL=${INFERENCE_API_URL:-http://soulos-inference-bridge:11434}
       - EMBEDDING_DIMENSION=${EMBEDDING_DIMENSION:-768}
       - INFERENCE_SKIP_PULL=${INFERENCE_SKIP_PULL:-1}
@@ -22,6 +22,18 @@ services:
     depends_on:
       soulos-db:
         condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - soulos_sidecar_net
 
@@ -31,7 +43,7 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_local_dev}
-      POSTGRES_DB: ${POSTGRES_DB:-senticore}
+      POSTGRES_DB: ${POSTGRES_DB:-soulos}
     ports:
       - "${SOULOS_DB_PORT:-5433}:5432"
     volumes:

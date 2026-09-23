@@ -2,18 +2,15 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from config import EMBEDDING_DIMENSION
 from runtime.memory_ledger import append_episode_line
 from runtime.memory_sync import sync_memory_directory
 from runtime.soulignore import content_matches_ignore_patterns, validate_memory_content
-
-
-from config import EMBEDDING_DIMENSION
 
 
 class MockEmbedder:

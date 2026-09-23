@@ -1,6 +1,6 @@
 """Unit tests for session memory TTL helpers."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock
 
 import pytest
@@ -21,8 +21,8 @@ def test_session_ttl_cutoff_enabled(monkeypatch):
     monkeypatch.setattr(memory_mod, "MEMORY_SESSION_TTL_SECONDS", 3600)
     cutoff = session_ttl_cutoff()
     assert cutoff is not None
-    assert cutoff < datetime.now(timezone.utc)
-    assert cutoff > datetime.now(timezone.utc) - timedelta(hours=2)
+    assert cutoff < datetime.now(UTC)
+    assert cutoff > datetime.now(UTC) - timedelta(hours=2)
 
 
 @pytest.mark.asyncio

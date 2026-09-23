@@ -34,4 +34,21 @@ def test_parse_example_soul_roundtrip():
 def test_soul_filename_slug():
     assert soul_filename("Site Support") == "site-support.soul.json"
     assert soul_filename("!!!") == "my-bot.soul.json"
+    assert soul_filename("a--b---c") == "a-b-c.soul.json"
+
+
+def test_build_simple_persona_mode():
+    form = default_form()
+    form["persona_mode"] = "simple"
+    form["simple_persona"] = {"warmth": 0.5, "rigor": 0.6, "caution": 0.4}
+    payload = build_soul_payload(form)
+    assert payload["persona_mode"] == "simple"
+    assert payload["simple_persona"]["warmth"] == 0.5
+
+
+def test_validate_soul_raises_on_invalid():
+    import pytest
+
+    with pytest.raises(ValueError, match="Soul validation failed"):
+        validate_soul({"name": "x"})
 

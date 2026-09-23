@@ -76,7 +76,7 @@ def test_validate_bounds_rejects_oversized_payload():
 def test_validate_bounds_rejects_deep_nesting():
     nested: dict = {"a": {}}
     cur = nested["a"]
-    for i in range(MAX_SLOT_DEPTH + 1):
+    for _ in range(MAX_SLOT_DEPTH + 1):
         cur["n"] = {}
         cur = cur["n"]
     with pytest.raises(TurnContractError) as exc:

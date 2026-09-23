@@ -1,14 +1,12 @@
 """GCP Vertex AI backend."""
 
-import json
 import os
 from collections.abc import AsyncIterator
 
+import vertexai
 from google.cloud import aiplatform
 from vertexai.generative_models import GenerativeModel
 from vertexai.language_models import TextEmbeddingModel
-
-import vertexai
 
 from backends.base import InferenceBackend
 

@@ -10,7 +10,6 @@ from httpx import ASGITransport, AsyncClient
 from dependencies import get_db, get_embedder, get_llm_service
 from main import app
 from test_main import MockEmbedder, MockLLMService, mock_get_db
-
 from turn_contract_fixtures import (
     BOOKING_CONTRACT,
     BOT_ID,

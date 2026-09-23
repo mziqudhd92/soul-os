@@ -7,7 +7,7 @@ from httpx import ASGITransport, AsyncClient
 
 from dependencies import get_db, get_embedder, get_llm_service
 from main import app
-from test_main import MockEmbedder, MockLLMService, VALID_SOUL, mock_get_db
+from test_main import VALID_SOUL, MockEmbedder, MockLLMService, mock_get_db
 
 app.dependency_overrides[get_db] = mock_get_db
 app.dependency_overrides[get_embedder] = MockEmbedder

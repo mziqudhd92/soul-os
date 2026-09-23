@@ -11,3 +11,5 @@ ACCOUNT_ID_HEADER = "X-SoulOS-Account-Id"
 GATEWAY_SECRET_HEADER = "X-SoulOS-Gateway-Secret"
 # When set, gateway rate limits are shared across replicas via Redis.
 REDIS_URL = os.getenv("REDIS_URL", "").strip()
+# Declared replica count (Helm sets this from gateway.replicaCount). >1 requires REDIS_URL.
+GATEWAY_REPLICAS = int(os.getenv("GATEWAY_REPLICAS", "1"))

@@ -23,7 +23,7 @@ helm upgrade --install soulos deploy/helm/soulos \
 | `purgeCron.enabled` | CronJob → `POST /memory/purge-expired` (requires TTL &gt; 0) |
 | `purgeCron.schedule` | Default `15 * * * *` |
 | `gateway.enabled` | Deploy cloud gateway |
-| `gateway.env.REDIS_URL` | Shared rate limits (multi-replica) |
+| `gateway.env.REDIS_URL` | Shared rate limits (multi-replica; required when `gateway.replicaCount > 1`; Redis outage fail-closed) |
 | `postgresql.enabled` | Chart-bundled Postgres (dev only) |
 
 **Production checklist:** `REQUIRE_AUTH=1`, enable `gateway`, point `DATABASE_URL` at managed Postgres with `pgvector`, set `MEMORY_SESSION_TTL_SECONDS` + `purgeCron.enabled=true`, terminate TLS at ingress.

@@ -1,31 +1,35 @@
 version: '3.8'
 
+# Database rename (0.3.x): default DB is `soulos` (was `senticore`).
+# Existing volumes still hold `senticore` — see docs/deployment/self-hosted.md
+# "Upgrading from senticore database name" before `docker compose up`.
+
 services:
   soulos-studio:
     build:
       context: .
       dockerfile: packages/soulos-studio/Dockerfile
-    container_name: senticore-soulos-studio
+    container_name: soulos-studio
     ports:
       - "8765:8765"
     environment:
       - SOULOS_KERNEL_URL=http://soulos-kernel:8000
     depends_on:
       soulos-kernel:
-        condition: service_started
+        condition: service_healthy
     networks:
-      - senticore_net
+      - soulos_net
 
   soulos-kernel:
     build:
       context: .
       dockerfile: packages/soulos-core/Dockerfile
-    container_name: senticore-soulos-kernel
+    container_name: soulos-kernel
     ports:
       - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
-      - DATABASE_URL=postgresql+asyncpg://postgres:changeme_local_dev@db:5432/senticore
+      - DATABASE_URL=postgresql+asyncpg://postgres:changeme_local_dev@db:5432/soulos
       - INFERENCE_API_URL=${INFERENCE_API_URL:-http://ollama:11434}
       - EMBEDDING_DIMENSION=${EMBEDDING_DIMENSION:-768}
       - INFERENCE_SKIP_PULL=${INFERENCE_SKIP_PULL:-0}
@@ -35,16 +39,28 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
-      - senticore_net
+      - soulos_net
 
   db:
     image: pgvector/pgvector:pg16
-    container_name: senticore-db
+    container_name: soulos-db
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_local_dev}
-      POSTGRES_DB: ${POSTGRES_DB:-senticore}
+      POSTGRES_DB: ${POSTGRES_DB:-soulos}
     ports:
       - "5432:5432"
     volumes:
@@ -55,24 +71,24 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - senticore_net
+      - soulos_net
 
   ollama:
     image: ollama/ollama:latest
-    container_name: senticore-ollama
+    container_name: soulos-ollama
     ports:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
     networks:
-      - senticore_net
+      - soulos_net
     command: ["serve"]
 
   soulos-inference-bridge:
     build:
       context: .
       dockerfile: packages/soulos-inference-bridge/Dockerfile
-    container_name: senticore-inference-bridge
+    container_name: soulos-inference-bridge
     profiles: ["bridge-mock", "bridge-aws", "bridge-vertex", "bridge-openrouter"]
     ports:
       - "127.0.0.1:11434:11434"
@@ -94,10 +110,10 @@ services:
       - OPENROUTER_HTTP_REFERER=${OPENROUTER_HTTP_REFERER:-https://github.com/mziqudhd92/soul-os}
       - OPENROUTER_APP_TITLE=${OPENROUTER_APP_TITLE:-SoulOS}
     networks:
-      - senticore_net
+      - soulos_net
 
 networks:
-  senticore_net:
+  soulos_net:
     driver: bridge
 
 volumes:

@@ -1,7 +1,7 @@
 import pytest
-from runtime.errors import ACCESS_DENIED, BOT_NOT_FOUND, SoulOSProblem
 
 from auth import AccountContext
+from runtime.errors import ACCESS_DENIED, BOT_NOT_FOUND, SoulOSProblem
 from tenant import verify_bot_access
 
 

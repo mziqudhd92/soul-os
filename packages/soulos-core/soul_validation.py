@@ -10,6 +10,7 @@ from jsonschema import Draft202012Validator
 from jsonschema.exceptions import ValidationError as JsonSchemaValidationError
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
+
 def _resolve_schema_path() -> Path:
     here = Path(__file__).resolve().parent
     candidates = [Path("/spec/soul.schema.json")]

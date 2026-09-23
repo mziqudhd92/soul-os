@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,20 +22,108 @@ jobs:
 
       - run: npm ci
 
+      - name: Install lint dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff \
+            -e "packages/soulos-core[dev]" \
+            -e "packages/soulos-gateway[dev]" \
+            -e "packages/soulos-studio[dev]" \
+            -e "packages/soulos-inference-bridge[dev]" \
+            -e "packages/soulos-sdk/python[dev]"
+
+      - run: npm run lint
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - run: npm ci
+
       - name: Install Python test dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e packages/soulos-core -e packages/soulos-gateway \
+          pip install ruff pytest-cov \
+            -e "packages/soulos-core[dev]" \
+            -e "packages/soulos-gateway[dev]" \
             -e "packages/soulos-studio[dev]" \
             -e "packages/soulos-inference-bridge[dev]" \
             -e "packages/soulos-sdk/python[dev]"
 
       - run: npm run test:all
 
+      - name: Coverage ≥85%
+        if: matrix.python-version == '3.12'
+        run: npm run test:coverage
+
       - name: Dependency license inventory
+        if: matrix.python-version == '3.12'
         run: |
           python scripts/generate-dependency-licenses.py --fail-on-copyleft
           # Refresh committed snapshot when maintainers bump deps locally via npm run licenses:gen
 
       - name: Doc drift checks
+        if: matrix.python-version == '3.12'
         run: npm run doc:check
+
+      - name: pip-audit
+        if: matrix.python-version == '3.12'
+        continue-on-error: true
+        run: |
+          python -m pip install pip-audit
+          pip-audit
+
+      - name: npm audit
+        if: matrix.python-version == '3.12'
+        continue-on-error: true
+        run: npm audit --omit=dev
+
+  integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: changeme_local_dev
+          POSTGRES_DB: soulos
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql+asyncpg://postgres:changeme_local_dev@localhost:5432/soulos
+      SOULOS_INTEGRATION: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install kernel (dev)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e "packages/soulos-core[dev]"
+
+      - name: Run Postgres integration tests
+        run: |
+          cd packages/soulos-core
+          python -m pytest -q -m integration test_integration_pg.py

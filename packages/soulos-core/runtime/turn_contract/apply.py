@@ -6,8 +6,17 @@ from typing import Any
 
 from runtime.turn_contract.bounds import validate_filled_slots_bounds
 from runtime.turn_contract.prompts import build_remedial_prompt_hint
-from runtime.turn_contract.slots import merge_slots, scan_reject_tokens, step_map, validate_slots
-from runtime.turn_contract.types import MAX_SLOT_KEYS, TurnApplyResult, TurnContractError
+from runtime.turn_contract.slots import (
+    merge_slots,
+    scan_reject_tokens,
+    step_map,
+    validate_slots,
+)
+from runtime.turn_contract.types import (
+    MAX_SLOT_KEYS,
+    TurnApplyResult,
+    TurnContractError,
+)
 
 
 def apply_turn(

@@ -14,7 +14,11 @@ from soulos.handoff import (
     handoff_to,
     role_external_key,
 )
-from soulos.hybrid import SoulHybridClient, SoulOSError, merge_contract_into_system_prompt
+from soulos.hybrid import (
+    SoulHybridClient,
+    SoulOSError,
+    merge_contract_into_system_prompt,
+)
 
 __all__ = [
     "SoulOSClient",

@@ -13,7 +13,7 @@ from runtime.memory_ledger import iter_episode_lines, memory_root
 
 
 def line_content_hash(summary: str, episode_hash: str) -> str:
-    digest = hashlib.sha256(f"{episode_hash}:{summary}".encode("utf-8")).hexdigest()
+    digest = hashlib.sha256(f"{episode_hash}:{summary}".encode()).hexdigest()
     return digest[:32]
 
 

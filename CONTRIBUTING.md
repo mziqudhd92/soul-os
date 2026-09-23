@@ -23,7 +23,8 @@ scripts/                   # Doc generators, utilities
 
 ```bash
 git clone https://github.com/mziqudhd92/soul-os.git soulos && cd soulos
-npm ci
+npm run setup                 # or: bash scripts/setup-dev.sh
+pre-commit install            # ruff on commit
 docker compose up --build
 # Studio: http://localhost:8765
 # Kernel: http://localhost:8000

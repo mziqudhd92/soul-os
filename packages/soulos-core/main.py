@@ -11,10 +11,12 @@ from auth import (
     set_mcp_account_context,
 )
 from config import ACCOUNT_ID_HEADER, GATEWAY_SECRET_HEADER, validate_gateway_secret
+from routes import avatars, chat, health, hybrid, mcp, memory
 from runtime.boot_memory import sync_memory_on_boot
 from runtime.bootstrap import init_database, pull_model, wait_for_ollama
 from runtime.errors import SoulOSProblem, problem_response, register_exception_handlers
-from routes import avatars, chat, health, hybrid, mcp, memory
+from runtime.migrations import SchemaTooNewError
+from runtime.request_log import RequestIdMiddleware
 from versioning import get_product_version
 
 logging.basicConfig(level=logging.INFO)
@@ -42,12 +44,20 @@ async def lifespan(app: FastAPI):
     validate_gateway_secret()
     try:
         await init_database()
+    except SchemaTooNewError:
+        raise
     except Exception as e:
         logger.error("Failed to initialize database: %s", e)
+        raise
 
     try:
         await wait_for_ollama()
-        from config import EMBED_MODEL_NAME, INFERENCE_MODE, INFERENCE_SKIP_PULL, MODEL_NAME
+        from config import (
+            EMBED_MODEL_NAME,
+            INFERENCE_MODE,
+            INFERENCE_SKIP_PULL,
+            MODEL_NAME,
+        )
 
         if not INFERENCE_SKIP_PULL:
             if INFERENCE_MODE != "embeddings_only":
@@ -74,6 +84,7 @@ app = FastAPI(
 )
 register_exception_handlers(app)
 app.add_middleware(McpAuthMiddleware)
+app.add_middleware(RequestIdMiddleware)
 
 app.include_router(health.router)
 app.include_router(avatars.router)

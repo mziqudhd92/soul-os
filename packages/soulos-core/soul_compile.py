@@ -192,7 +192,7 @@ def _looks_like_json(raw: bytes) -> bool:
 
 
 def _looks_like_soul(raw: bytes) -> bool:
-    return raw.lstrip(b"\ufeff").startswith(b"---")
+    return raw.lstrip(b"\xef\xbb\xbf").startswith(b"---")
 
 
 def _hint_is_soul(filename_hint: str | None) -> bool:

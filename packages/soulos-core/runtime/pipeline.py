@@ -10,7 +10,6 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from config import INFERENCE_API_URL, MODEL_NAME, inference_headers
-from soul_validation import default_msv_dict
 from runtime.cognitive_telemetry import (
     confidence_from_msv,
     format_cognitive_state_sse,
@@ -19,6 +18,7 @@ from runtime.cognitive_telemetry import (
     system1_threshold,
 )
 from runtime.reflector import run_system_2_reflector
+from soul_validation import default_msv_dict
 
 logger = logging.getLogger(__name__)
 

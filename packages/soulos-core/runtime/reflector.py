@@ -9,9 +9,14 @@ from typing import Any
 import httpx
 from sqlalchemy import text
 
-from runtime.boot_memory import sync_memory_on_boot
+from config import (
+    INFERENCE_API_URL,
+    INFERENCE_MODE,
+    MODEL_NAME,
+    engine,
+    inference_headers,
+)
 from runtime.crystallization import apply_crystallization_if_needed
-from config import INFERENCE_API_URL, INFERENCE_MODE, MODEL_NAME, engine, inference_headers
 
 logger = logging.getLogger(__name__)
 

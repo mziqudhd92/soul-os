@@ -4,18 +4,19 @@ from typing import Any
 
 from pydantic import AliasChoices, BaseModel, Field, field_validator
 
+from config import MAX_MEMORY_CONTENT_CHARS
 from runtime.turn_contract import TurnContractError, validate_filled_slots_bounds
 
 
 class MemoryIngest(BaseModel):
     bot_id: str
-    content: str
+    content: str = Field(max_length=MAX_MEMORY_CONTENT_CHARS)
     session_id: str | None = None
 
 
 class MemoryRetrieve(BaseModel):
     bot_id: str
-    query: str
+    query: str = Field(max_length=MAX_MEMORY_CONTENT_CHARS)
     top_k: int = 5
     session_id: str | None = None
 
@@ -27,7 +28,7 @@ class MemorySync(BaseModel):
 
 class MemoryForget(BaseModel):
     bot_id: str
-    content_match: str
+    content_match: str = Field(max_length=MAX_MEMORY_CONTENT_CHARS)
 
 
 class MemoryPurgeExpired(BaseModel):
@@ -43,12 +44,12 @@ class MemoryPurgeExpired(BaseModel):
 
 class ChatRequest(BaseModel):
     bot_id: str
-    message: str
+    message: str = Field(max_length=MAX_MEMORY_CONTENT_CHARS)
 
 
 class ReflectStateRequest(BaseModel):
     bot_id: str
-    message: str
+    message: str = Field(max_length=MAX_MEMORY_CONTENT_CHARS)
     reflect_async: bool = False
 
 
@@ -59,21 +60,21 @@ class UpdateStateRequest(BaseModel):
 
 class HybridPrepareRequest(BaseModel):
     bot_id: str
-    query: str
+    query: str = Field(max_length=MAX_MEMORY_CONTENT_CHARS)
     top_k: int = 5
     session_id: str | None = None
 
 
 class HybridCompleteRequest(BaseModel):
     bot_id: str
-    summary: str
-    user_message: str | None = None
+    summary: str = Field(max_length=MAX_MEMORY_CONTENT_CHARS)
+    user_message: str | None = Field(default=None, max_length=MAX_MEMORY_CONTENT_CHARS)
     session_id: str | None = None
     reflect: bool = True
     reflect_async: bool = False
     filled_slots: dict[str, Any] | None = None
     intent: str | None = None
-    assistant_text: str | None = None
+    assistant_text: str | None = Field(default=None, max_length=MAX_MEMORY_CONTENT_CHARS)
     expected_version: int | None = None
     idempotency_key: str | None = None
     advance: bool = True

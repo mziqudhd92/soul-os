@@ -1,0 +1,14 @@
+[run]
+source = soulos_studio
+omit =
+    */__pycache__/*
+    */interactive_tutorials/*
+
+[report]
+precision = 1
+show_missing = true
+exclude_lines =
+    pragma: no cover
+    if TYPE_CHECKING:
+    if __name__ == .__main__.:
+fail_under = 85

@@ -1,0 +1,18 @@
+line-length = 88
+target-version = "py312"
+extend-exclude = ["site", "site-test-output", "**/node_modules"]
+
+[lint]
+select = ["E4", "E7", "E9", "F", "I", "B", "UP", "ASYNC"]
+# B008: FastAPI dependency injection uses calls in defaults (Depends/Query/Body).
+# E741: HEXACO trait keys are single letters (O = openness).
+# ASYNC240: small local file reads (soul files, fixtures) are intentionally sync.
+ignore = ["B008", "E741", "ASYNC240"]
+
+[lint.per-file-ignores]
+# Tests and scripts adjust sys.path / env before importing kernel modules.
+"**/test_*.py" = ["E402"]
+"scripts/**" = ["E402"]
+
+[lint.isort]
+known-first-party = ["runtime", "routes", "soulos", "soulos_studio", "backends"]

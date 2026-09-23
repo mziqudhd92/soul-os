@@ -5,7 +5,6 @@ import json
 import pytest
 
 from runtime.cognitive_telemetry import (
-    build_cognitive_state,
     confidence_from_msv,
     format_cognitive_state_sse,
     merge_runtime_config,

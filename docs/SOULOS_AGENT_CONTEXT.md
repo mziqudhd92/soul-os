@@ -179,8 +179,13 @@ Errors: RFC 7807 `application/problem+json` with `code` (e.g. `BOT_NOT_FOUND`, `
 
 | Tool | Args | Purpose |
 |------|------|---------|
-| `ingest_memory` | `bot_id`, `content` | Store episodic memory |
-| `retrieve_memory` | `bot_id`, `query`, `top_k?` | Semantic recall |
+| `ingest_memory` | `bot_id`, `content`, `session_id?` | Store episodic memory |
+| `retrieve_memory` | `bot_id`, `query`, `top_k?`, `session_id?` | Semantic recall |
+| `forget_memory` | `bot_id`, `content_match` | Delete by content match |
+| `delete_session` | `bot_id`, `session_id` | Session memories + turn state |
+| `ensure_avatar` | `external_key`, `soul`, `runtime_config?` | Idempotent bootstrap |
+| `hybrid_prepare` | `bot_id`, `query`, `session_id?`, `top_k?` | Sidecar prepare |
+| `hybrid_complete` | `bot_id`, `summary`, … | Sidecar complete (+ turn contract) |
 | `get_identity` | `bot_id` | Persona + baseline/current MSV |
 | `register_avatar` | `soul` (object) | Create avatar |
 | `list_avatars` | `limit?` | List avatars (tenant-scoped if auth on) |
@@ -233,7 +238,7 @@ async for event in soul.send_message(avatar["id"], "hello"):
 | `spec/soul.schema.json` | Soul validation contract |
 | `examples/` | support-bot, dev-twin, companion, mcp, multi-agent-handoff |
 
-**Runtime pipeline:** `embedder` → `memory` (recall) → `pipeline` (System 1 SSE) → `reflector` (System 2 MSV). Routes in `main.py`.
+**Runtime pipeline:** `embedder` → `memory` (recall) → `pipeline` (System 1 SSE) → `reflector` (System 2 MSV). HTTP routes live under `packages/soulos-core/routes/` (wired from `main.py`). Schema migrations: `runtime/migrations.py` / `soulos db migrate`.
 
 ---
 

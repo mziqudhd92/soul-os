@@ -186,15 +186,21 @@ def get_tutorial_content(tutorial_id: str) -> dict[str, Any]:
 
     if meta.get("interactive"):
         if tutorial_id == "python-bot":
-            from soulos_studio.interactive_tutorials.python_bot import get_python_bot_tutorial
+            from soulos_studio.interactive_tutorials.python_bot import (
+                get_python_bot_tutorial,
+            )
 
             doc = get_python_bot_tutorial()
         elif tutorial_id == "quickstart":
-            from soulos_studio.interactive_tutorials.quickstart import get_quickstart_tutorial
+            from soulos_studio.interactive_tutorials.quickstart import (
+                get_quickstart_tutorial,
+            )
 
             doc = get_quickstart_tutorial()
         elif tutorial_id == "soul-builder":
-            from soulos_studio.interactive_tutorials.soul_builder import get_soul_builder_tutorial
+            from soulos_studio.interactive_tutorials.soul_builder import (
+                get_soul_builder_tutorial,
+            )
 
             doc = get_soul_builder_tutorial()
         else:

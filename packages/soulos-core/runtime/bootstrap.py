@@ -4,123 +4,31 @@ import asyncio
 import logging
 
 import httpx
-from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from config import (
     DATABASE_URL,
-    EMBED_MODEL_NAME,
-    EMBEDDING_DIMENSION,
     INFERENCE_API_URL,
-    MODEL_NAME,
     inference_headers,
 )
+from runtime.migrations import apply_migrations
 
 logger = logging.getLogger(__name__)
 
 
-async def init_database() -> None:
-    engine = create_async_engine(DATABASE_URL, echo=True)
-    async with engine.begin() as conn:
-        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
-        await conn.execute(
-            text("""
-            CREATE TABLE IF NOT EXISTS bots (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                owner_id UUID,
-                name TEXT NOT NULL,
-                baseline_msv JSONB,
-                current_msv JSONB,
-                role VARCHAR(255),
-                description TEXT,
-                attachment_style VARCHAR(50),
-                capabilities JSONB,
-                hourly_rate INTEGER,
-                status VARCHAR(50),
-                avatar_url VARCHAR(255),
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-            );
-        """)
-        )
-        await conn.execute(
-            text(f"""
-            CREATE TABLE IF NOT EXISTS episodic_memories (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                bot_id UUID REFERENCES bots(id) ON DELETE CASCADE,
-                content TEXT NOT NULL,
-                embedding vector({EMBEDDING_DIMENSION})
-            );
-        """)
-        )
-        await conn.execute(
-            text(
-                "ALTER TABLE bots ADD COLUMN IF NOT EXISTS attachment_style VARCHAR(50);"
-            )
-        )
-        await conn.execute(
-            text(
-                "ALTER TABLE bots ADD COLUMN IF NOT EXISTS runtime_config JSONB;"
-            )
-        )
-        await conn.execute(
-            text(
-                "ALTER TABLE episodic_memories "
-                "ADD COLUMN IF NOT EXISTS source_hash VARCHAR(64);"
-            )
-        )
-        await conn.execute(
-            text("ALTER TABLE bots ADD COLUMN IF NOT EXISTS cognitive_meta JSONB;")
-        )
-        await conn.execute(
-            text(
-                "ALTER TABLE episodic_memories "
-                "ADD COLUMN IF NOT EXISTS session_id VARCHAR(128);"
-            )
-        )
-        await conn.execute(
-            text(
-                "ALTER TABLE episodic_memories "
-                "ADD COLUMN IF NOT EXISTS created_at "
-                "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP;"
-            )
-        )
-        await conn.execute(
-            text(
-                "ALTER TABLE bots ADD COLUMN IF NOT EXISTS external_key VARCHAR(128);"
-            )
-        )
-        await conn.execute(
-            text(
-                "CREATE UNIQUE INDEX IF NOT EXISTS idx_bots_owner_external_key "
-                "ON bots (owner_id, external_key) "
-                "WHERE external_key IS NOT NULL;"
-            )
-        )
-        await conn.execute(
-            text(
-                """
-                CREATE TABLE IF NOT EXISTS turn_sessions (
-                    bot_id UUID NOT NULL REFERENCES bots(id) ON DELETE CASCADE,
-                    session_id VARCHAR(128) NOT NULL,
-                    current_step TEXT NOT NULL,
-                    slots JSONB NOT NULL DEFAULT '{}'::jsonb,
-                    turn_version INTEGER NOT NULL DEFAULT 0,
-                    last_idempotency_key VARCHAR(128),
-                    last_success_response JSONB,
-                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                    PRIMARY KEY (bot_id, session_id)
-                );
-                """
-            )
-        )
-        await conn.execute(
-            text(
-                "CREATE INDEX IF NOT EXISTS idx_turn_sessions_updated_at "
-                "ON turn_sessions (updated_at);"
-            )
-        )
-    await engine.dispose()
-    logger.info("Database initialized successfully.")
+async def init_database(database_url: str = DATABASE_URL) -> list[int]:
+    """Apply pending schema migrations; returns the versions applied on this boot."""
+    engine = create_async_engine(database_url)
+    try:
+        async with engine.begin() as conn:
+            applied = await apply_migrations(conn)
+    finally:
+        await engine.dispose()
+    if applied:
+        logger.info("Database migrated (applied: %s).", applied)
+    else:
+        logger.info("Database schema up to date.")
+    return applied
 
 
 async def wait_for_ollama() -> bool:

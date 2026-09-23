@@ -8,7 +8,12 @@ from unittest.mock import AsyncMock, patch
 import httpx
 import pytest
 
-from soulos.hybrid import SoulHybridClient, SoulOSError, _parse_problem
+from soulos.hybrid import (
+    SoulHybridClient,
+    SoulOSError,
+    _parse_problem,
+    merge_contract_into_system_prompt,
+)
 
 
 @pytest.mark.asyncio
@@ -257,3 +262,109 @@ async def test_complete_turn_raises_turn_contract_violation():
             )
     assert exc.value.code == "TURN_CONTRACT_VIOLATION"
     assert exc.value.body.get("remedial_prompt_hint") == "Ask again"
+
+
+def test_parse_problem_non_json():
+    resp = httpx.Response(500, text="plain error")
+    err = _parse_problem(resp)
+    assert err.status == 500
+    assert "plain error" in err.detail
+
+
+def test_merge_contract_appendix_only():
+    assert merge_contract_into_system_prompt(
+        {"system_prompt": "", "contract_context": {"prompt_appendix": "ONLY"}}
+    ) == "ONLY"
+
+
+@pytest.mark.asyncio
+async def test_enabled_from_env(monkeypatch):
+    monkeypatch.setenv("SOULOS_ENABLED", "0")
+    client = SoulHybridClient(base_url="http://k", bot_id="b")
+    assert client.enabled is False
+
+
+@pytest.mark.asyncio
+async def test_close_and_get_client():
+    client = SoulHybridClient(base_url="http://k", bot_id="b", enabled=True)
+    with patch("soulos.hybrid.httpx.AsyncClient") as MockClient:
+        instance = AsyncMock()
+        MockClient.return_value = instance
+        c1 = await client._get_client()
+        c2 = await client._get_client()
+        assert c1 is c2
+        await client.close()
+        assert client._client is None
+
+
+@pytest.mark.asyncio
+async def test_request_retries_http_error_then_raises():
+    client = SoulHybridClient(base_url="http://k", bot_id="b", max_retries=1)
+    mock_http = AsyncMock()
+    mock_http.request = AsyncMock(side_effect=httpx.ConnectError("down"))
+    client._client = mock_http
+    with pytest.raises(httpx.ConnectError):
+        await client._request("GET", "/ready")
+
+
+@pytest.mark.asyncio
+async def test_is_ready_paths():
+    client = SoulHybridClient(base_url="http://k", bot_id="b", enabled=False)
+    assert await client.is_ready() is False
+
+    client.enabled = True
+    with patch.object(client, "_request", new_callable=AsyncMock) as mock_req:
+        mock_req.return_value = httpx.Response(200, json={"status": "ok"})
+        assert await client.is_ready() is True
+        mock_req.return_value = httpx.Response(503, json={"status": "down"})
+        # 503 raises SoulOSError via _request logic — simulate by raising
+        mock_req.side_effect = SoulOSError("DOWN", 503, "no", {})
+        assert await client.is_ready() is False
+
+
+@pytest.mark.asyncio
+async def test_ensure_avatar_dict_soul():
+    client = SoulHybridClient(base_url="http://k", enabled=True)
+    with patch.object(client, "_request", new_callable=AsyncMock) as mock_req:
+        mock_req.return_value = httpx.Response(200, json={"id": "bot-9"})
+        out = await client.ensure_avatar("app:u", {"name": "X"})
+    assert out["id"] == "bot-9"
+    assert client.bot_id == "bot-9"
+
+
+@pytest.mark.asyncio
+async def test_complete_turn_soft_fail_http_error():
+    client = SoulHybridClient(base_url="http://k", bot_id="b", enabled=True)
+    with patch.object(client, "_request", new_callable=AsyncMock) as mock_req:
+        mock_req.side_effect = httpx.ConnectError("down")
+        assert await client.complete_turn("s") is None
+
+
+@pytest.mark.asyncio
+async def test_ingest_memory_paths():
+    client = SoulHybridClient(base_url="http://k", enabled=False)
+    assert await client.ingest_memory("x") is None
+    client.enabled = True
+    assert await client.ingest_memory("x") is None  # no bot_id
+    client.bot_id = "b"
+    with patch.object(client, "_request", new_callable=AsyncMock) as mock_req:
+        mock_req.return_value = httpx.Response(200, json={"status": "ok"})
+        out = await client.ingest_memory("fact", session_id="s1")
+        assert out["status"] == "ok"
+        mock_req.side_effect = SoulOSError("X", 500, "no", {})
+        assert await client.ingest_memory("fact") is None
+
+
+@pytest.mark.asyncio
+async def test_run_turn_ensure_and_prepare_fail():
+    client = SoulHybridClient(base_url="http://k", enabled=True)
+    with patch.object(client, "ensure_avatar", new_callable=AsyncMock) as ensure:
+        with patch.object(client, "prepare_turn", new_callable=AsyncMock, return_value=None):
+            with pytest.raises(SoulOSError, match="PREPARE_FAILED"):
+                await client.run_turn(
+                    "q",
+                    AsyncMock(),
+                    external_key="k",
+                    soul={"name": "n"},
+                )
+            ensure.assert_awaited_once()

@@ -8,13 +8,13 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 from auth import AccountContext, get_account_context
 from dependencies import get_db, get_embedder
 from runtime.errors import ACCESS_DENIED, SOUL_INVALID, SoulOSProblem
-from runtime.memory import ingest_memory as ingest_memory_record
 from runtime.memory import (
     delete_session_memories,
     forget_memory,
     purge_expired_session_memories,
     retrieve_memories,
 )
+from runtime.memory import ingest_memory as ingest_memory_record
 from runtime.memory_sync import sync_memory_directory
 from runtime.turn_session import delete_turn_session, purge_expired_turn_sessions
 from schemas import (

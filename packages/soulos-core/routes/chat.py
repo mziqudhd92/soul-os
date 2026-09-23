@@ -47,7 +47,7 @@ async def update_state(
     try:
         validated_msv = validate_msv_payload(payload.new_msv)
     except ValueError as e:
-        raise SoulOSProblem(SOUL_INVALID, 422, str(e))
+        raise SoulOSProblem(SOUL_INVALID, 422, str(e)) from e
 
     await db.execute(
         text("UPDATE bots SET current_msv = :msv WHERE id = :id"),

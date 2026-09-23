@@ -1,6 +1,8 @@
-import pytest
-from httpx import AsyncClient, ASGITransport
 from unittest.mock import patch
+
+import pytest
+from httpx import ASGITransport, AsyncClient
+
 from dependencies import get_db, get_embedder, get_llm_service
 from main import app
 
@@ -274,3 +276,34 @@ async def test_kernel_route_modules_mounted():
         "/mcp/sse",
     ):
         assert expected in paths, f"missing route {expected}"
+
+
+@pytest.mark.asyncio
+async def test_lifespan_fail_closed_on_db_init():
+    from main import lifespan
+    from runtime.migrations import SchemaTooNewError
+
+    with patch("main.init_database", side_effect=RuntimeError("db unavailable")):
+        with pytest.raises(RuntimeError, match="db unavailable"):
+            async with lifespan(app):
+                pass
+
+    with patch("main.init_database", side_effect=SchemaTooNewError("schema too new")):
+        with pytest.raises(SchemaTooNewError, match="schema too new"):
+            async with lifespan(app):
+                pass
+
+
+@pytest.mark.asyncio
+async def test_request_id_header_round_trip():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.get("/health", headers={"X-Request-Id": "req-test-1"})
+    assert response.status_code == 200
+    assert response.headers.get("x-request-id") == "req-test-1"
+
+
+@pytest.mark.asyncio
+async def test_request_id_generated_when_missing():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.get("/health")
+    assert response.headers.get("x-request-id")

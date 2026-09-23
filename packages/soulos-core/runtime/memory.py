@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
@@ -15,7 +15,7 @@ def session_ttl_cutoff() -> datetime | None:
     """UTC cutoff for session-scoped rows when MEMORY_SESSION_TTL_SECONDS > 0."""
     if MEMORY_SESSION_TTL_SECONDS <= 0:
         return None
-    return datetime.now(timezone.utc) - timedelta(seconds=MEMORY_SESSION_TTL_SECONDS)
+    return datetime.now(UTC) - timedelta(seconds=MEMORY_SESSION_TTL_SECONDS)
 
 
 def _session_filter_sql(session_id: str | None, *, ttl_cutoff: datetime | None) -> str:
@@ -111,17 +111,23 @@ async def list_memories(
     return [row.content for row in result.fetchall()]
 
 
+def _escape_ilike_pattern(value: str) -> str:
+    """Escape ``\\``, ``%``, and ``_`` for PostgreSQL LIKE with ``ESCAPE '\\'``."""
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
 async def forget_memory(
     db: AsyncConnection,
     bot_id: str,
     content_match: str,
 ) -> int:
+    pattern = f"%{_escape_ilike_pattern(content_match)}%"
     result = await db.execute(
         text(
             "DELETE FROM episodic_memories "
-            "WHERE bot_id = :bot_id AND content ILIKE :pattern"
+            "WHERE bot_id = :bot_id AND content ILIKE :pattern ESCAPE '\\'"
         ),
-        {"bot_id": bot_id, "pattern": f"%{content_match}%"},
+        {"bot_id": bot_id, "pattern": pattern},
     )
     return int(result.rowcount or 0)
 

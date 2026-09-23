@@ -59,6 +59,52 @@ Environment variables for the kernel:
 - **Open mode** (`REQUIRE_AUTH=0`, default): any client with kernel access can use any `bot_id` — fine for solo local dev only.
 - **Cloud mode** (`REQUIRE_AUTH=1`): kernel requires `X-SoulOS-Gateway-Secret` + `X-SoulOS-Account-Id` from the gateway; do not expose port 8000 publicly.
 - **Studio**: local dev tool; do not expose port 8765 publicly without auth in production.
+- **Content limits**: `MAX_MEMORY_CONTENT_CHARS` (default 32768) caps ingest / chat / hybrid text fields (REST and MCP).
+
+### Upgrading from `senticore` database name
+
+Compose defaults renamed the Postgres database from `senticore` to `soulos`. **Existing data volumes are not rewritten** — Postgres only creates `POSTGRES_DB` on first init. If you already have a `postgres_data` volume from an older install:
+
+```bash
+# Option A — rename in place (stop kernel first so nothing is connected)
+docker compose stop soulos-kernel
+docker compose exec db psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'senticore';"
+docker compose exec db psql -U postgres -c 'ALTER DATABASE senticore RENAME TO soulos;'
+docker compose start soulos-kernel
+
+# Option B — keep the old name (no data move)
+# Set in .env / compose override:
+#   POSTGRES_DB=senticore
+#   DATABASE_URL=postgresql+asyncpg://postgres:changeme_local_dev@db:5432/senticore
+```
+
+Fresh installs need no action.
+
+### Backup and restore (Postgres)
+
+Avatar identity (`bots.current_msv`, `baseline_msv`) and episodic memory live in Postgres (+ pgvector). Back up regularly:
+
+```bash
+# Dump (from host with network to the db container)
+docker compose exec -T db pg_dump -U postgres soulos > soulos-$(date +%F).sql
+
+# Restore into a fresh volume
+docker compose exec -T db psql -U postgres -d soulos < soulos-YYYY-MM-DD.sql
+```
+
+After restore, kernel boot applies any pending schema migrations (`soulos db migrate` / startup `init_database`).
+
+**Embedding dimension:** if you change `EMBEDDING_DIMENSION`, existing `episodic_memories.embedding` rows are not compatible — recreate the column / re-ingest (or restore a backup taken with the same dimension). Prefer fixing the dimension before production data accumulates.
+
+### Schema migrations
+
+Kernel schema is versioned in `soulos_schema_migrations`. Boot applies pending migrations; operators can also run:
+
+```bash
+soulos db status
+soulos db migrate
+```
+
 
 ## Kernel-only for site integrations
 

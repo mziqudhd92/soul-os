@@ -1,7 +1,7 @@
 import secrets
 
 import pytest
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
 from auth import resolve_account_context
 from config import GATEWAY_SECRET, validate_gateway_secret

@@ -1,0 +1,18 @@
+[run]
+branch = false
+source = .
+omit =
+    test_*.py
+    turn_contract_fixtures.py
+    */__pycache__/*
+    test_integration_pg.py
+
+[report]
+precision = 1
+show_missing = true
+skip_covered = false
+exclude_lines =
+    pragma: no cover
+    if TYPE_CHECKING:
+    if __name__ == .__main__.:
+fail_under = 85

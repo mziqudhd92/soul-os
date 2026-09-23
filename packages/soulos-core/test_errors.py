@@ -1,7 +1,7 @@
 """Tests for RFC 7807 Problem Details."""
 
 import pytest
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
 from dependencies import get_db, get_embedder, get_llm_service
 from main import app
@@ -9,18 +9,17 @@ from runtime.errors import (
     ACCESS_DENIED,
     BOT_NOT_FOUND,
     INFERENCE_DOWN,
-    MEMORY_DIM_MISMATCH,
+    INTERNAL_ERROR,
     PROBLEM_CONTENT_TYPE,
     READY_DEGRADED,
     SOUL_INVALID,
     VALIDATION_ERROR,
-    INTERNAL_ERROR,
     SoulOSProblem,
     _map_http_detail_to_code,
     problem_body,
     validation_exception_handler,
 )
-from test_main import MockEmbedder, MockLLMService, VALID_SOUL, mock_get_db
+from test_main import MockEmbedder, MockLLMService, mock_get_db
 
 app.dependency_overrides[get_db] = mock_get_db
 app.dependency_overrides[get_embedder] = MockEmbedder
@@ -126,6 +125,23 @@ async def test_memory_forget_missing_field_problem():
         response = await ac.post(
             "/memory/forget",
             json={"bot_id": "123e4567-e89b-12d3-a456-426614174000"},
+        )
+    assert response.status_code == 422
+    assert PROBLEM_CONTENT_TYPE in response.headers.get("content-type", "")
+    assert response.json()["code"] == VALIDATION_ERROR
+
+
+@pytest.mark.asyncio
+async def test_memory_ingest_content_too_long():
+    from config import MAX_MEMORY_CONTENT_CHARS
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.post(
+            "/memory/ingest",
+            json={
+                "bot_id": "123e4567-e89b-12d3-a456-426614174000",
+                "content": "x" * (MAX_MEMORY_CONTENT_CHARS + 1),
+            },
         )
     assert response.status_code == 422
     assert PROBLEM_CONTENT_TYPE in response.headers.get("content-type", "")

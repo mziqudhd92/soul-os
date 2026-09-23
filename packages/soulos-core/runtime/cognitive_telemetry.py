@@ -6,7 +6,6 @@ import json
 import time
 from typing import Any
 
-
 DEFAULT_SYSTEM1_THRESHOLD = 0.35
 DEFAULT_SYSTEM2_MAX_LOOPS = 3
 

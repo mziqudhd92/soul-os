@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+asyncpg://postgres:changeme_local_dev@db:5432/senticore",
+    "postgresql+asyncpg://postgres:changeme_local_dev@db:5432/soulos",
 )
 INFERENCE_API_URL = os.getenv("INFERENCE_API_URL", "http://ollama:11434")
 MODEL_NAME = os.getenv("MODEL_NAME", "llama3")
@@ -46,6 +46,8 @@ MEMORY_SYNC_BOT_ID = os.getenv("SOULOS_MEMORY_SYNC_BOT_ID", "").strip()
 # Session-scoped episodic rows older than this are excluded from retrieve and
 # deletable via POST /memory/purge-expired. 0 disables TTL.
 MEMORY_SESSION_TTL_SECONDS = int(os.getenv("MEMORY_SESSION_TTL_SECONDS", "0"))
+# Max characters for memory content / hybrid summary (and related text fields).
+MAX_MEMORY_CONTENT_CHARS = int(os.getenv("MAX_MEMORY_CONTENT_CHARS", "32768"))
 
 WEAK_GATEWAY_SECRETS = frozenset(
     {DEFAULT_GATEWAY_SECRET, "changeme", "secret", "password", ""}

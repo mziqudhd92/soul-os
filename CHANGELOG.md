@@ -4,7 +4,29 @@ All notable changes to SoulOS are documented here.
 
 ## [Unreleased]
 
-## [0.3.2] — 2026-09-05
+### Added
+
+- Versioned Postgres schema migrations (`soulos_schema_migrations`, `soulos db status|migrate`)
+- MCP tools parity with REST: `forget_memory`, `delete_session`, `ensure_avatar`, `hybrid_prepare`, `hybrid_complete`
+- Gateway Redis sliding-window rate limits; refuse multi-replica without `REDIS_URL`
+- Hashed API keys at rest (`sha256:…`); request body size caps (`MAX_MEMORY_CONTENT_CHARS`)
+- CI lint/typecheck, Python 3.12/3.13 matrix, pgvector integration job, Dependabot, pre-commit (ruff)
+- `npm run setup` / `clean` / `lint` / `test:coverage` / `test:integration`; SDK OpenAPI coverage check
+- Request `X-Request-Id` + structured access logs; Docker non-root user + pinned `requirements.txt`
+- TypeScript SDK core client tests; backup/restore notes in self-hosted docs
+- **≥85% line coverage gate** for kernel, gateway, inference-bridge, studio, and Python SDK (`npm run test:coverage` / CI)
+
+### Changed
+
+- Compose/network/default DB renamed `senticore*` → `soulos*` (see self-hosted upgrade note for existing volumes)
+- Pytest moved to package `[dev]` extras (not installed in production images)
+- Kernel fails closed if database init/migration fails at boot
+- MCP hybrid errors return structured `{code, status, detail}` JSON
+
+### Fixed
+
+- `forget_memory` escapes SQL `ILIKE` wildcards (`%`, `_`)
+
 
 ### Added
 

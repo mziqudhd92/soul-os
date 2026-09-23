@@ -34,7 +34,7 @@ def get_quickstart_tutorial() -> dict[str, Any]:
                         "type": "run",
                         "cmd": "docker compose up --build",
                         "output": [
-                            "✔ Container senticore-soulos-kernel  Started",
+                            "✔ Container soulos-kernel  Started",
                             "✔ Kernel listening on http://localhost:8000",
                             "✔ Studio optional → http://localhost:8765",
                         ],

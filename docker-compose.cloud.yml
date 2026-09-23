@@ -2,6 +2,9 @@
 # Usage: docker compose -f docker-compose.cloud.yml up --build
 #
 # SDK: SoulOSClient({ apiKey: 'sk_test_demo_key_for_local_dev', baseUrl: 'http://localhost:8080' })
+#
+# DB rename: default database is `soulos` (was `senticore`). Existing volumes:
+# see docs/deployment/self-hosted.md → "Upgrading from senticore database name".
 
 services:
   soulos-gateway:
@@ -19,9 +22,21 @@ services:
       - DEFAULT_RATE_LIMIT_PER_MINUTE=120
     depends_on:
       soulos-kernel:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health')",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
     networks:
-      - senticore_net
+      - soulos_net
 
   soulos-kernel:
     build:
@@ -35,7 +50,7 @@ services:
       - ./spec:/spec
     environment:
       - PYTHONUNBUFFERED=1
-      - DATABASE_URL=postgresql+asyncpg://postgres:changeme_local_dev@db:5432/senticore
+      - DATABASE_URL=postgresql+asyncpg://postgres:changeme_local_dev@db:5432/soulos
       - INFERENCE_API_URL=http://ollama:11434
       - REQUIRE_AUTH=1
       - GATEWAY_SECRET=${GATEWAY_SECRET:-changeme_gateway_secret}
@@ -44,16 +59,28 @@ services:
         condition: service_healthy
       ollama:
         condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
-      - senticore_net
+      - soulos_net
 
   db:
     image: pgvector/pgvector:pg16
-    container_name: senticore-db-cloud
+    container_name: soulos-db-cloud
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_local_dev}
-      POSTGRES_DB: ${POSTGRES_DB:-senticore}
+      POSTGRES_DB: ${POSTGRES_DB:-soulos}
     ports:
       - "5432:5432"
     volumes:
@@ -64,21 +91,21 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - senticore_net
+      - soulos_net
 
   ollama:
     image: ollama/ollama:latest
-    container_name: senticore-ollama-cloud
+    container_name: soulos-ollama-cloud
     ports:
       - "11434:11434"
     volumes:
       - ollama_data_cloud:/root/.ollama
     networks:
-      - senticore_net
+      - soulos_net
     command: ["serve"]
 
 networks:
-  senticore_net:
+  soulos_net:
     driver: bridge
 
 volumes:

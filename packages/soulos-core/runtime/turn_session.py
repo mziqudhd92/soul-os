@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import timezone
+from datetime import UTC
 from typing import Any
 
 from sqlalchemy import text
@@ -40,7 +40,7 @@ async def get_turn_session(
     if cutoff is not None and row.updated_at is not None:
         updated = row.updated_at
         if getattr(updated, "tzinfo", None) is None and getattr(cutoff, "tzinfo", None):
-            updated = updated.replace(tzinfo=timezone.utc)
+            updated = updated.replace(tzinfo=UTC)
         if updated < cutoff:
             await delete_turn_session(db, bot_id, session_id)
             return None

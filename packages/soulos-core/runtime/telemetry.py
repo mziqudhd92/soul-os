@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Generator
 
 OTEL_ENABLED = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "").strip() != "" or os.getenv(
     "SOULOS_OTEL_ENABLED", "0"
@@ -23,12 +23,12 @@ def _get_tracer():
         return None
     try:
         from opentelemetry import trace
-        from opentelemetry.sdk.resources import Resource
-        from opentelemetry.sdk.trace import TracerProvider
-        from opentelemetry.sdk.trace.export import BatchSpanProcessor
         from opentelemetry.exporter.otlp.proto.http.trace_exporter import (
             OTLPSpanExporter,
         )
+        from opentelemetry.sdk.resources import Resource
+        from opentelemetry.sdk.trace import TracerProvider
+        from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
         resource = Resource.create({"service.name": "soulos-kernel"})
         provider = TracerProvider(resource=resource)
@@ -50,12 +50,12 @@ def _get_duration_histogram():
         return None
     try:
         from opentelemetry import metrics
-        from opentelemetry.sdk.metrics import MeterProvider
-        from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-        from opentelemetry.sdk.resources import Resource
         from opentelemetry.exporter.otlp.proto.http.metric_exporter import (
             OTLPMetricExporter,
         )
+        from opentelemetry.sdk.metrics import MeterProvider
+        from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+        from opentelemetry.sdk.resources import Resource
 
         resource = Resource.create({"service.name": "soulos-kernel"})
         endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "").strip()

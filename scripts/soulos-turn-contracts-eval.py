@@ -14,9 +14,8 @@ ROOT = Path(__file__).resolve().parent.parent
 CORE = ROOT / "packages" / "soulos-core"
 sys.path.insert(0, str(CORE))
 
-from httpx import ASGITransport, AsyncClient  # noqa: E402
-
 from dependencies import get_db, get_embedder, get_llm_service  # noqa: E402
+from httpx import ASGITransport, AsyncClient  # noqa: E402
 from main import app  # noqa: E402
 from test_main import MockEmbedder, MockLLMService, mock_get_db  # noqa: E402
 

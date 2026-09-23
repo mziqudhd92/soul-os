@@ -17,10 +17,9 @@ os.environ["SOULOS_API_KEYS"] = json.dumps(
     }
 )
 
-from keys import KEY_STORE, load_key_store
-
 # Refresh store after env set
 import keys as keys_module
+from keys import load_key_store
 
 keys_module.KEY_STORE = load_key_store()
 
@@ -116,3 +115,53 @@ async def test_gateway_proxies_mcp_sse_as_stream():
     body = b"".join([chunk async for chunk in response.aiter_bytes()])
     assert body == b"".join(chunks)
     mock_client.send.assert_awaited_once()
+
+
+def test_hash_api_key_format():
+    from keys import hash_api_key
+
+    digest = hash_api_key("sk_test_demo_key_for_local_dev")
+    assert digest.startswith("sha256:")
+    assert len(digest) == len("sha256:") + 64
+    assert hash_api_key("sk_test_demo_key_for_local_dev") == digest
+
+
+def test_lookup_api_key_hashes_bearer_token():
+    from keys import hash_api_key, lookup_api_key
+
+    record = lookup_api_key("sk_test_demo_key_for_local_dev")
+    assert record is not None
+    assert record.account_id == "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+    assert hash_api_key("sk_test_demo_key_for_local_dev") in keys_module.KEY_STORE
+    assert "sk_test_demo_key_for_local_dev" not in keys_module.KEY_STORE
+    assert lookup_api_key("sk_invalid") is None
+
+
+def test_load_key_store_accepts_prehashed_keys(monkeypatch):
+    from keys import hash_api_key, load_key_store, lookup_api_key
+
+    plaintext = "sk_prehashed_test"
+    hashed = hash_api_key(plaintext)
+    monkeypatch.setenv(
+        "SOULOS_API_KEYS",
+        json.dumps(
+            {
+                hashed: {
+                    "account_id": "11111111-2222-3333-4444-555555555555",
+                    "tier": "cloud",
+                    "rate_limit_per_minute": 60,
+                }
+            }
+        ),
+    )
+    monkeypatch.setattr("keys.API_KEYS_JSON", os.environ["SOULOS_API_KEYS"])
+    store = load_key_store()
+    assert hashed in store
+    assert plaintext not in store
+    old = keys_module.KEY_STORE
+    keys_module.KEY_STORE = store
+    try:
+        assert lookup_api_key(plaintext) is not None
+        assert lookup_api_key(plaintext).account_id == "11111111-2222-3333-4444-555555555555"
+    finally:
+        keys_module.KEY_STORE = old

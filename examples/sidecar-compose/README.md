@@ -48,7 +48,7 @@ services:
     ports:
       - "8100:8000"
     environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:changeme_local_dev@soulos-db:5432/senticore
+      DATABASE_URL: postgresql+asyncpg://postgres:changeme_local_dev@soulos-db:5432/soulos
       INFERENCE_API_URL: http://soulos-inference-bridge:11434
       EMBEDDING_DIMENSION: "1024"
       INFERENCE_SKIP_PULL: "1"
@@ -62,7 +62,7 @@ services:
     image: pgvector/pgvector:pg16
     environment:
       POSTGRES_PASSWORD: changeme_local_dev
-      POSTGRES_DB: senticore
+      POSTGRES_DB: soulos
     networks:
       - app_net
     healthcheck:
