@@ -1,4 +1,4 @@
-"""Unit tests for Phase A multi-agent handoff helpers."""
+"""Unit tests for multi-agent handoff helpers (Phase B + Phase A fallback)."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from soulos.handoff import (
     handoff_to,
     role_external_key,
 )
-from soulos.hybrid import SoulHybridClient
+from soulos.hybrid import SoulHybridClient, SoulOSError
 
 
 def test_role_external_key():
@@ -52,11 +52,52 @@ def test_format_handoff_note():
 
 
 @pytest.mark.asyncio
-async def test_handoff_to_complete_then_ingest():
+async def test_handoff_to_prefers_phase_b_endpoint():
+    client = SoulHybridClient(base_url="http://kernel.test", enabled=True)
+
+    with patch.object(client, "_request", new_callable=AsyncMock) as mock_req:
+        mock_req.return_value = httpx.Response(
+            200,
+            json={
+                "status": "success",
+                "session_id": "conv:thread-1",
+                "note": "[SoulOS handoff]\nsummary: Need SKU-42 availability\npayload.sku: SKU-42",
+                "shared_memory_id": "mem-1",
+            },
+        )
+        result = await handoff_to(
+            client,
+            from_bot_id="bot-customer",
+            to_bot_id="bot-inventory",
+            from_role="customer",
+            to_role="inventory",
+            conversation_id="thread-1",
+            reason="stock check",
+            summary="Need SKU-42 availability",
+            payload={"sku": "SKU-42"},
+            idempotency_key="idem-1",
+        )
+
+    assert result["to_bot_id"] == "bot-inventory"
+    assert result["session_id"] == "conv:thread-1"
+    assert "SKU-42" in result["note"]
+    assert result["complete"]["phase"] == "b"
+    assert mock_req.await_count == 1
+    call = mock_req.await_args_list[0]
+    assert call.args[0] == "POST"
+    assert call.args[1] == "/v1/handoffs"
+    assert call.kwargs["json_body"]["from_bot_id"] == "bot-customer"
+    assert call.kwargs["json_body"]["to_bot_id"] == "bot-inventory"
+    assert call.kwargs["json_body"]["idempotency_key"] == "idem-1"
+
+
+@pytest.mark.asyncio
+async def test_handoff_to_falls_back_to_phase_a():
     client = SoulHybridClient(base_url="http://kernel.test", enabled=True)
 
     with patch.object(client, "_request", new_callable=AsyncMock) as mock_req:
         mock_req.side_effect = [
+            SoulOSError("NOT_FOUND", 404, "no handoffs", {}),
             httpx.Response(200, json={"status": "success", "ingested": True}),
             httpx.Response(200, json={"status": "success"}),
         ]
@@ -75,16 +116,10 @@ async def test_handoff_to_complete_then_ingest():
     assert result["to_bot_id"] == "bot-inventory"
     assert result["session_id"] == "conv:thread-1"
     assert "SKU-42" in result["note"]
-    assert mock_req.await_count == 2
-    complete_call = mock_req.await_args_list[0]
-    assert complete_call.args[0] == "POST"
-    assert complete_call.args[1] == "/hybrid/complete"
-    assert complete_call.kwargs["json_body"]["bot_id"] == "bot-customer"
-    assert complete_call.kwargs["json_body"]["session_id"] == "conv:thread-1"
-    ingest_call = mock_req.await_args_list[1]
-    assert ingest_call.args[1] == "/memory/ingest"
-    assert ingest_call.kwargs["json_body"]["bot_id"] == "bot-inventory"
-    assert "[SoulOS handoff]" in ingest_call.kwargs["json_body"]["content"]
+    assert mock_req.await_count == 3
+    assert mock_req.await_args_list[0].args[1] == "/v1/handoffs"
+    assert mock_req.await_args_list[1].args[1] == "/hybrid/complete"
+    assert mock_req.await_args_list[2].args[1] == "/memory/ingest"
 
 
 @pytest.mark.asyncio
