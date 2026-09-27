@@ -1,6 +1,6 @@
 {
   "name": "soulos-monorepo",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "SoulOS \u2014 open-source runtime for persistent AI avatars (HEXACO MSV, episodic memory, MCP, Soul Studio)",
   "private": true,
   "license": "MIT",
@@ -32,8 +32,9 @@
     "packages/soulos-sdk/ts"
   ],
   "scripts": {
-    "test:all": "npm run test:kernel && npm run test:bridge && npm run test:gateway && npm run test:studio && npm run test:sdk && npm run test:turn-contracts",
+    "test:all": "npm run test:kernel && npm run test:eval && npm run test:bridge && npm run test:gateway && npm run test:studio && npm run test:sdk && npm run test:turn-contracts",
     "test:kernel": "cd packages/soulos-core && ../../scripts/py.sh -m pytest -q -m 'not integration'",
+    "test:eval": "scripts/py.sh scripts/soulos-eval.py",
     "test:turn-contracts": "cd packages/soulos-core && ../../scripts/py.sh ../../scripts/soulos-turn-contracts-eval.py",
     "test:bridge": "cd packages/soulos-inference-bridge && ../../scripts/py.sh -m pytest -q",
     "test:gateway": "cd packages/soulos-gateway && ../../scripts/py.sh -m pytest -q",

@@ -54,7 +54,13 @@ class MockConnection:
 
             def fetchall(self):
                 row = type("Row", (), {})()
+                row.id = "mem-mock-1"
                 row.content = "Mocked retrieved memory"
+                row.distance = 0.1
+                row.importance = 0.5
+                row.memory_kind = "episodic"
+                row.embedding_text = None
+                row.rank = 0.5
                 return [row]
 
         if params and "INSERT INTO bots" in q:

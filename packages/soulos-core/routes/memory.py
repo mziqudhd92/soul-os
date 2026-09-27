@@ -13,11 +13,14 @@ from runtime.memory import (
     forget_memory,
     purge_expired_session_memories,
     retrieve_memories,
+    retrieve_memory_hits,
 )
 from runtime.memory import ingest_memory as ingest_memory_record
+from runtime.memory_consolidate import consolidate_memories
 from runtime.memory_sync import sync_memory_directory
 from runtime.turn_session import delete_turn_session, purge_expired_turn_sessions
 from schemas import (
+    MemoryConsolidate,
     MemoryForget,
     MemoryIngest,
     MemoryPurgeExpired,
@@ -51,6 +54,19 @@ async def retrieve_memory(
     account: AccountContext = Depends(get_account_context),
 ):
     await verify_bot_access(db, payload.bot_id, account)
+    if payload.include_scores:
+        hits = await retrieve_memory_hits(
+            db,
+            embedder,
+            payload.bot_id,
+            payload.query,
+            payload.top_k,
+            payload.session_id,
+        )
+        return {
+            "memories": [h.content for h in hits],
+            "hits": [h.to_dict() for h in hits],
+        }
     memories = await retrieve_memories(
         db,
         embedder,
@@ -60,6 +76,23 @@ async def retrieve_memory(
         payload.session_id,
     )
     return {"memories": memories}
+
+
+@router.post("/memory/consolidate")
+async def consolidate_memory_route(
+    payload: MemoryConsolidate,
+    db: AsyncConnection = Depends(get_db),
+    embedder=Depends(get_embedder),
+    account: AccountContext = Depends(get_account_context),
+):
+    await verify_bot_access(db, payload.bot_id, account)
+    return await consolidate_memories(
+        db,
+        embedder,
+        payload.bot_id,
+        session_id=payload.session_id,
+        limit=payload.limit,
+    )
 
 
 @router.post("/memory/forget")

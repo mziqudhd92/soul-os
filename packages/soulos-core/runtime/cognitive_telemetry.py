@@ -35,6 +35,8 @@ def merge_runtime_config(raw: dict[str, Any] | None) -> dict[str, Any]:
         base["turn_contract"] = raw["turn_contract"]
     if isinstance(raw.get("source"), dict):
         base["source"] = raw["source"]
+    if isinstance(raw.get("memory_budgets"), dict):
+        base["memory_budgets"] = raw["memory_budgets"]
     base["dual_process"] = dual
     return base
 

@@ -1,73 +1,46 @@
-# Multi-agent teams (Phase A)
+# Multi-agent teams
 
-Run specialist avatars as a **team in your app** using today’s SoulOS kernel. There is no teams or handoff API yet — you orchestrate routing, then use `ensure` / `prepare` / `complete` / `memory/ingest`.
+Run specialist avatars as a team. **Phase B (shipped in 0.6.0)** adds shared conversation memory, atomic kernel handoffs, and capability query. **Phase A** (app-orchestrated complete + ingest) remains a compatible fallback.
 
-**See also:** [Identity model](identity-model.md) · [Hybrid API](../reference/hybrid-api.md) · [SoulPacks](persona-packs.md) · [examples/multi-agent-handoff](../../examples/multi-agent-handoff/)
+**See also:** [Identity model](identity-model.md) · [Hybrid API](../reference/hybrid-api.md) · [SoulPacks](persona-packs.md) · [examples/multi-agent-handoff](../../examples/multi-agent-handoff/) · [0.6.0 report](../reports/phase-b-ml-improvements.md)
 
 ---
 
-## What Phase A is
+## Phase B (recommended)
 
 | Concern | Who owns it |
 |---------|-------------|
 | Which specialist speaks | Your conductor (router / LLM tool / rules) |
 | Stable identity per role | `external_key` via `POST /v1/avatars/ensure` |
-| Conversation correlation | App `conversation_id` → `session_id` `conv:{id}` on each bot |
-| Memory | Still **per `bot_id`** — share context by ingesting a handoff note |
-| Personality | Separate souls / SoulPacks per role |
+| Shared thread memory | `POST /v1/conversations/{id}/memory` (tenant-scoped) |
+| Transfer | `POST /v1/handoffs` with `idempotency_key` |
+| Capability discovery | `GET /v1/avatars/by-capability/{capability}` |
+| Prepare merge | Hybrid prepare merges bot episodic + shared (+ semantic) under budgets when `session_id` is `conv:…` |
 
-Phase B (later) may add kernel teams, shared conversation memory, and capability query. Do not wait on that to ship multi-bot flows.
+```bash
+# Shared ingest
+curl -X POST http://localhost:8000/v1/conversations/thread-9/memory \
+  -H "Content-Type: application/json" \
+  -d '{"content":"User prefers overnight shipping","source_bot_id":"<customer_bot>"}'
+
+# Atomic handoff
+curl -X POST http://localhost:8000/v1/handoffs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "from_bot_id":"<customer>","to_bot_id":"<inventory>",
+    "from_role":"customer","to_role":"inventory",
+    "conversation_id":"thread-9","reason":"stock check",
+    "summary":"SKU-42 overnight","idempotency_key":"t9-1"
+  }'
+```
+
+Python SDK `handoff_to(...)` calls `/v1/handoffs` when available.
 
 ---
 
-## Conventions
+## Phase A (fallback)
 
-### 1. One avatar per role, stable keys
-
-```text
-org:{org_id}:{role}   →   e.g. org:acme:customer , org:acme:inventory
-```
-
-Python helper:
-
-```python
-from soulos import role_external_key
-role_external_key("acme", "customer")  # "org:acme:customer"
-```
-
-Bootstrap each specialist once (or on every deploy — `ensure` is idempotent):
-
-```bash
-# Import SoulPack souls, then ensure with your keys
-curl -X POST http://localhost:8000/v1/avatars/import-soulpack \
-  -H "Content-Type: application/json" \
-  -d '{"pack_id":"customer-front","persist":false}'
-```
-
-Use the returned `soul` with `POST /v1/avatars/ensure` and `external_key: "org:acme:customer"`. Repeat for `inventory`.
-
-First-party packs for this pattern: `customer-front`, `inventory` under `packs/soulpacks/`.
-
-### 2. Shared conversation id (app-level)
-
-Keep one `conversation_id` for the user thread. Map it to the hybrid `session_id`:
-
-```python
-from soulos import conversation_session_id
-session_id = conversation_session_id("thread-9")  # "conv:thread-9"
-```
-
-Pass the **same** `session_id` on prepare/complete for whichever bot is active. That scopes each specialist’s episodic memory for the thread; it does **not** merge memories across bots.
-
-### 3. Handoff recipe
-
-When the conductor switches specialists:
-
-1. **Complete** the current bot (turn summary + optional `user_message`).
-2. **Ingest** a handoff note into the **next** bot’s memory (`POST /memory/ingest`, same `session_id`).
-3. **Prepare** on the next `bot_id` with the user’s follow-up (or a rewritten specialist query).
-
-SDK helper:
+App orchestrates: complete current bot → ingest handoff note into next bot → prepare. Same `conversation_session_id` correlates turns; memory stays per `bot_id` unless you also write shared conversation memory.
 
 ```python
 from soulos import SoulHybridClient, handoff_to, conversation_session_id
@@ -82,9 +55,7 @@ result = await handoff_to(
     conversation_id="thread-9",
     reason="stock and overnight feasibility",
     summary="User asked for SKU-42 overnight shipping.",
-    payload={"sku": "SKU-42"},
 )
-# result["session_id"] == "conv:thread-9"
 await client.prepare_turn(
     "Confirm SKU-42 for overnight.",
     bot_id=inventory_bot_id,
@@ -92,22 +63,22 @@ await client.prepare_turn(
 )
 ```
 
-Handoff notes are plain text starting with `[SoulOS handoff]` so retrieves and prompts can surface them.
-
 ---
 
-## Conductor sketch
+## Conventions
+
+### One avatar per role
 
 ```text
-User message
-    → route(role)   # your rules or tool call
-    → prepare(bot_id[role], session_id=conv:…)
-    → your LLM
-    → if tool=handoff(to_role): handoff_to(...) then prepare(next)
-    → else complete(current)
+org:{org_id}:{role}   →   e.g. org:acme:customer , org:acme:inventory
 ```
 
-Capabilities stay app metadata until Phase B: store `capabilities: ["billing","returns"]` next to each `bot_id` in your DB; the kernel does not query them yet.
+### Shared conversation id
+
+```python
+from soulos import conversation_session_id
+session_id = conversation_session_id("thread-9")  # "conv:thread-9"
+```
 
 ---
 
@@ -117,11 +88,3 @@ Capabilities stay app metadata until Phase B: store `capabilities: ["billing","r
 docker compose -f docker-compose.sidecar.yml --profile bridge-mock up -d
 python3 examples/multi-agent-handoff/run_handoff.py
 ```
-
----
-
-## Limits (intentional)
-
-- No shared vector memory across bots — only the handoff note (and anything else you ingest).
-- No atomic “team turn” — two HTTP steps for transfer.
-- Reflection on handoff complete defaults to off in `handoff_to` (`reflect=False`) so transfers stay fast; set `reflect=True` if you want MSV updates on the source bot.

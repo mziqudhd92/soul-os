@@ -11,6 +11,13 @@ export {
 } from "./hybrid";
 
 export {
+  roleExternalKey,
+  conversationSessionId,
+  handoffTo,
+  type HandoffParams,
+} from "./handoff";
+
+export {
   TURN_CONTRACT_VIOLATION,
   TURN_REJECT_TOKEN,
   TURN_STEP_MISMATCH,

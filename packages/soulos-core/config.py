@@ -49,6 +49,38 @@ MEMORY_SESSION_TTL_SECONDS = int(os.getenv("MEMORY_SESSION_TTL_SECONDS", "0"))
 # Max characters for memory content / hybrid summary (and related text fields).
 MAX_MEMORY_CONTENT_CHARS = int(os.getenv("MAX_MEMORY_CONTENT_CHARS", "32768"))
 
+# Hybrid retrieval (dense + FTS → cutoff → RRF → importance → MMR)
+MEMORY_RETRIEVAL_MODE = os.getenv("MEMORY_RETRIEVAL_MODE", "hybrid").lower()
+MEMORY_MAX_DISTANCE = float(os.getenv("MEMORY_MAX_DISTANCE", "0.85"))
+MEMORY_MMR_LAMBDA = float(os.getenv("MEMORY_MMR_LAMBDA", "0.7"))
+MEMORY_MMR_CANDIDATE_CAP = int(os.getenv("MEMORY_MMR_CANDIDATE_CAP", "24"))
+MEMORY_RRF_K = int(os.getenv("MEMORY_RRF_K", "60"))
+MEMORY_IMPORTANCE_WEIGHT = float(os.getenv("MEMORY_IMPORTANCE_WEIGHT", "0.25"))
+MEMORY_DENSE_CANDIDATE_LIMIT = int(os.getenv("MEMORY_DENSE_CANDIDATE_LIMIT", "40"))
+MEMORY_LEXICAL_CANDIDATE_LIMIT = int(os.getenv("MEMORY_LEXICAL_CANDIDATE_LIMIT", "40"))
+
+# MSV reflect constraints
+MSV_EMA_ALPHA = float(os.getenv("MSV_EMA_ALPHA", "0.25"))
+MSV_MAX_STEP = float(os.getenv("MSV_MAX_STEP", "0.15"))
+MSV_EMA_MIN_CONFIDENCE = float(os.getenv("MSV_EMA_MIN_CONFIDENCE", "0.60"))
+MSV_UNCERTAINTY_FLOOR = float(os.getenv("MSV_UNCERTAINTY_FLOOR", "0.05"))
+MSV_UNCERTAINTY_DECAY = float(os.getenv("MSV_UNCERTAINTY_DECAY", "0.7"))
+MSV_RETRIEVAL_UNCERTAINTY_NUDGE = float(
+    os.getenv("MSV_RETRIEVAL_UNCERTAINTY_NUDGE", "0.05")
+)
+
+# Dual-process router
+DEFAULT_UNCERTAINTY_TRIGGER = float(os.getenv("DEFAULT_UNCERTAINTY_TRIGGER", "0.7"))
+SOULOS_ROUTER_LOG_PATH = os.getenv("SOULOS_ROUTER_LOG_PATH", "").strip()
+
+# Hybrid prepare multi-source memory budgets (fractions, sum ≈ 1)
+MEMORY_BUDGET_EPISODIC = float(os.getenv("MEMORY_BUDGET_EPISODIC", "0.4"))
+MEMORY_BUDGET_SHARED = float(os.getenv("MEMORY_BUDGET_SHARED", "0.4"))
+MEMORY_BUDGET_SEMANTIC = float(os.getenv("MEMORY_BUDGET_SEMANTIC", "0.2"))
+
+# Capability query cache TTL (seconds)
+CAPABILITY_CACHE_TTL_SECONDS = float(os.getenv("CAPABILITY_CACHE_TTL_SECONDS", "30"))
+
 WEAK_GATEWAY_SECRETS = frozenset(
     {DEFAULT_GATEWAY_SECRET, "changeme", "secret", "password", ""}
 )

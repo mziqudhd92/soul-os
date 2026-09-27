@@ -28,7 +28,8 @@ Primary integration for apps that already call an LLM (Bedrock, OpenAI, LiteLLM,
 | [My first sidecar](tutorials/my-first-sidecar.md) | 15-min beginner tutorial (curl + `SoulHybridClient`) |
 | [Sidecar integration](guides/sidecar-integration.md) | Compose, client, production checklist |
 | [Identity model](guides/identity-model.md) | `external_key`, `bot_id`, `session_id`, tenants |
-| [Multi-agent teams (Phase A)](guides/multi-agent-teams.md) | App-orchestrated specialist handoffs |
+| [Multi-agent teams (Phase B)](guides/multi-agent-teams.md) | Shared conversation memory + kernel handoffs |
+| [ML / Phase B report](reports/phase-b-ml-improvements.md) | 0.6.0 retrieval, MSV, eval, consolidate, router |
 | [Hybrid API](reference/hybrid-api.md) | `prepare` / `complete` / `ensure` / `/ready` JSON |
 | [examples/fastapi-hybrid](../examples/fastapi-hybrid/) | Reference FastAPI app |
 | [Port layout](guides/sidecar-integration.md#port-layout-common-confusion) | `:8000` full stack vs `:8001` sidecar |

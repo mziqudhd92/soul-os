@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "embedding_model": "hash-fixture",
+  "dimension": 4,
+  "cases": [
+    {
+      "id": "refund-policy",
+      "top_k": 3,
+      "max_distance": 0.85,
+      "min_recall": 0.5,
+      "min_ndcg": 0.4,
+      "relevant_ids": ["m1", "m2"],
+      "dense": [
+        {
+          "id": "m1",
+          "content": "Refunds within 30 days with receipt.",
+          "distance": 0.12,
+          "importance": 0.8,
+          "embedding": [1.0, 0.0, 0.0, 0.0]
+        },
+        {
+          "id": "m2",
+          "content": "Return shipping is free under 30 days.",
+          "distance": 0.25,
+          "importance": 0.6,
+          "embedding": [0.9, 0.1, 0.0, 0.0]
+        },
+        {
+          "id": "m3",
+          "content": "Store hours are 9 to 5.",
+          "distance": 0.7,
+          "importance": 0.2,
+          "embedding": [0.0, 1.0, 0.0, 0.0]
+        },
+        {
+          "id": "m4",
+          "content": "Unrelated noise far away",
+          "distance": 0.95,
+          "importance": 0.1,
+          "embedding": [0.0, 0.0, 1.0, 0.0]
+        }
+      ],
+      "lexical": [
+        {
+          "id": "m1",
+          "content": "Refunds within 30 days with receipt.",
+          "fts_rank": 0.9,
+          "importance": 0.8
+        },
+        {
+          "id": "m2",
+          "content": "Return shipping is free under 30 days.",
+          "fts_rank": 0.7,
+          "importance": 0.6
+        }
+      ]
+    }
+  ]
+}

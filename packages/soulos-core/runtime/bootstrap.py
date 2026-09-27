@@ -18,6 +18,8 @@ logger = logging.getLogger(__name__)
 
 async def init_database(database_url: str = DATABASE_URL) -> list[int]:
     """Apply pending schema migrations; returns the versions applied on this boot."""
+    from runtime.migrations import apply_concurrent_indexes
+
     engine = create_async_engine(database_url)
     try:
         async with engine.begin() as conn:
@@ -28,6 +30,12 @@ async def init_database(database_url: str = DATABASE_URL) -> list[int]:
         logger.info("Database migrated (applied: %s).", applied)
     else:
         logger.info("Database schema up to date.")
+    try:
+        idxs = await apply_concurrent_indexes(database_url)
+        if idxs:
+            logger.info("Concurrent indexes applied: %s", idxs)
+    except Exception as e:
+        logger.warning("Concurrent index pass failed: %s", e)
     return applied
 
 

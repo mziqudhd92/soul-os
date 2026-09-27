@@ -4,6 +4,44 @@ All notable changes to SoulOS are documented here.
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-09-27
+
+ML quality stack + Phase B multi-agent: hybrid retrieval, constrained MSV reflection, deterministic eval harness, memory consolidation, feature-based dual-process routing, and tenant-scoped shared conversation memory with atomic handoffs.
+
+### Added
+
+- Hybrid memory retrieval: dense + Postgres FTS (`websearch_to_tsquery`) → distance cutoff → RRF → importance weighting → capped cosine MMR (`MEMORY_RETRIEVAL_*`)
+- Structured `MemoryHit` scores; `include_scores` on `POST /memory/retrieve`
+- Closed-enum HEXACO trait directives injected into hybrid system prompts
+- MSV reflect constraints: validate/clamp, EMA with confidence gate, uncertainty hysteresis (`MSV_*`)
+- Deterministic eval suite: `npm run test:eval` (retrieval Recall/nDCG, persona, drift) + fixture re-embed CLI
+- Memory consolidation: `POST /memory/consolidate` with `FOR UPDATE`, provenance (`source_memory_ids`, time range), importance column
+- Feature-based System 1/2 router with per-bot `uncertainty_trigger`, async router logging (`SOULOS_ROUTER_LOG_PATH`), `reflect_force`
+- Phase B shared conversation memory: `POST /v1/conversations/{id}/memory` (+ retrieve), tenant isolation
+- Atomic handoffs: `POST /v1/handoffs` with `idempotency_key`; SDK prefers Phase B with Phase A fallback
+- Capability query: `GET /v1/avatars/by-capability/{capability}` with TTL cache
+- Hybrid prepare multi-source memory budgets (episodic / shared / semantic)
+- Schema migration 3 + concurrent FTS GIN indexes
+- Report: [docs/reports/phase-b-ml-improvements.md](docs/reports/phase-b-ml-improvements.md)
+
+### Changed
+
+- Dual-process no longer always runs System 2; router gates chat reflect and hybrid complete
+- Default hybrid prompt includes `Behavior directives` from trait compiler
+- Version bump to **0.6.0** across packages, Helm, OpenAPI indexes, and docs
+
+### Security
+
+- FTS queries use `websearch_to_tsquery` (no `plainto_tsquery` syntax crashes / injection surface)
+- Trait directives never interpolate raw MSV free text
+- Shared conversation memory filtered by `tenant_id` when auth is enabled
+- Idempotent handoff writes prevent partial multi-bot state on retries
+
+### Upgrade notes
+
+- Boot applies migration `003_phase_b_ml_memory` (importance/kind columns, `conversation_memories`, `handoff_idempotency`) then concurrent FTS indexes
+- See [self-hosted upgrade](docs/deployment/self-hosted.md) for 0.6.0 notes
+
 ## [0.5.0] — 2026-09-23
 
 Production hardening release: schema migrations, MCP↔REST parity, gateway security defaults, and an 85% coverage gate.

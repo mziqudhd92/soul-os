@@ -8,3 +8,4 @@ Product / architecture blueprints for SoulOS. These are **not** pytest TDD docs 
 | [Alignment with current kernel](alignment-with-current-kernel.md) | Gap analysis vs `main` |
 | [SoulPacks TDD plan](soulpacks-tdd-plan.md) | Complete — M1–M5 shipped |
 | [Near-term non-goals](non-goals.md) | Explicit skip list (registry, Kafka, storage SPI, …) |
+| [Phase B + ML report](../reports/phase-b-ml-improvements.md) | Shared memory + hybrid retrieval shipped in 0.6.0 |

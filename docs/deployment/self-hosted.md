@@ -105,6 +105,18 @@ soulos db status
 soulos db migrate
 ```
 
+### Upgrading to 0.6.0
+
+Boot applies migration **3** (`phase_b_ml_memory`):
+
+- `episodic_memories`: `importance`, `memory_kind`, `supersedes`, `source_memory_ids`, `time_range_*`
+- `conversation_memories` (tenant-scoped shared memory)
+- `handoff_idempotency`
+
+Then creates FTS GIN indexes **concurrently** (non-blocking). No manual SQL required for typical installs.
+
+New env knobs (optional): `MEMORY_RETRIEVAL_*`, `MSV_*`, `DEFAULT_UNCERTAINTY_TRIGGER`, `SOULOS_ROUTER_LOG_PATH`, `MEMORY_BUDGET_*` — see `.env.example` and [phase-b-ml-improvements.md](../reports/phase-b-ml-improvements.md).
+
 
 ## Kernel-only for site integrations
 

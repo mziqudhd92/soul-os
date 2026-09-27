@@ -1,6 +1,6 @@
 # SoulOS
 
-**Identity + memory sidecar for agents you already run** — validated personality (HEXACO MSV), episodic memory (pgvector), and a hybrid API so your existing LLM (Bedrock, OpenAI, LiteLLM) keeps generation while SoulOS owns persona, recall, and MSV drift.
+**Identity + memory sidecar for agents you already run** — validated personality (HEXACO MSV), hybrid episodic memory (pgvector + FTS), constrained MSV drift with trait→prompt directives, feature-based dual-process routing, and Phase B shared conversation memory / handoffs. Your existing LLM (Bedrock, OpenAI, LiteLLM) keeps generation while SoulOS owns persona, recall, and state.
 
 Give your bot a **soul file** instead of a fragile system prompt. Primary path: **`ensure_avatar → prepare → your LLM → complete`**. Full SSE chat, MCP, and Soul Studio remain supported.
 
@@ -143,12 +143,16 @@ You should see `event: message` chunks and optional `event: msv_update` / `event
 
 SoulOS is **not** a chat UI and **not** a replacement for your LLM. It is the layer that sits between your app and the model:
 
-- **Personality** — HEXACO psychometrics in a validated `.soul` / `.soul.json` file; state drifts per turn (`msv_update`).
-- **Memory** — episodic facts in Postgres/pgvector; optional `.soul-memory/` git ledger + sync API.
-- **Orchestration** — dual-process routing (fast System 1 stream + System 2 reflection when uncertainty is high).
+- **Personality** — HEXACO psychometrics in a validated `.soul` / `.soul.json` file; constrained per-turn MSV updates + closed-enum trait directives in hybrid prompts.
+- **Memory** — hybrid dense + FTS retrieval (RRF/MMR), importance, optional consolidation to semantic summaries; `.soul-memory/` git ledger + sync API.
+- **Multi-agent (Phase B)** — shared conversation memory, atomic `POST /v1/handoffs`, capability query; Phase A app-orchestrated handoffs still work.
+- **Orchestration** — feature-based dual-process routing (System 2 when uncertainty / weak recall / complex queries warrant it).
 - **Integrations** — REST + SSE, Python/`@soulos/sdk`, MCP tools at `/mcp/sse`.
+- **Quality** — deterministic `npm run test:eval` (retrieval + persona + drift) in CI.
 
-**Typical use cases:** customer support bots, dev assistants, companions, Cursor/Claude agents with persistent identity and recall.
+**Typical use cases:** customer support bots, dev assistants, companions, multi-specialist teams, Cursor/Claude agents with persistent identity and recall.
+
+Changelog: [CHANGELOG.md](CHANGELOG.md) · Report: [docs/reports/phase-b-ml-improvements.md](docs/reports/phase-b-ml-improvements.md)
 
 ---
 
@@ -290,13 +294,14 @@ docs/                      Guides, reference, deployment
 | [examples/dev-twin](examples/dev-twin/) | Developer assistant |
 | [examples/companion](examples/companion/) | Personal companion |
 | [examples/soulpack-sidecar](examples/soulpack-sidecar/) | Seed a MIT SoulPack into the kernel |
-| [examples/multi-agent-handoff](examples/multi-agent-handoff/) | Phase A Customer → Inventory handoff |
+| [examples/multi-agent-handoff](examples/multi-agent-handoff/) | Phase B handoffs + shared conversation memory (Phase A fallback) |
 | [examples/langchain-hybrid](examples/langchain-hybrid/) | LangChain-shaped prepare → LLM → complete |
 | [examples/mcp](examples/mcp/) | Cursor MCP workflow |
 
 ```bash
 npm run seed          # optional demo data
-npm run test:all      # kernel + bridge + gateway + studio + sdk
+npm run test:all      # kernel + eval + bridge + gateway + studio + sdk
+npm run test:eval     # deterministic retrieval / persona / drift (no live LLM)
 ```
 
 ---
@@ -319,6 +324,18 @@ Contributing: [CONTRIBUTING.md](CONTRIBUTING.md) · Code of Conduct: [CODE_OF_CO
 ---
 
 ## FAQ
+
+<details>
+<summary><strong>Can specialists share memory across bots?</strong></summary>
+
+Yes (Phase B). Use `session_id` / `conversation_id` as `conv:…`, ingest via `POST /v1/conversations/{id}/memory`, or `POST /v1/handoffs` (writes shared + destination notes). Hybrid prepare merges shared memory with episodic under token budgets. See [multi-agent teams](docs/guides/multi-agent-teams.md).
+</details>
+
+<details>
+<summary><strong>How does memory retrieval rank?</strong></summary>
+
+Dense pgvector distance + Postgres FTS (`websearch_to_tsquery`), distance cutoff, reciprocal rank fusion, importance boost, then capped MMR diversification. Optional `include_scores` on retrieve. Env: `MEMORY_RETRIEVAL_MODE`, `MEMORY_MAX_DISTANCE`, `MEMORY_MMR_*`.
+</details>
 
 <details>
 <summary><strong>What problem does SoulOS solve?</strong></summary>

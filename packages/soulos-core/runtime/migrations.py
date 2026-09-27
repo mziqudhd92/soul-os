@@ -2,22 +2,27 @@
 
 Each migration is applied once, in order, and recorded in ``soulos_schema_migrations``.
 Append new migrations to ``MIGRATIONS`` — never edit or reorder applied ones.
+
+FTS / GIN indexes that need ``CREATE INDEX CONCURRENTLY`` are listed on
+``Migration.concurrent_indexes`` and applied **after** the transactional
+migration commits (see ``apply_concurrent_indexes``).
 """
 
 from __future__ import annotations
 
 import logging
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncConnection
+from sqlalchemy.ext.asyncio import AsyncConnection, create_async_engine
 
-from config import EMBEDDING_DIMENSION
+from config import DATABASE_URL, EMBEDDING_DIMENSION
 
 logger = logging.getLogger(__name__)
 
 MIGRATIONS_TABLE = "soulos_schema_migrations"
+CONCURRENT_INDEX_TABLE = "soulos_concurrent_indexes"
 # Arbitrary constant key for pg_advisory_xact_lock; serializes concurrent kernel boots.
 ADVISORY_LOCK_KEY = 0x50_55_4C_05
 
@@ -31,6 +36,7 @@ class Migration:
     version: int
     name: str
     statements: Callable[[], list[str]]
+    concurrent_indexes: tuple[str, ...] = field(default_factory=tuple)
 
 
 def _baseline() -> list[str]:
@@ -99,9 +105,66 @@ def _memory_lookup_indexes() -> list[str]:
     ]
 
 
+def _phase_b_ml_schema() -> list[str]:
+    """Importance, semantic provenance, conversation shared memory, handoff idempotency."""
+    return [
+        "ALTER TABLE episodic_memories ADD COLUMN IF NOT EXISTS importance REAL DEFAULT 0.5;",
+        "ALTER TABLE episodic_memories ADD COLUMN IF NOT EXISTS memory_kind VARCHAR(32) "
+        "DEFAULT 'episodic';",
+        "ALTER TABLE episodic_memories ADD COLUMN IF NOT EXISTS supersedes UUID;",
+        "ALTER TABLE episodic_memories ADD COLUMN IF NOT EXISTS source_memory_ids JSONB;",
+        "ALTER TABLE episodic_memories ADD COLUMN IF NOT EXISTS time_range_start "
+        "TIMESTAMP WITH TIME ZONE;",
+        "ALTER TABLE episodic_memories ADD COLUMN IF NOT EXISTS time_range_end "
+        "TIMESTAMP WITH TIME ZONE;",
+        f"""
+        CREATE TABLE IF NOT EXISTS conversation_memories (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            tenant_id UUID,
+            conversation_id VARCHAR(128) NOT NULL,
+            content TEXT NOT NULL,
+            embedding vector({EMBEDDING_DIMENSION}),
+            source_bot_id UUID REFERENCES bots(id) ON DELETE SET NULL,
+            importance REAL DEFAULT 0.5,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+        """,
+        "CREATE INDEX IF NOT EXISTS idx_conversation_memories_tenant_conv "
+        "ON conversation_memories (tenant_id, conversation_id);",
+        """
+        CREATE TABLE IF NOT EXISTS handoff_idempotency (
+            tenant_id UUID,
+            idempotency_key VARCHAR(128) NOT NULL,
+            response JSONB NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (tenant_id, idempotency_key)
+        );
+        """,
+        # Partial unique for null tenant (local auth-off)
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_handoff_idempotency_null_tenant "
+        "ON handoff_idempotency (idempotency_key) WHERE tenant_id IS NULL;",
+    ]
+
+
+_FTS_EPISODIC = (
+    "CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_episodic_memories_content_fts "
+    "ON episodic_memories USING GIN (to_tsvector('english', content))"
+)
+_FTS_CONVERSATION = (
+    "CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_conversation_memories_content_fts "
+    "ON conversation_memories USING GIN (to_tsvector('english', content))"
+)
+
+
 MIGRATIONS: list[Migration] = [
     Migration(1, "baseline_0_3_2", _baseline),
     Migration(2, "episodic_memory_lookup_indexes", _memory_lookup_indexes),
+    Migration(
+        3,
+        "phase_b_ml_memory",
+        _phase_b_ml_schema,
+        concurrent_indexes=(_FTS_EPISODIC, _FTS_CONVERSATION),
+    ),
 ]
 
 
@@ -158,6 +221,60 @@ async def apply_migrations(
         )
         applied.append(migration.version)
     return applied
+
+
+async def apply_concurrent_indexes(
+    database_url: str = DATABASE_URL,
+    migrations: list[Migration] | None = None,
+) -> list[str]:
+    """Create CONCURRENTLY indexes outside a transaction; idempotent via tracking table."""
+    migrations = MIGRATIONS if migrations is None else migrations
+    engine = create_async_engine(database_url, isolation_level="AUTOCOMMIT")
+    created: list[str] = []
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(
+                text(
+                    f"""
+                    CREATE TABLE IF NOT EXISTS {CONCURRENT_INDEX_TABLE} (
+                        index_name TEXT PRIMARY KEY,
+                        applied_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                    );
+                    """
+                )
+            )
+            done_rows = await conn.execute(
+                text(f"SELECT index_name FROM {CONCURRENT_INDEX_TABLE}")
+            )
+            done = {row[0] for row in done_rows.fetchall()}
+            for migration in migrations:
+                for stmt in migration.concurrent_indexes:
+                    # Derive a stable name from the statement
+                    name = "idx_unknown"
+                    if "IF NOT EXISTS" in stmt:
+                        parts = stmt.split("IF NOT EXISTS", 1)[1].strip().split()
+                        if parts:
+                            name = parts[0]
+                    if name in done:
+                        continue
+                    logger.info("Applying concurrent index %s", name)
+                    try:
+                        await conn.execute(text(stmt))
+                        await conn.execute(
+                            text(
+                                f"INSERT INTO {CONCURRENT_INDEX_TABLE} (index_name) "
+                                f"VALUES (:n) ON CONFLICT DO NOTHING"
+                            ),
+                            {"n": name},
+                        )
+                        created.append(name)
+                    except Exception as e:
+                        logger.warning(
+                            "Concurrent index %s failed (may already exist): %s", name, e
+                        )
+    finally:
+        await engine.dispose()
+    return created
 
 
 async def migration_status(

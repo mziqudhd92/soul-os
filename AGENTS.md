@@ -37,7 +37,7 @@ Write or update tests **before or alongside** behavior changes — CI blocks mer
 - Pure logic: unit tests without HTTP (e.g. `test_persona_simple.py`, `runtime/` helpers).
 - SDK: mock `httpx` / `_request`; assert RFC 7807 `SoulOSError` codes.
 - New API routes need route tests + unit tests for service functions when non-trivial.
-- Persona / hybrid regressions: extend `test_persona_simple.py` or run `python3 scripts/soulos-eval.py`.
+- Persona / hybrid regressions: extend `test_persona_simple.py` or run `npm run test:eval` / `python3 scripts/soulos-eval.py`.
 
 Do not merge untested public API or SDK surface changes.
 

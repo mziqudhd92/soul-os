@@ -34,8 +34,9 @@ Boot: `docker compose up --build` (kernel :8000, studio :8765, Postgres, Ollama)
 Identity model: [guides/identity-model.md](guides/identity-model.md)
 SoulPacks: [guides/persona-packs.md](guides/persona-packs.md) (23 MIT packs)
 Turn contracts (optional reliability): [guides/turn-contracts.md](guides/turn-contracts.md) · tutorials [my-first-turn-contract](tutorials/my-first-turn-contract.md) / [production](tutorials/turn-contracts-production.md)
-Multi-agent (Phase A): [guides/multi-agent-teams.md](guides/multi-agent-teams.md)
+Multi-agent (Phase B): [guides/multi-agent-teams.md](guides/multi-agent-teams.md) — shared conversation memory + `POST /v1/handoffs`
 Observability: [guides/observability.md](guides/observability.md)
+0.6.0 ML report: [reports/phase-b-ml-improvements.md](reports/phase-b-ml-improvements.md)
 Architecture: [guides/architecture-overview.md](guides/architecture-overview.md)
 
 ---
@@ -149,7 +150,12 @@ Example souls: `examples/support-bot/`, `examples/dev-twin/`, `examples/companio
 | `POST` | `/state/update` | `{ bot_id, new_msv }` |
 | `POST` | `/state/reflect` | `{ bot_id, message, reflect_async? }` — hybrid integrations |
 | `GET` | `/ready` | Sidecar health (db + inference) |
-| `POST` | `/hybrid/prepare` | `{ bot_id, query, session_id?, top_k? }` → `system_prompt` |
+| `POST` | `/hybrid/prepare` | `{ bot_id, query, session_id?, top_k?, include_shared_memory? }` → `system_prompt` (+ shared merge for `conv:`) |
+| `POST` | `/hybrid/complete` | `{ …, reflect_force? }` — router may skip reflect unless forced |
+| `POST` | `/v1/conversations/{id}/memory` | Shared conversation ingest (tenant-scoped) |
+| `POST` | `/v1/handoffs` | Atomic handoff + shared note (`idempotency_key`) |
+| `POST` | `/memory/consolidate` | Summarize old episodics → semantic with provenance |
+| `GET` | `/v1/avatars/by-capability/{capability}` | List bots by capability tag |
 | `POST` | `/hybrid/complete` | ingest + async reflect |
 | `POST` | `/v1/avatars/ensure` | `{ external_key, soul, runtime_config? }` |
 | `POST` | `/memory/forget` | `{ bot_id, content_match }` |

@@ -1,6 +1,6 @@
 [project]
 name = "soulos-sdk"
-version = "0.5.0"
+version = "0.6.0"
 description = "Thin Python client for the SoulOS kernel API"
 requires-python = ">=3.12"
 license = { text = "MIT" }

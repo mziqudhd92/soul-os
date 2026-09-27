@@ -11,7 +11,7 @@ from auth import (
     set_mcp_account_context,
 )
 from config import ACCOUNT_ID_HEADER, GATEWAY_SECRET_HEADER, validate_gateway_secret
-from routes import avatars, chat, health, hybrid, mcp, memory
+from routes import avatars, chat, conversations, handoffs, health, hybrid, mcp, memory
 from runtime.boot_memory import sync_memory_on_boot
 from runtime.bootstrap import init_database, pull_model, wait_for_ollama
 from runtime.errors import SoulOSProblem, problem_response, register_exception_handlers
@@ -89,6 +89,8 @@ app.add_middleware(RequestIdMiddleware)
 app.include_router(health.router)
 app.include_router(avatars.router)
 app.include_router(memory.router)
+app.include_router(conversations.router)
+app.include_router(handoffs.router)
 app.include_router(hybrid.router)
 app.include_router(chat.router)
 app.include_router(mcp.router)

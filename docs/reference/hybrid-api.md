@@ -76,9 +76,12 @@ Single pre-turn call (replaces `GET /bot/{id}/identity` + `POST /memory/retrieve
   "bot_id": "uuid",
   "query": "user message or search query",
   "top_k": 5,
-  "session_id": "optional-session-uuid"
+  "session_id": "conv:thread-9",
+  "include_shared_memory": null
 }
 ```
+
+When `session_id` starts with `conv:` (or `include_shared_memory: true`), prepare merges **shared conversation** memories with bot episodic/semantic under configurable budgets (default 40%/40%/20%). System prompt includes closed-enum **trait directives** from current MSV.
 
 **Response**
 
@@ -126,6 +129,7 @@ Post-turn ingest + optional MSV reflect. When a turn contract is active for the 
   "session_id": "optional-session-uuid",
   "reflect": true,
   "reflect_async": true,
+  "reflect_force": false,
   "filled_slots": { "check_in": "2026-09-01", "check_out": "2026-09-05" },
   "intent": "provide_dates",
   "assistant_text": "optional — scanned for reject_tokens only",
@@ -148,7 +152,9 @@ Contract fields are optional. When `runtime_config.turn_contract` is set and `se
 
 - **200** — sync reflect: `{ "status": "success", "ingested": true, "reflect": "completed", "current_msv": { ... }, "turn": { ... } }`
 - **202** — async reflect: `{ "status": "accepted", "ingested": true, "reflect": "async", "bot_id": "uuid", "turn": { ... } }`
-- **200** — `reflect: false`: `{ "status": "success", "ingested": true, "reflect": "skipped", "turn": { ... } }`
+- **200** — `reflect: false` or router skip: `{ "status": "success", "ingested": true, "reflect": "skipped"|"skipped_by_router", "turn": { ... } }`
+
+Feature-based dual-process may skip System 2 unless `reflect_force: true` or uncertainty / weak retrieval / contract gaps trigger it. Override trigger via `runtime_config.dual_process.uncertainty_trigger`.
 
 `turn` (when contract active): `{ "step", "slots", "advanced", "turn_version" }`.
 

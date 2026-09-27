@@ -1,4 +1,4 @@
-"""REFLECT: System 2 metacognitive MSV update."""
+"""REFLECT: System 2 metacognitive MSV update with constrained merges."""
 
 import json
 import logging
@@ -17,6 +17,7 @@ from config import (
     inference_headers,
 )
 from runtime.crystallization import apply_crystallization_if_needed
+from runtime.msv_update import merge_reflected_msv
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,8 @@ async def run_system_2_reflector(
     message: str,
     current_msv: dict,
     active_mcp_tools: list[str] | None = None,
+    *,
+    retrieval_weak: bool = False,
 ) -> ReflectorResult:
     started = time.monotonic()
     tools = list(active_mcp_tools or [])
@@ -89,7 +92,14 @@ async def run_system_2_reflector(
             latency_ms = int((time.monotonic() - started) * 1000)
             if resp.status_code == 200:
                 response_text = resp.json()["response"]
-                new_msv = json.loads(response_text)
+                proposed = json.loads(response_text)
+                if not isinstance(proposed, dict):
+                    raise ValueError("reflector returned non-object JSON")
+                new_msv = merge_reflected_msv(
+                    current_msv,
+                    proposed,
+                    retrieval_weak=retrieval_weak,
+                )
                 async with engine.begin() as conn:
                     await conn.execute(
                         text("UPDATE bots SET current_msv = :msv WHERE id = :id"),

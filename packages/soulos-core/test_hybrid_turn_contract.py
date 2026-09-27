@@ -252,6 +252,7 @@ async def test_complete_idempotent_async_preserves_202(contract_app):
             "session_id": "sess-202",
             "reflect": True,
             "reflect_async": True,
+            "reflect_force": True,
             "filled_slots": {"check_in": "2026-09-01", "check_out": "2026-09-05"},
             "intent": "provide_dates",
             "expected_version": 0,

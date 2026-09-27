@@ -33,6 +33,12 @@ Semantic similarity search over episodic memory.
 
 Response: `{"bot_id": "...", "query": "...", "memories": ["...", ...]}`
 
+Uses the same hybrid ranking stack as REST (dense + FTS → RRF → MMR).
+
+## Phase B (REST preferred in 0.6.0)
+
+Shared conversation memory, handoffs, and consolidate are exposed primarily via REST (`/v1/conversations/...`, `/v1/handoffs`, `/memory/consolidate`). Prefer those endpoints or the Python/TS SDK helpers; MCP parity may follow.
+
 ## `forget_memory`
 
 Delete episodic memories whose content contains `content_match` (case-insensitive; `%` / `_` are escaped).

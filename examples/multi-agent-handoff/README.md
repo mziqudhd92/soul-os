@@ -1,6 +1,8 @@
-# Multi-agent handoff (Phase A)
+# Multi-agent handoff (Phase B)
 
-App-orchestrated Customer → Inventory handoff using existing SoulOS hybrid APIs. No kernel `teams` endpoint.
+Kernel-supported Customer → Inventory handoff with **shared conversation memory**.
+
+`handoff_to` prefers `POST /v1/handoffs` (atomic, idempotent). Older kernels fall back to Phase A (complete + ingest).
 
 ## Prerequisites
 
@@ -19,8 +21,8 @@ The script:
 
 1. Imports `customer-front` and `inventory` SoulPacks (convert-only).
 2. Ensures avatars with stable keys `org:{org}:customer` and `org:{org}:inventory`.
-3. Prepares on Customer, mock-replies, then `handoff_to` (complete + ingest note).
-4. Prepares on Inventory with the same `conv:{conversation_id}` session.
+3. Prepares on Customer, mock-replies, then `handoff_to` (Phase B handoff API when available).
+4. Prepares on Inventory with the same `conv:{conversation_id}` session (shared + bot episodic memories).
 
 ## SDK
 
@@ -38,9 +40,8 @@ await handoff_to(
     conversation_id="thread-1",
     reason="stock check",
     summary="User needs SKU-42 overnight",
-    payload={"sku": "SKU-42"},
+    idempotency_key="handoff-thread-1-1",
 )
-await client.prepare_turn(query, bot_id=inventory_id, session_id=session)
 ```
 
-See [Multi-agent teams](../../docs/guides/multi-agent-teams.md).
+Guide: [docs/guides/multi-agent-teams.md](../../docs/guides/multi-agent-teams.md)

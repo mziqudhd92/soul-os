@@ -19,6 +19,13 @@ class MemoryRetrieve(BaseModel):
     query: str = Field(max_length=MAX_MEMORY_CONTENT_CHARS)
     top_k: int = 5
     session_id: str | None = None
+    include_scores: bool = False
+
+
+class MemoryConsolidate(BaseModel):
+    bot_id: str
+    session_id: str | None = None
+    limit: int = 8
 
 
 class MemorySync(BaseModel):
@@ -63,6 +70,7 @@ class HybridPrepareRequest(BaseModel):
     query: str = Field(max_length=MAX_MEMORY_CONTENT_CHARS)
     top_k: int = 5
     session_id: str | None = None
+    include_shared_memory: bool | None = None
 
 
 class HybridCompleteRequest(BaseModel):
@@ -72,6 +80,7 @@ class HybridCompleteRequest(BaseModel):
     session_id: str | None = None
     reflect: bool = True
     reflect_async: bool = False
+    reflect_force: bool = False
     filled_slots: dict[str, Any] | None = None
     intent: str | None = None
     assistant_text: str | None = Field(default=None, max_length=MAX_MEMORY_CONTENT_CHARS)

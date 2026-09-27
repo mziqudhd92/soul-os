@@ -6,8 +6,9 @@ Human-facing guide for running and writing tests. Agent-oriented notes also live
 
 | Command | Scope |
 |---------|--------|
-| `npm run test:all` | Kernel + bridge + gateway + studio + Python SDK |
+| `npm run test:all` | Kernel + **eval** + bridge + gateway + studio + Python SDK |
 | `npm run test:kernel` | `packages/soulos-core/test_*.py` |
+| `npm run test:eval` | Deterministic retrieval / persona / drift (`scripts/soulos-eval.py`; no live LLM) |
 | `npm run test:bridge` | Inference bridge tests |
 | `npm run test:gateway` | Gateway tests |
 | `npm run test:studio` | Soul Studio tests |
@@ -18,7 +19,10 @@ Human-facing guide for running and writing tests. Agent-oriented notes also live
 | `npm run setup` | Create root `.venv` + install all packages editable |
 | `npm run doc:check` | Hybrid doc drift + OpenAPI lock + SDK coverage + completeness |
 | `npm run smoke:hybrid` | Sidecar ensure → prepare smoke (`scripts/hybrid-smoke.sh`) |
-| `python3 scripts/soulos-eval.py` | Persona / hybrid eval harness |
+| `python3 scripts/soulos-eval.py` | Deterministic eval (retrieval fixtures + persona + MSV drift) |
+| `python3 scripts/eval/reembed_fixtures.py --dimension N --write` | Refresh fixture vectors when embedding dim/model changes |
+
+Eval fixtures live in `scripts/eval/retrieval_fixtures.json` (`schema_version`, `embedding_model`, `dimension`). CI must not call live inference.
 
 Python packages need **3.12+**. Prefer `npm run setup` (root `.venv`); package-local `.venv` still works for ad-hoc pytest.
 

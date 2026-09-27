@@ -46,7 +46,8 @@ async def test_reflector_uses_own_connection_not_shared_db():
         mock_engine.begin.return_value = mock_begin_ctx
         result = await run_system_2_reflector("bot-1", "hello", current_msv)
 
-    assert result.msv["epistemic_uncertainty"] == 0.42
+    # Constrained merge applies uncertainty hysteresis (not raw LLM float)
+    assert 0.05 <= result.msv["epistemic_uncertainty"] <= 0.42
     mock_engine.begin.assert_called_once()
     assert mock_conn.execute.await_count >= 1
     shared_db.commit.assert_not_awaited()

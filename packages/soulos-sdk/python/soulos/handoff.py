@@ -88,15 +88,12 @@ async def handoff_to(
     intent: str | None = None,
     expected_step: str | None = None,
     advance: bool = True,
+    idempotency_key: str | None = None,
 ) -> dict[str, Any]:
-    """Complete the source bot and seed the destination bot with a handoff note.
+    """Complete the source bot and seed destination (+ shared) memory.
 
-    Caller should then ``prepare_turn`` on ``to_bot_id`` with the same
-    ``conversation_session_id(conversation_id)``.
-
-    When the source avatar has an active turn contract, pass ``expected_version``
-    (from the last prepare ``contract_context.turn_version``) and any slot/intent
-    fields required to complete that step.
+    Prefers kernel ``POST /v1/handoffs`` (Phase B). Falls back to Phase A
+    complete + ingest if the endpoint is missing.
     """
     if from_bot_id == to_bot_id:
         raise ValueError("from_bot_id and to_bot_id must differ")
@@ -110,6 +107,36 @@ async def handoff_to(
         payload=dict(payload or {}),
     )
     note = format_handoff_note(packet)
+
+    body = {
+        "from_bot_id": from_bot_id,
+        "to_bot_id": to_bot_id,
+        "from_role": from_role,
+        "to_role": to_role,
+        "conversation_id": conversation_id,
+        "reason": reason,
+        "summary": summary,
+        "user_message": user_message,
+        "payload": dict(payload or {}),
+        "idempotency_key": idempotency_key,
+    }
+    try:
+        resp = await client._request("POST", "/v1/handoffs", json_body=body)
+        if resp.status_code < 400:
+            data = resp.json()
+            return {
+                "to_bot_id": to_bot_id,
+                "session_id": data.get("session_id") or session_id,
+                "packet": packet.to_dict(),
+                "note": data.get("note") or note,
+                "complete": {"status": "success", "phase": "b"},
+                "ingest": {"status": "success", "shared_memory_id": data.get("shared_memory_id")},
+                "handoff": data,
+            }
+    except Exception:
+        pass
+
+    # Phase A fallback
     complete_kwargs: dict[str, Any] = {
         "summary": summary,
         "user_message": user_message or f"Handoff to {to_role}: {reason}",

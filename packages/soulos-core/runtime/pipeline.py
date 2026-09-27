@@ -17,6 +17,7 @@ from runtime.cognitive_telemetry import (
     merge_runtime_config,
     system1_threshold,
 )
+from runtime.dual_process import decide_reflect
 from runtime.reflector import run_system_2_reflector
 from soul_validation import default_msv_dict
 
@@ -59,6 +60,14 @@ class ChatPipeline:
         runtime_config = await self.load_runtime_config(db, bot_id)
         threshold = system1_threshold(runtime_config)
         confidence = confidence_from_msv(current_msv)
+        retrieval_weak = not context
+        run_s2, features = decide_reflect(
+            current_msv,
+            runtime_config,
+            query=message,
+            retrieval_weak=retrieval_weak,
+            bot_id=bot_id,
+        )
 
         yield format_cognitive_state_sse(
             "system_1_heuristic",
@@ -66,10 +75,12 @@ class ChatPipeline:
                 "confidence_score": round(confidence, 3),
                 "cached_response_triggered": False,
                 "latency_ms": 0,
+                "router_decision": "system_2" if run_s2 else "system_1",
+                "retrieval_weak": features.retrieval_weak,
             },
         )
 
-        if confidence < threshold:
+        if run_s2:
             yield format_cognitive_state_sse(
                 "system_2_deliberation",
                 system_1={
@@ -89,14 +100,21 @@ class ChatPipeline:
         if context:
             active_mcp_tools.append("retrieve_memory")
 
-        reflector_task = asyncio.create_task(
-            run_system_2_reflector(
-                bot_id, message, current_msv, active_mcp_tools=active_mcp_tools
+        reflector_task = None
+        if run_s2:
+            reflector_task = asyncio.create_task(
+                run_system_2_reflector(
+                    bot_id,
+                    message,
+                    current_msv,
+                    active_mcp_tools=active_mcp_tools,
+                    retrieval_weak=retrieval_weak,
+                )
             )
-        )
         reflector_yielded = False
         system1_started = time.monotonic()
         first_token_ms: int | None = None
+        s1_tokens: list[str] = []
 
         context_str = "\n".join(context)
         prompt = (
@@ -134,11 +152,16 @@ class ChatPipeline:
                                         "latency_ms": first_token_ms,
                                     },
                                 )
+                            s1_tokens.append(data["response"])
                             yield format_sse(
                                 "message", {"text": data["response"]}
                             )
 
-                        if reflector_task.done() and not reflector_yielded:
+                        if (
+                            reflector_task is not None
+                            and reflector_task.done()
+                            and not reflector_yielded
+                        ):
                             reflector_result = reflector_task.result()
                             new_msv = reflector_result.msv
                             yield format_sse("msv_update", new_msv)
@@ -156,7 +179,7 @@ class ChatPipeline:
                     except json.JSONDecodeError:
                         pass
 
-        if not reflector_yielded:
+        if reflector_task is not None and not reflector_yielded:
             reflector_result = await reflector_task
             yield format_sse("msv_update", reflector_result.msv)
             yield format_cognitive_state_sse(
@@ -166,5 +189,29 @@ class ChatPipeline:
                     "reasoning_tokens": reflector_result.reasoning_tokens,
                     "active_mcp_tools": reflector_result.active_mcp_tools or [],
                     "latency_ms": reflector_result.latency_ms,
+                },
+            )
+        elif not run_s2:
+            yield format_cognitive_state_sse(
+                "system_1_heuristic",
+                system_1={
+                    "confidence_score": round(confidence, 3),
+                    "cached_response_triggered": False,
+                    "latency_ms": first_token_ms or 0,
+                    "router_decision": "system_1",
+                    "low_confidence": confidence < threshold,
+                    "router_exhausted": False,
+                },
+            )
+        elif run_s2 and not s1_tokens:
+            # Graceful fallback metadata if S1 produced nothing
+            yield format_cognitive_state_sse(
+                "system_1_heuristic",
+                system_1={
+                    "confidence_score": round(confidence, 3),
+                    "cached_response_triggered": False,
+                    "latency_ms": 0,
+                    "low_confidence": True,
+                    "router_exhausted": True,
                 },
             )

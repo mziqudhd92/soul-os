@@ -21,6 +21,8 @@ from runtime.soulpacks import (
     default_external_key,
     list_packs,
 )
+from runtime.capability_query import invalidate_capability_cache, list_avatars_by_capability
+from runtime.conversation_memory import parse_tenant_uuid
 from schemas import EnsureAvatarRequest, ImportSoulPackRequest
 from soul_compile import parse_soul_request_bundle
 
@@ -40,9 +42,11 @@ async def register_avatar(
         payload, runtime_config = parse_soul_request_bundle(
             raw, content_type, filename_hint
         )
-        return await register_avatar_record(
+        result = await register_avatar_record(
             db, account.account_id, payload, runtime_config
         )
+        invalidate_capability_cache()
+        return result
     except ValueError as e:
         raise SoulOSProblem(SOUL_INVALID, 422, str(e)) from e
 
@@ -54,15 +58,30 @@ async def ensure_avatar(
     account: AccountContext = Depends(get_account_context),
 ):
     try:
-        return await ensure_avatar_record(
+        result = await ensure_avatar_record(
             db,
             account.account_id,
             payload.external_key,
             payload.soul,
             payload.runtime_config,
         )
+        invalidate_capability_cache()
+        return result
     except ValueError as e:
         raise SoulOSProblem(SOUL_INVALID, 422, str(e)) from e
+
+
+@router.get("/v1/avatars/by-capability/{capability}")
+async def avatars_by_capability(
+    capability: str,
+    db: AsyncConnection = Depends(get_db),
+    account: AccountContext = Depends(get_account_context),
+):
+    tenant_id = parse_tenant_uuid(account.account_id)
+    avatars = await list_avatars_by_capability(
+        db, capability, tenant_id=tenant_id
+    )
+    return {"capability": capability, "avatars": avatars, "total": len(avatars)}
 
 
 @router.get("/v1/soulpacks")

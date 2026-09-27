@@ -38,6 +38,8 @@ MCP tools mirror REST privileges. Treat MCP SSE URLs like admin APIs.
 | `update_cognitive_state` | Direct MSV manipulation |
 | `retrieve_memory` / resources | Exfiltration of episodic memory |
 | `/hybrid/*` (REST) | Prompt building + memory ingest without chat auth |
+| Conversation shared memory | Cross-bot fact injection within tenant conversation_id |
+| `POST /v1/handoffs` | Multi-bot memory writes; require idempotency + auth in production |
 
 **Mitigation:** gateway-only exposure, API keys, network policies, never `:8000` with `REQUIRE_AUTH=0` on the public internet.
 

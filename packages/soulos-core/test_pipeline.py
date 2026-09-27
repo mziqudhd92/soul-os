@@ -106,6 +106,7 @@ def _stream_client(lines: list[str], status_code: int = 200):
 async def test_generate_chat_stream_success_with_context_and_reflector_after():
     pipeline = ChatPipeline()
     msv = default_msv_dict()
+    msv["epistemic_uncertainty"] = 0.8  # force System 2 via uncertainty trigger
     reflector = ReflectorResult(
         msv={**msv, "epistemic_uncertainty": 0.2},
         latency_ms=12,
@@ -184,6 +185,7 @@ async def test_generate_chat_stream_low_confidence_and_error_status():
 async def test_generate_chat_stream_reflector_during_tokens():
     pipeline = ChatPipeline()
     msv = default_msv_dict()
+    msv["epistemic_uncertainty"] = 0.85
     done_result = ReflectorResult(
         msv=msv, latency_ms=3, reasoning_tokens=2, active_mcp_tools=[]
     )

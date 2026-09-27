@@ -154,9 +154,36 @@ Hydrate pgvector from a workspace `.soul-memory/` directory (dedupes by content 
 
 ### `POST /memory/retrieve`
 
-- **Payload:** `{"bot_id": "uuid", "query": "string", "top_k?": 5, "session_id?": "string"}`
-- **Response:** `{"memories": ["string"]}`
+Hybrid dense + FTS ranking (RRF / MMR). Optional scores for observability.
+
+- **Payload:** `{"bot_id": "uuid", "query": "string", "top_k?": 5, "session_id?": "string", "include_scores?": false}`
+- **Response:** `{"memories": ["string"]}` or with `include_scores`: also `"hits": [{content, dense_distance, rrf_score, importance, ...}]`
 - With `session_id`, retrieve merges global (`session_id IS NULL`) and session-scoped rows.
+
+### `POST /memory/consolidate`
+
+Lock old/low-importance episodics and write one `semantic` summary with provenance.
+
+- **Payload:** `{"bot_id": "uuid", "session_id?": "string", "limit?": 8}`
+- **Response:** `{"status": "success", "semantic_id": "...", "source_memory_ids": [...], "time_range_start": "...", "time_range_end": "...", "consolidated": N}`
+
+### `POST /v1/conversations/{conversation_id}/memory`
+
+Tenant-scoped **shared** conversation memory (Phase B).
+
+- **Payload:** `{"content": "string", "source_bot_id?": "uuid", "importance?": 0.6}`
+- **Retrieve:** `POST /v1/conversations/{conversation_id}/memory/retrieve` with `{"query", "top_k?", "include_scores?"}`
+
+### `POST /v1/handoffs`
+
+Atomic handoff: ingest on from-bot, shared conversation note, dest-bot note. Optional `idempotency_key`.
+
+- **Payload:** `from_bot_id`, `to_bot_id`, `from_role`, `to_role`, `conversation_id`, `reason`, `summary`, `user_message?`, `payload?`, `idempotency_key?`
+- **Response:** `{status, session_id, note, shared_memory_id, ...}`
+
+### `GET /v1/avatars/by-capability/{capability}`
+
+List avatars whose `capabilities` JSON includes the tag (TTL-cached; tenant-scoped when auth on).
 
 ### `POST /memory/forget`
 
