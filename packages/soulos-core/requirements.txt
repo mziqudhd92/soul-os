@@ -7,6 +7,7 @@ annotated-types==0.8.0
 anyio==4.15.1
     # via
     #   httpx
+    #   httpx2
     #   mcp
     #   sse-starlette
     #   starlette
@@ -28,30 +29,38 @@ cryptography==50.0.1
     # via pyjwt
 fastapi==0.141.1
     # via soulos-core (pyproject.toml)
+greenlet==3.5.6
+    # via sqlalchemy
 h11==0.16.0
     # via
     #   httpcore
+    #   httpcore2
     #   uvicorn
 httpcore==1.0.9
     # via httpx
+httpcore2==2.13.1
+    # via httpx2
 httpx==0.28.1
-    # via
-    #   soulos-core (pyproject.toml)
-    #   mcp
-httpx-sse==0.4.3
+    # via soulos-core (pyproject.toml)
+httpx2==2.13.1
     # via mcp
 idna==3.20
     # via
     #   anyio
     #   httpx
+    #   httpx2
 jsonschema==4.26.0
     # via
     #   soulos-core (pyproject.toml)
     #   mcp
 jsonschema-specifications==2025.9.1
     # via jsonschema
-mcp==1.30.0
+mcp==2.2.0
     # via soulos-core (pyproject.toml)
+mcp-types==2.2.0
+    # via mcp
+opentelemetry-api==1.45.0
+    # via mcp
 pgvector==0.5.0
     # via soulos-core (pyproject.toml)
 pycparser==3.0
@@ -61,13 +70,12 @@ pydantic==2.13.5
     #   soulos-core (pyproject.toml)
     #   fastapi
     #   mcp
+    #   mcp-types
     #   pydantic-settings
-pydantic-core==2.49.0
+pydantic-core==2.46.5
     # via pydantic
 pydantic-settings==2.15.0
-    # via
-    #   soulos-core (pyproject.toml)
-    #   mcp
+    # via soulos-core (pyproject.toml)
 pyjwt==2.14.0
     # via mcp
 python-dotenv==1.2.3
@@ -93,11 +101,17 @@ starlette==1.6.0
     #   fastapi
     #   mcp
     #   sse-starlette
+truststore==0.10.4
+    # via
+    #   httpcore2
+    #   httpx2
 typing-extensions==4.16.0
     # via
     #   anyio
     #   fastapi
     #   mcp
+    #   mcp-types
+    #   opentelemetry-api
     #   pydantic
     #   pydantic-core
     #   sqlalchemy

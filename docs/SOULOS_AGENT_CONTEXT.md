@@ -201,7 +201,7 @@ Errors: RFC 7807 `application/problem+json` with `code` (e.g. `BOT_NOT_FOUND`, `
 **Prompt:** `identity` (`bot_id`)  
 **Responses:** JSON in `TextContent`.
 
-Implementation: `packages/soulos-core/mcp_server.py`
+Implementation: `packages/soulos-core/mcp_server.py` (MCP Python SDK **2.x** low-level `Server` with `on_*` handlers)
 
 ---
 

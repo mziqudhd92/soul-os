@@ -4,6 +4,10 @@ All notable changes to SoulOS are documented here.
 
 ## [Unreleased]
 
+### Changed
+
+- Kernel MCP server migrated to **MCP Python SDK 2.x** low-level `Server` (`on_*` handlers); dependency pin `mcp>=2,<3`
+
 ## [0.6.0] — 2026-09-27
 
 ML quality stack + Phase B multi-agent: hybrid retrieval, constrained MSV reflection, deterministic eval harness, memory consolidation, feature-based dual-process routing, and tenant-scoped shared conversation memory with atomic handoffs.

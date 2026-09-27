@@ -1,19 +1,35 @@
+"""SoulOS kernel MCP server (MCP Python SDK 2.x low-level Server)."""
+
+from __future__ import annotations
+
 import asyncio
 import json
 import logging
 from contextlib import asynccontextmanager
+from typing import Any
 
 from fastapi import BackgroundTasks
 from fastapi.responses import JSONResponse
 from mcp.server import Server
+from mcp.server.context import ServerRequestContext
 from mcp.types import (
+    CallToolRequestParams,
+    CallToolResult,
+    GetPromptRequestParams,
     GetPromptResult,
+    ListPromptsResult,
+    ListResourcesResult,
+    ListResourceTemplatesResult,
+    ListToolsResult,
+    PaginatedRequestParams,
     Prompt,
     PromptArgument,
     PromptMessage,
-    Resource,
+    ReadResourceRequestParams,
+    ReadResourceResult,
     ResourceTemplate,
     TextContent,
+    TextResourceContents,
     Tool,
 )
 from pydantic import ValidationError
@@ -52,7 +68,6 @@ from tenant import verify_bot_access
 
 logger = logging.getLogger("mcp_server")
 
-mcp_server = Server("soulos-kernel")
 _embedder = Embedder()
 # Strong refs so async-reflect tasks scheduled from MCP calls are not GC'd mid-run.
 _background: set[asyncio.Task] = set()
@@ -126,28 +141,25 @@ async def _with_verified_bot(bot_id: str):
         yield conn
 
 
-@mcp_server.list_resources()
-async def handle_list_resources() -> list[Resource]:
+async def handle_list_resources() -> list:
     return []
 
 
-@mcp_server.list_resource_templates()
 async def handle_list_resource_templates() -> list[ResourceTemplate]:
     return [
         ResourceTemplate(
-            uriTemplate="memory://episodic/{bot_id}",
+            uri_template="memory://episodic/{bot_id}",
             name="Bot Episodic Memory",
             description="Recent episodic memories for an avatar (chronological log)",
         ),
         ResourceTemplate(
-            uriTemplate="soul://identity/{bot_id}",
+            uri_template="soul://identity/{bot_id}",
             name="Avatar Identity",
             description="Name, role, description, baseline and current MSV as JSON",
         ),
     ]
 
 
-@mcp_server.read_resource()
 async def handle_read_resource(uri: str) -> str:
     if uri.startswith("memory://episodic/"):
         bot_id = uri.split("/")[-1]
@@ -168,7 +180,6 @@ async def handle_read_resource(uri: str) -> str:
     raise ValueError(f"Unknown resource: {uri}")
 
 
-@mcp_server.list_prompts()
 async def handle_list_prompts() -> list[Prompt]:
     return [
         Prompt(
@@ -183,7 +194,6 @@ async def handle_list_prompts() -> list[Prompt]:
     ]
 
 
-@mcp_server.get_prompt()
 async def handle_get_prompt(name: str, arguments: dict | None) -> GetPromptResult:
     if name == "identity":
         bot_id = (arguments or {}).get("bot_id")
@@ -207,13 +217,12 @@ async def handle_get_prompt(name: str, arguments: dict | None) -> GetPromptResul
     raise ValueError(f"Unknown prompt: {name}")
 
 
-@mcp_server.list_tools()
 async def handle_list_tools() -> list[Tool]:
     return [
         Tool(
             name="ingest_memory",
             description="Store episodic memory for an avatar (pgvector).",
-            inputSchema={
+            input_schema={
                 "type": "object",
                 "properties": {
                     "bot_id": {"type": "string", "description": "Avatar UUID"},
@@ -229,7 +238,7 @@ async def handle_list_tools() -> list[Tool]:
         Tool(
             name="retrieve_memory",
             description="Semantic recall from episodic memory (RAG).",
-            inputSchema={
+            input_schema={
                 "type": "object",
                 "properties": {
                     "bot_id": {"type": "string"},
@@ -247,7 +256,7 @@ async def handle_list_tools() -> list[Tool]:
         Tool(
             name="forget_memory",
             description="Delete episodic memories whose content contains content_match.",
-            inputSchema={
+            input_schema={
                 "type": "object",
                 "properties": {
                     "bot_id": {"type": "string"},
@@ -262,7 +271,7 @@ async def handle_list_tools() -> list[Tool]:
         Tool(
             name="delete_session",
             description="Delete session-scoped memories and turn-contract state.",
-            inputSchema={
+            input_schema={
                 "type": "object",
                 "properties": {
                     "bot_id": {"type": "string"},
@@ -277,7 +286,7 @@ async def handle_list_tools() -> list[Tool]:
                 "Idempotent avatar bootstrap: return the avatar for external_key, "
                 "registering it from soul if missing."
             ),
-            inputSchema={
+            input_schema={
                 "type": "object",
                 "properties": {
                     "external_key": {
@@ -296,7 +305,7 @@ async def handle_list_tools() -> list[Tool]:
                 "Hybrid sidecar step 1: recall memories and build a persona "
                 "system_prompt for your own LLM."
             ),
-            inputSchema={
+            input_schema={
                 "type": "object",
                 "properties": {
                     "bot_id": {"type": "string"},
@@ -313,7 +322,7 @@ async def handle_list_tools() -> list[Tool]:
                 "Hybrid sidecar step 2: ingest the turn summary and optionally run "
                 "System 2 reflection (same contract as POST /hybrid/complete)."
             ),
-            inputSchema={
+            input_schema={
                 "type": "object",
                 "properties": {
                     "bot_id": {"type": "string"},
@@ -336,7 +345,7 @@ async def handle_list_tools() -> list[Tool]:
         Tool(
             name="get_identity",
             description="Avatar persona and baseline/current MSV as JSON.",
-            inputSchema={
+            input_schema={
                 "type": "object",
                 "properties": {
                     "bot_id": {"type": "string"},
@@ -347,7 +356,7 @@ async def handle_list_tools() -> list[Tool]:
         Tool(
             name="register_avatar",
             description="Register a new avatar from a .soul.json payload.",
-            inputSchema={
+            input_schema={
                 "type": "object",
                 "properties": {
                     "soul": {
@@ -361,7 +370,7 @@ async def handle_list_tools() -> list[Tool]:
         Tool(
             name="list_avatars",
             description="List avatars (tenant-scoped when auth is enabled).",
-            inputSchema={
+            input_schema={
                 "type": "object",
                 "properties": {
                     "limit": {
@@ -375,7 +384,7 @@ async def handle_list_tools() -> list[Tool]:
         Tool(
             name="update_cognitive_state",
             description="Force-update the Metacognitive State Vector (MSV).",
-            inputSchema={
+            input_schema={
                 "type": "object",
                 "properties": {
                     "bot_id": {"type": "string"},
@@ -390,7 +399,6 @@ async def handle_list_tools() -> list[Tool]:
     ]
 
 
-@mcp_server.call_tool()
 async def handle_call_tool(name: str, arguments: dict) -> list[TextContent]:
     try:
         return await _dispatch_tool(name, arguments)
@@ -590,3 +598,80 @@ async def _dispatch_tool(name: str, arguments: dict) -> list[TextContent]:
         )
 
     raise ValueError(f"Unknown tool: {name}")
+
+
+# --- MCP 2.x low-level request handlers (ctx, params) -> Result -----------------
+
+
+async def _on_list_resources(
+    _ctx: ServerRequestContext[Any],
+    _params: PaginatedRequestParams | None,
+) -> ListResourcesResult:
+    return ListResourcesResult(resources=await handle_list_resources())
+
+
+async def _on_list_resource_templates(
+    _ctx: ServerRequestContext[Any],
+    _params: PaginatedRequestParams | None,
+) -> ListResourceTemplatesResult:
+    return ListResourceTemplatesResult(
+        resource_templates=await handle_list_resource_templates()
+    )
+
+
+async def _on_read_resource(
+    _ctx: ServerRequestContext[Any],
+    params: ReadResourceRequestParams,
+) -> ReadResourceResult:
+    uri = str(params.uri)
+    text_body = await handle_read_resource(uri)
+    return ReadResourceResult(
+        contents=[
+            TextResourceContents(
+                uri=uri,
+                mime_type="application/json",
+                text=text_body,
+            )
+        ]
+    )
+
+
+async def _on_list_prompts(
+    _ctx: ServerRequestContext[Any],
+    _params: PaginatedRequestParams | None,
+) -> ListPromptsResult:
+    return ListPromptsResult(prompts=await handle_list_prompts())
+
+
+async def _on_get_prompt(
+    _ctx: ServerRequestContext[Any],
+    params: GetPromptRequestParams,
+) -> GetPromptResult:
+    return await handle_get_prompt(params.name, params.arguments)
+
+
+async def _on_list_tools(
+    _ctx: ServerRequestContext[Any],
+    _params: PaginatedRequestParams | None,
+) -> ListToolsResult:
+    return ListToolsResult(tools=await handle_list_tools())
+
+
+async def _on_call_tool(
+    _ctx: ServerRequestContext[Any],
+    params: CallToolRequestParams,
+) -> CallToolResult:
+    content = await handle_call_tool(params.name, dict(params.arguments or {}))
+    return CallToolResult(content=content)
+
+
+mcp_server = Server(
+    "soulos-kernel",
+    on_list_resources=_on_list_resources,
+    on_list_resource_templates=_on_list_resource_templates,
+    on_read_resource=_on_read_resource,
+    on_list_prompts=_on_list_prompts,
+    on_get_prompt=_on_get_prompt,
+    on_list_tools=_on_list_tools,
+    on_call_tool=_on_call_tool,
+)
