@@ -19,7 +19,10 @@ from runtime.memory_rank import (  # noqa: E402
     reciprocal_rank_fusion,
 )
 from runtime.msv_update import merge_reflected_msv  # noqa: E402
-from runtime.persona_simple import build_simple_baseline_msv, simple_sliders_to_hexaco  # noqa: E402
+from runtime.persona_simple import (  # noqa: E402
+    build_simple_baseline_msv,
+    simple_sliders_to_hexaco,
+)
 from runtime.trait_directives import compile_trait_directives  # noqa: E402
 
 FIXTURES = Path(__file__).resolve().parent / "eval" / "retrieval_fixtures.json"

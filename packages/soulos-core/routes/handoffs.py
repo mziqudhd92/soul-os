@@ -18,7 +18,7 @@ from runtime.conversation_memory import (
     normalize_conversation_id,
     parse_tenant_uuid,
 )
-from runtime.errors import BOT_NOT_FOUND, SOUL_INVALID, SoulOSProblem
+from runtime.errors import SOUL_INVALID, SoulOSProblem
 from runtime.memory import ingest_memory as ingest_memory_record
 from tenant import verify_bot_access
 

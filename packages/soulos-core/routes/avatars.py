@@ -6,6 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 from auth import AccountContext, get_account_context
 from dependencies import get_db
 from runtime.avatars import ensure_avatar_record, register_avatar_record
+from runtime.capability_query import (
+    invalidate_capability_cache,
+    list_avatars_by_capability,
+)
+from runtime.conversation_memory import parse_tenant_uuid
 from runtime.errors import (
     SOUL_INVALID,
     SOULPACK_INVALID,
@@ -21,8 +26,6 @@ from runtime.soulpacks import (
     default_external_key,
     list_packs,
 )
-from runtime.capability_query import invalidate_capability_cache, list_avatars_by_capability
-from runtime.conversation_memory import parse_tenant_uuid
 from schemas import EnsureAvatarRequest, ImportSoulPackRequest
 from soul_compile import parse_soul_request_bundle
 

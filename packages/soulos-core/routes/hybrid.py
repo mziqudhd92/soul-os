@@ -21,7 +21,11 @@ from runtime.conversation_memory import (
 )
 from runtime.dual_process import decide_reflect
 from runtime.errors import BOT_NOT_FOUND, SoulOSProblem
-from runtime.hybrid import apply_memory_budgets, build_hybrid_system_prompt, extract_inner_monologue
+from runtime.hybrid import (
+    apply_memory_budgets,
+    build_hybrid_system_prompt,
+    extract_inner_monologue,
+)
 from runtime.hybrid_complete import resolve_turn_on_complete
 from runtime.hybrid_tasks import run_reflect_background
 from runtime.memory import ingest_memory as ingest_memory_record

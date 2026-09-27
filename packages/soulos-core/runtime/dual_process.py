@@ -106,18 +106,26 @@ def features_from_msv(
     )
 
 
+async def _append_router_log(path: Path, line: str) -> None:
+    def _write() -> None:
+        with path.open("a", encoding="utf-8") as fh:
+            fh.write(line)
+
+    await asyncio.to_thread(_write)
+
+
 async def _router_log_worker(queue: asyncio.Queue) -> None:
     path = Path(SOULOS_ROUTER_LOG_PATH)
     try:
-        path.parent.mkdir(parents=True, exist_ok=True)
+        await asyncio.to_thread(lambda: path.parent.mkdir(parents=True, exist_ok=True))
     except OSError as e:
         logger.warning("Router log path unavailable: %s", e)
         return
     while True:
         record = await queue.get()
         try:
-            with path.open("a", encoding="utf-8") as fh:
-                fh.write(json.dumps(record, ensure_ascii=False) + "\n")
+            line = json.dumps(record, ensure_ascii=False) + "\n"
+            await _append_router_log(path, line)
         except OSError as e:
             logger.warning("Router log write failed: %s", e)
         finally:

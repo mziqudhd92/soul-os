@@ -76,13 +76,7 @@ def build_hybrid_system_prompt(
     try:
         return template.format(**values)
     except KeyError:
-        # Custom templates may omit trait_directives
-        safe = {
-            k: v
-            for k, v in values.items()
-            if f"{{{k}}}" in template or k in ("name", "role", "description", "inner_monologue", "memories")
-        }
-        # Prefer format_map with defaults
+        # Custom templates may omit placeholders — fill missing keys with "".
         class _Default(dict):
             def __missing__(self, key: str) -> str:
                 return values.get(key, "")
