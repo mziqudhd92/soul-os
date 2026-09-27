@@ -10,7 +10,10 @@ from httpx import ASGITransport, AsyncClient
 
 from dependencies import get_db, get_embedder, get_llm_service
 from main import app
-from runtime.capability_query import invalidate_capability_cache, list_avatars_by_capability
+from runtime.capability_query import (
+    invalidate_capability_cache,
+    list_avatars_by_capability,
+)
 from runtime.conversation_memory import normalize_conversation_id, parse_tenant_uuid
 from runtime.dual_process import (
     DualProcessFeatures,
@@ -390,10 +393,10 @@ async def test_consolidate_memories_logic():
 @pytest.mark.asyncio
 async def test_conversation_memory_ingest_and_retrieve():
     from runtime.conversation_memory import (
+        _parse_embedding,
         ingest_conversation_memory,
         retrieve_conversation_memories,
         retrieve_conversation_memory_hits,
-        _parse_embedding,
     )
 
     assert _parse_embedding(None) is None
