@@ -84,7 +84,5 @@ docs/SOULOS_AGENT_CONTEXT_FULL.md
 *.tsbuildinfo
 next-env.d.ts
 
-# Cursor local state (keep committed .cursor/rules/ for agent conventions)
-.cursor/*
-!.cursor/rules/
-!.cursor/rules/**
+# Cursor local / IDE state
+.cursor/
