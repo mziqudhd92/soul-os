@@ -18,7 +18,7 @@ dependencies = [
     "pgvector>=0.3.0",
     "pydantic>=2.7.4",
     "pydantic-settings>=2.3.4",
-    "mcp>=1.0.0,<2",
+    "mcp>=1.0.0,<3",
     "jsonschema>=4.22.0",
     "pyyaml>=6.0",
 ]
