@@ -16,7 +16,7 @@ from dependencies import get_db, get_embedder, get_llm_service
 from runtime.avatars import fetch_bot_identity
 from runtime.conversation_memory import (
     normalize_conversation_id,
-    parse_tenant_uuid,
+    require_tenant_uuid,
     retrieve_conversation_memory_hits,
 )
 from runtime.dual_process import decide_reflect
@@ -103,7 +103,7 @@ async def hybrid_prepare(
         if include_shared and payload.session_id:
             try:
                 cid = normalize_conversation_id(payload.session_id)
-                tenant_id = parse_tenant_uuid(account.account_id)
+                tenant_id = require_tenant_uuid(account.account_id)
                 shared_hits = await retrieve_conversation_memory_hits(
                     db,
                     embedder,

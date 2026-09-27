@@ -79,6 +79,23 @@ def test_parse_tenant_uuid():
     assert parse_tenant_uuid(BOT_A) == BOT_A
 
 
+def test_require_tenant_uuid_fail_closed(monkeypatch):
+    from runtime.conversation_memory import require_tenant_uuid
+    from runtime.errors import ACCESS_DENIED, SoulOSProblem
+
+    monkeypatch.setattr("config.REQUIRE_AUTH", True)
+    with pytest.raises(SoulOSProblem) as exc:
+        require_tenant_uuid("not-a-uuid")
+    assert exc.value.code == ACCESS_DENIED
+    with pytest.raises(SoulOSProblem):
+        require_tenant_uuid(None)
+    assert require_tenant_uuid(BOT_A) == BOT_A
+
+    monkeypatch.setattr("config.REQUIRE_AUTH", False)
+    assert require_tenant_uuid("not-a-uuid") is None
+    assert require_tenant_uuid(None) is None
+
+
 def test_apply_memory_budgets_fills_top_k():
     out = apply_memory_budgets(
         ["e1", "e2", "e3"],

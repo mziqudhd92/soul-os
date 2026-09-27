@@ -256,9 +256,33 @@ def _parse_embedding(raw: Any) -> list[float] | None:
 
 
 def parse_tenant_uuid(account_id: str | None) -> str | None:
+    """Soft-parse account id as UUID (returns None when missing/invalid)."""
     if not account_id:
         return None
     try:
         return str(UUID(account_id))
     except (TypeError, ValueError):
+        return None
+
+
+def require_tenant_uuid(account_id: str | None) -> str | None:
+    """Tenant scope for isolation queries.
+
+    When ``REQUIRE_AUTH`` is on, a missing or non-UUID account id fails closed
+    (avoids falling into the shared ``tenant_id IS NULL`` bucket).
+    """
+    from config import REQUIRE_AUTH
+    from runtime.errors import ACCESS_DENIED, SoulOSProblem
+
+    if not account_id:
+        if REQUIRE_AUTH:
+            raise SoulOSProblem(ACCESS_DENIED, 403, "Account id required")
+        return None
+    try:
+        return str(UUID(account_id))
+    except (TypeError, ValueError) as e:
+        if REQUIRE_AUTH:
+            raise SoulOSProblem(
+                ACCESS_DENIED, 403, "Account id must be a UUID"
+            ) from e
         return None

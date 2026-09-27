@@ -123,6 +123,27 @@ async def test_handoff_to_falls_back_to_phase_a():
 
 
 @pytest.mark.asyncio
+async def test_handoff_to_reraises_non_missing_endpoint_errors():
+    client = SoulHybridClient(base_url="http://kernel.test", enabled=True)
+
+    with patch.object(client, "_request", new_callable=AsyncMock) as mock_req:
+        mock_req.side_effect = SoulOSError("INTERNAL_ERROR", 500, "boom", {})
+        with pytest.raises(SoulOSError) as exc:
+            await handoff_to(
+                client,
+                from_bot_id="bot-customer",
+                to_bot_id="bot-inventory",
+                from_role="customer",
+                to_role="inventory",
+                conversation_id="thread-1",
+                reason="stock check",
+                summary="Need SKU-42 availability",
+            )
+    assert exc.value.status == 500
+    assert mock_req.await_count == 1
+
+
+@pytest.mark.asyncio
 async def test_handoff_to_rejects_same_bot():
     client = SoulHybridClient(base_url="http://kernel.test", enabled=True)
     with pytest.raises(ValueError, match="must differ"):

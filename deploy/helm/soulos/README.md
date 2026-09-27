@@ -20,6 +20,9 @@ helm upgrade --install soulos deploy/helm/soulos \
 | `kernel.env.GATEWAY_SECRET` | Shared secret with gateway |
 | `kernel.env.OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP collector |
 | `kernel.env.MEMORY_SESSION_TTL_SECONDS` | Session + turn_session TTL (0 = off) |
+| `kernel.env.MEMORY_MAX_DISTANCE` / `MEMORY_RRF_K` | Hybrid retrieval cutoff / RRF `k` (optional) |
+| `kernel.env.MSV_EMA_ALPHA` / `DEFAULT_UNCERTAINTY_TRIGGER` | MSV merge + dual-process router (optional) |
+| `kernel.env.SOULOS_ROUTER_LOG_PATH` | Async dual-process decision log path (optional) |
 | `purgeCron.enabled` | CronJob → `POST /memory/purge-expired` (requires TTL &gt; 0) |
 | `purgeCron.schedule` | Default `15 * * * *` |
 | `gateway.enabled` | Deploy cloud gateway |

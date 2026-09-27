@@ -35,6 +35,30 @@ spec:
               value: {{ .Values.kernel.env.INFERENCE_MODE | quote }}
             - name: MEMORY_SESSION_TTL_SECONDS
               value: {{ .Values.kernel.env.MEMORY_SESSION_TTL_SECONDS | quote }}
+            {{- if .Values.kernel.env.MEMORY_MAX_DISTANCE }}
+            - name: MEMORY_MAX_DISTANCE
+              value: {{ .Values.kernel.env.MEMORY_MAX_DISTANCE | quote }}
+            {{- end }}
+            {{- if .Values.kernel.env.MEMORY_RRF_K }}
+            - name: MEMORY_RRF_K
+              value: {{ .Values.kernel.env.MEMORY_RRF_K | quote }}
+            {{- end }}
+            {{- if .Values.kernel.env.MSV_EMA_ALPHA }}
+            - name: MSV_EMA_ALPHA
+              value: {{ .Values.kernel.env.MSV_EMA_ALPHA | quote }}
+            {{- end }}
+            {{- if .Values.kernel.env.DEFAULT_UNCERTAINTY_TRIGGER }}
+            - name: DEFAULT_UNCERTAINTY_TRIGGER
+              value: {{ .Values.kernel.env.DEFAULT_UNCERTAINTY_TRIGGER | quote }}
+            {{- end }}
+            {{- if .Values.kernel.env.SOULOS_ROUTER_LOG_PATH }}
+            - name: SOULOS_ROUTER_LOG_PATH
+              value: {{ .Values.kernel.env.SOULOS_ROUTER_LOG_PATH | quote }}
+            {{- end }}
+            {{- if .Values.kernel.env.CAPABILITY_CACHE_TTL_SECONDS }}
+            - name: CAPABILITY_CACHE_TTL_SECONDS
+              value: {{ .Values.kernel.env.CAPABILITY_CACHE_TTL_SECONDS | quote }}
+            {{- end }}
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: {{ .Values.kernel.env.OTEL_EXPORTER_OTLP_ENDPOINT | quote }}
             - name: SOULOS_OTEL_ENABLED

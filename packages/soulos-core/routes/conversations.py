@@ -10,7 +10,7 @@ from dependencies import get_db, get_embedder
 from runtime.conversation_memory import (
     ingest_conversation_memory,
     normalize_conversation_id,
-    parse_tenant_uuid,
+    require_tenant_uuid,
     retrieve_conversation_memories,
     retrieve_conversation_memory_hits,
 )
@@ -43,7 +43,7 @@ async def ingest_shared_memory(
         cid = normalize_conversation_id(conversation_id)
     except ValueError as e:
         raise SoulOSProblem(SOUL_INVALID, 422, str(e)) from e
-    tenant_id = parse_tenant_uuid(account.account_id)
+    tenant_id = require_tenant_uuid(account.account_id)
     mem_id = await ingest_conversation_memory(
         db,
         embedder,
@@ -68,7 +68,7 @@ async def retrieve_shared_memory(
         cid = normalize_conversation_id(conversation_id)
     except ValueError as e:
         raise SoulOSProblem(SOUL_INVALID, 422, str(e)) from e
-    tenant_id = parse_tenant_uuid(account.account_id)
+    tenant_id = require_tenant_uuid(account.account_id)
     if payload.include_scores:
         hits = await retrieve_conversation_memory_hits(
             db, embedder, cid, payload.query, payload.top_k, tenant_id=tenant_id

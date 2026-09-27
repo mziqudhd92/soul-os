@@ -131,16 +131,45 @@ def _phase_b_ml_schema() -> list[str]:
         """,
         "CREATE INDEX IF NOT EXISTS idx_conversation_memories_tenant_conv "
         "ON conversation_memories (tenant_id, conversation_id);",
+        # Correct schema: surrogate PK so tenant_id may be NULL (auth-off).
+        # Migration 4 repairs DBs that got the broken composite PK from an earlier 3.
         """
         CREATE TABLE IF NOT EXISTS handoff_idempotency (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             tenant_id UUID,
             idempotency_key VARCHAR(128) NOT NULL,
             response JSONB NOT NULL,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (tenant_id, idempotency_key)
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         );
         """,
-        # Partial unique for null tenant (local auth-off)
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_handoff_idempotency_tenant_key "
+        "ON handoff_idempotency (tenant_id, idempotency_key) WHERE tenant_id IS NOT NULL;",
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_handoff_idempotency_null_tenant "
+        "ON handoff_idempotency (idempotency_key) WHERE tenant_id IS NULL;",
+    ]
+
+
+def _fix_handoff_idempotency_nullable_tenant() -> list[str]:
+    """Repair composite PK that forced tenant_id NOT NULL (broke auth-off idempotency)."""
+    return [
+        """
+        CREATE TABLE IF NOT EXISTS handoff_idempotency_new (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            tenant_id UUID,
+            idempotency_key VARCHAR(128) NOT NULL,
+            response JSONB NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+        """,
+        """
+        INSERT INTO handoff_idempotency_new (tenant_id, idempotency_key, response, created_at)
+        SELECT tenant_id, idempotency_key, response, COALESCE(created_at, CURRENT_TIMESTAMP)
+        FROM handoff_idempotency;
+        """,
+        "DROP TABLE IF EXISTS handoff_idempotency;",
+        "ALTER TABLE handoff_idempotency_new RENAME TO handoff_idempotency;",
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_handoff_idempotency_tenant_key "
+        "ON handoff_idempotency (tenant_id, idempotency_key) WHERE tenant_id IS NOT NULL;",
         "CREATE UNIQUE INDEX IF NOT EXISTS idx_handoff_idempotency_null_tenant "
         "ON handoff_idempotency (idempotency_key) WHERE tenant_id IS NULL;",
     ]
@@ -164,6 +193,11 @@ MIGRATIONS: list[Migration] = [
         "phase_b_ml_memory",
         _phase_b_ml_schema,
         concurrent_indexes=(_FTS_EPISODIC, _FTS_CONVERSATION),
+    ),
+    Migration(
+        4,
+        "fix_handoff_idempotency_nullable_tenant",
+        _fix_handoff_idempotency_nullable_tenant,
     ),
 ]
 

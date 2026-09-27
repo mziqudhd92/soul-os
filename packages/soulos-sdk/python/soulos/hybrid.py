@@ -345,3 +345,67 @@ class SoulHybridClient:
             "prepare": prepared,
             "complete": completed,
         }
+
+    async def ingest_conversation_memory(
+        self,
+        conversation_id: str,
+        content: str,
+        *,
+        source_bot_id: str | None = None,
+        importance: float = 0.6,
+    ) -> dict[str, Any]:
+        """POST /v1/conversations/{id}/memory — Phase B shared memory."""
+        cid = conversation_id.strip()
+        body: dict[str, Any] = {"content": content, "importance": importance}
+        if source_bot_id:
+            body["source_bot_id"] = source_bot_id
+        resp = await self._request(
+            "POST", f"/v1/conversations/{cid}/memory", json_body=body
+        )
+        return resp.json()
+
+    async def retrieve_conversation_memory(
+        self,
+        conversation_id: str,
+        query: str,
+        *,
+        top_k: int = 5,
+        include_scores: bool = False,
+    ) -> dict[str, Any]:
+        """POST /v1/conversations/{id}/memory/retrieve."""
+        cid = conversation_id.strip()
+        resp = await self._request(
+            "POST",
+            f"/v1/conversations/{cid}/memory/retrieve",
+            json_body={
+                "query": query,
+                "top_k": top_k,
+                "include_scores": include_scores,
+            },
+        )
+        return resp.json()
+
+    async def consolidate_memories(
+        self,
+        bot_id: str | None = None,
+        *,
+        session_id: str | None = None,
+        limit: int = 8,
+    ) -> dict[str, Any]:
+        """POST /memory/consolidate — fold episodics into a semantic summary."""
+        bid = bot_id or self.bot_id
+        if not bid:
+            raise ValueError("bot_id is required")
+        body: dict[str, Any] = {"bot_id": bid, "limit": limit}
+        if session_id is not None:
+            body["session_id"] = session_id
+        resp = await self._request("POST", "/memory/consolidate", json_body=body)
+        return resp.json()
+
+    async def list_avatars_by_capability(self, capability: str) -> dict[str, Any]:
+        """GET /v1/avatars/by-capability/{capability}."""
+        cap = (capability or "").strip()
+        if not cap:
+            raise ValueError("capability is required")
+        resp = await self._request("GET", f"/v1/avatars/by-capability/{cap}")
+        return resp.json()

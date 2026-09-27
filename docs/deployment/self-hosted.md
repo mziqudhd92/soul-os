@@ -107,11 +107,11 @@ soulos db migrate
 
 ### Upgrading to 0.6.0
 
-Boot applies migration **3** (`phase_b_ml_memory`):
+Boot applies migrations **3** (`phase_b_ml_memory`) and **4** (`fix_handoff_idempotency_nullable_tenant`):
 
 - `episodic_memories`: `importance`, `memory_kind`, `supersedes`, `source_memory_ids`, `time_range_*`
 - `conversation_memories` (tenant-scoped shared memory)
-- `handoff_idempotency`
+- `handoff_idempotency` (nullable `tenant_id` + partial unique indexes; migration 4 repairs installs that got a composite PK)
 
 Then creates FTS GIN indexes **concurrently** (non-blocking). No manual SQL required for typical installs.
 

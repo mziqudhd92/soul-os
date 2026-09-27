@@ -277,7 +277,12 @@ async def test_kernel_route_modules_mounted():
         "/hybrid/prepare",
         "/hybrid/complete",
         "/v1/avatars",
+        "/v1/avatars/by-capability/{capability}",
+        "/v1/conversations/{conversation_id}/memory",
+        "/v1/conversations/{conversation_id}/memory/retrieve",
+        "/v1/handoffs",
         "/memory/ingest",
+        "/memory/consolidate",
         "/chat/generate",
         "/mcp/sse",
     ):

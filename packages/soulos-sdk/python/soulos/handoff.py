@@ -11,7 +11,9 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
-from soulos.hybrid import SoulHybridClient
+import httpx
+
+from soulos.hybrid import SoulHybridClient, SoulOSError
 
 
 def role_external_key(org_id: str, role: str) -> str:
@@ -122,19 +124,25 @@ async def handoff_to(
     }
     try:
         resp = await client._request("POST", "/v1/handoffs", json_body=body)
-        if resp.status_code < 400:
-            data = resp.json()
-            return {
-                "to_bot_id": to_bot_id,
-                "session_id": data.get("session_id") or session_id,
-                "packet": packet.to_dict(),
-                "note": data.get("note") or note,
-                "complete": {"status": "success", "phase": "b"},
-                "ingest": {"status": "success", "shared_memory_id": data.get("shared_memory_id")},
-                "handoff": data,
-            }
-    except Exception:
-        pass
+        data = resp.json()
+        return {
+            "to_bot_id": to_bot_id,
+            "session_id": data.get("session_id") or session_id,
+            "packet": packet.to_dict(),
+            "note": data.get("note") or note,
+            "complete": {"status": "success", "phase": "b"},
+            "ingest": {
+                "status": "success",
+                "shared_memory_id": data.get("shared_memory_id"),
+            },
+            "handoff": data,
+        }
+    except SoulOSError as e:
+        # Only fall back when Phase B endpoint is missing on older kernels.
+        if e.status not in (404, 405):
+            raise
+    except httpx.HTTPError:
+        raise
 
     # Phase A fallback
     complete_kwargs: dict[str, Any] = {

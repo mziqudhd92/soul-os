@@ -10,7 +10,7 @@ from runtime.capability_query import (
     invalidate_capability_cache,
     list_avatars_by_capability,
 )
-from runtime.conversation_memory import parse_tenant_uuid
+from runtime.conversation_memory import require_tenant_uuid
 from runtime.errors import (
     SOUL_INVALID,
     SOULPACK_INVALID,
@@ -80,7 +80,7 @@ async def avatars_by_capability(
     db: AsyncConnection = Depends(get_db),
     account: AccountContext = Depends(get_account_context),
 ):
-    tenant_id = parse_tenant_uuid(account.account_id)
+    tenant_id = require_tenant_uuid(account.account_id)
     avatars = await list_avatars_by_capability(
         db, capability, tenant_id=tenant_id
     )

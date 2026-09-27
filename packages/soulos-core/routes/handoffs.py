@@ -6,7 +6,7 @@ import json
 from typing import Any
 
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
@@ -16,13 +16,16 @@ from dependencies import get_db, get_embedder
 from runtime.conversation_memory import (
     ingest_conversation_memory,
     normalize_conversation_id,
-    parse_tenant_uuid,
+    require_tenant_uuid,
 )
 from runtime.errors import SOUL_INVALID, SoulOSProblem
 from runtime.memory import ingest_memory as ingest_memory_record
 from tenant import verify_bot_access
 
 router = APIRouter(tags=["handoffs"])
+
+# Cap serialized handoff payload size (DoS / embed cost).
+_MAX_HANDOFF_PAYLOAD_CHARS = min(8192, MAX_MEMORY_CONTENT_CHARS)
 
 
 class HandoffRequest(BaseModel):
@@ -35,7 +38,19 @@ class HandoffRequest(BaseModel):
     summary: str = Field(max_length=MAX_MEMORY_CONTENT_CHARS)
     user_message: str | None = Field(default=None, max_length=MAX_MEMORY_CONTENT_CHARS)
     payload: dict[str, Any] | None = None
-    idempotency_key: str | None = None
+    idempotency_key: str | None = Field(default=None, max_length=128)
+
+    @field_validator("payload")
+    @classmethod
+    def _bound_payload(cls, value: dict[str, Any] | None) -> dict[str, Any] | None:
+        if value is None:
+            return None
+        encoded = json.dumps(value, ensure_ascii=False)
+        if len(encoded) > _MAX_HANDOFF_PAYLOAD_CHARS:
+            raise ValueError(
+                f"payload JSON must be at most {_MAX_HANDOFF_PAYLOAD_CHARS} characters"
+            )
+        return value
 
 
 def format_handoff_note(
@@ -88,21 +103,36 @@ async def _load_idempotent(
 
 async def _store_idempotent(
     db: AsyncConnection, tenant_id: str | None, key: str, response: dict
-) -> None:
-    await db.execute(
-        text(
-            "INSERT INTO handoff_idempotency (tenant_id, idempotency_key, response) "
-            "VALUES (CAST(:t AS uuid), :k, CAST(:r AS jsonb)) "
-            "ON CONFLICT DO NOTHING"
+) -> bool:
+    """Insert idempotent response. Returns False if another writer won the race."""
+    params = {"t": tenant_id, "k": key, "r": json.dumps(response)}
+    if tenant_id:
+        result = await db.execute(
+            text(
+                "INSERT INTO handoff_idempotency (tenant_id, idempotency_key, response) "
+                "SELECT CAST(:t AS uuid), :k, CAST(:r AS jsonb) "
+                "WHERE NOT EXISTS ("
+                "  SELECT 1 FROM handoff_idempotency "
+                "  WHERE tenant_id = CAST(:t AS uuid) AND idempotency_key = :k"
+                ") "
+                "RETURNING id"
+            ),
+            params,
         )
-        if tenant_id
-        else text(
-            "INSERT INTO handoff_idempotency (tenant_id, idempotency_key, response) "
-            "VALUES (NULL, :k, CAST(:r AS jsonb)) "
-            "ON CONFLICT DO NOTHING"
-        ),
-        {"t": tenant_id, "k": key, "r": json.dumps(response)},
-    )
+    else:
+        result = await db.execute(
+            text(
+                "INSERT INTO handoff_idempotency (tenant_id, idempotency_key, response) "
+                "SELECT NULL, :k, CAST(:r AS jsonb) "
+                "WHERE NOT EXISTS ("
+                "  SELECT 1 FROM handoff_idempotency "
+                "  WHERE tenant_id IS NULL AND idempotency_key = :k"
+                ") "
+                "RETURNING id"
+            ),
+            params,
+        )
+    return result.fetchone() is not None
 
 
 @router.post("/v1/handoffs")
@@ -119,7 +149,7 @@ async def create_handoff(
     except ValueError as e:
         raise SoulOSProblem(SOUL_INVALID, 422, str(e)) from e
 
-    tenant_id = parse_tenant_uuid(account.account_id)
+    tenant_id = require_tenant_uuid(account.account_id)
     if payload.idempotency_key:
         cached = await _load_idempotent(db, tenant_id, payload.idempotency_key)
         if cached:
@@ -165,5 +195,10 @@ async def create_handoff(
         "shared_memory_id": shared_id,
     }
     if payload.idempotency_key:
-        await _store_idempotent(db, tenant_id, payload.idempotency_key, response)
+        stored = await _store_idempotent(db, tenant_id, payload.idempotency_key, response)
+        if not stored:
+            # Lost race: return the winner's cached response when available.
+            cached = await _load_idempotent(db, tenant_id, payload.idempotency_key)
+            if cached:
+                return cached
     return response

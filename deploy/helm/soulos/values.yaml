@@ -10,7 +10,7 @@ kernel:
   service:
     port: 8000
   resources: {}
-  env:
+    env:
     # Production / public: set "1" and enable gateway (kernel rejects direct HTTP without gateway headers).
     # Local/dev chart default stays "0".
     REQUIRE_AUTH: "0"
@@ -18,6 +18,13 @@ kernel:
     INFERENCE_MODE: embeddings_only
     # Set >0 and enable purgeCron for session + turn_session TTL cleanup.
     MEMORY_SESSION_TTL_SECONDS: "0"
+    # Optional ML / retrieval knobs (kernel code defaults apply when empty).
+    MEMORY_MAX_DISTANCE: ""
+    MEMORY_RRF_K: ""
+    MSV_EMA_ALPHA: ""
+    DEFAULT_UNCERTAINTY_TRIGGER: ""
+    SOULOS_ROUTER_LOG_PATH: ""
+    CAPABILITY_CACHE_TTL_SECONDS: ""
     OTEL_EXPORTER_OTLP_ENDPOINT: ""
     SOULOS_OTEL_ENABLED: "0"
   databaseUrl: "postgresql+asyncpg://postgres:changeme@postgresql:5432/soulos"

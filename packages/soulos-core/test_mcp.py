@@ -335,6 +335,16 @@ async def test_mcp_lists_rest_parity_tools():
     } <= names
 
 
+def test_mcp_server_initialization_advertises_capabilities():
+    from mcp_server import mcp_server
+
+    opts = mcp_server.create_initialization_options()
+    caps = opts.capabilities
+    assert caps.tools is not None
+    assert caps.prompts is not None
+    assert caps.resources is not None
+
+
 @pytest.mark.asyncio
 async def test_mcp_retrieve_memory_passes_session_id():
     from mcp_server import handle_call_tool
