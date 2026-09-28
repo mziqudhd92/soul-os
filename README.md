@@ -2,7 +2,8 @@
 
 **Identity + memory sidecar for agents you already run** — validated personality (HEXACO MSV), hybrid episodic memory (pgvector + FTS), constrained MSV drift with trait→prompt directives, feature-based dual-process routing, and Phase B shared conversation memory / handoffs. Your existing LLM (Bedrock, OpenAI, LiteLLM) keeps generation while SoulOS owns persona, recall, and state.
 
-Give your bot a **soul file** instead of a fragile system prompt. Primary path: **`ensure_avatar → prepare → your LLM → complete`**. Full SSE chat, MCP, and Soul Studio remain supported.
+Give your bot a **soul file** instead of a fragile system prompt. Primary path: 
+**`ensure_avatar → prepare → your LLM → complete`**. Full SSE chat, MCP, and Soul Studio remain supported.
 
 <p align="center">
   <a href="https://github.com/mziqudhd92/soul-os/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mziqudhd92/soul-os/ci.yml?branch=main&label=CI" alt="CI"/></a>
