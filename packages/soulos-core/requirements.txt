@@ -92,7 +92,7 @@ rpds-py==2026.6.3
     # via
     #   jsonschema
     #   referencing
-sqlalchemy==2.0.54
+sqlalchemy==2.1.1
     # via soulos-core (pyproject.toml)
 sse-starlette==3.4.11
     # via mcp
