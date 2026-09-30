@@ -34,7 +34,7 @@ pydantic-core==2.49.0
     # via pydantic
 redis==8.1.0
     # via soulos-gateway (pyproject.toml)
-starlette==1.6.0
+starlette==1.7.0
     # via fastapi
 typing-extensions==4.16.0
     # via
