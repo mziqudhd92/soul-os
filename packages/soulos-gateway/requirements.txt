@@ -30,7 +30,7 @@ idna==3.20
     #   httpx
 pydantic==2.13.5
     # via fastapi
-pydantic-core==2.49.0
+pydantic-core==2.50.1
     # via pydantic
 redis==8.1.0
     # via soulos-gateway (pyproject.toml)
