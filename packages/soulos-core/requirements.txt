@@ -122,7 +122,7 @@ typing-inspection==0.4.4
     #   mcp
     #   pydantic
     #   pydantic-settings
-uvicorn==0.53.0
+uvicorn==0.54.0
     # via
     #   soulos-core (pyproject.toml)
     #   mcp
