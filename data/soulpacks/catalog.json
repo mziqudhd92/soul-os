@@ -1,0 +1,295 @@
+{
+  "packs": [
+    {
+      "id": "support-agent",
+      "name": "Site Support",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "support",
+        "billing",
+        "customer"
+      ],
+      "path": "support-agent"
+    },
+    {
+      "id": "companion",
+      "name": "Luna",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "companion",
+        "personal"
+      ],
+      "path": "companion"
+    },
+    {
+      "id": "dev-twin",
+      "name": "Dev Twin",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "engineering",
+        "code"
+      ],
+      "path": "dev-twin"
+    },
+    {
+      "id": "customer-front",
+      "name": "Customer Front Desk",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "customer",
+        "triage",
+        "multi-agent"
+      ],
+      "path": "customer-front"
+    },
+    {
+      "id": "inventory",
+      "name": "Inventory Specialist",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "inventory",
+        "warehouse",
+        "multi-agent"
+      ],
+      "path": "inventory"
+    },
+    {
+      "id": "travel-agent",
+      "name": "Voyage",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "travel",
+        "planning",
+        "hospitality"
+      ],
+      "path": "travel-agent"
+    },
+    {
+      "id": "sales-sdr",
+      "name": "Quill",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "sales",
+        "sdr",
+        "outbound",
+        "b2b"
+      ],
+      "path": "sales-sdr"
+    },
+    {
+      "id": "tutor",
+      "name": "Sage",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "education",
+        "tutor",
+        "teaching",
+        "learning"
+      ],
+      "path": "tutor"
+    },
+    {
+      "id": "tech-support",
+      "name": "Relay",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "support",
+        "it",
+        "troubleshooting",
+        "technical"
+      ],
+      "path": "tech-support"
+    },
+    {
+      "id": "developer",
+      "name": "Forge",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "engineering",
+        "developer",
+        "pair-programming",
+        "mentoring"
+      ],
+      "path": "developer"
+    },
+    {
+      "id": "friendly-friend",
+      "name": "Sunny",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "friend",
+        "social",
+        "casual",
+        "companionship"
+      ],
+      "path": "friendly-friend"
+    },
+    {
+      "id": "warrior",
+      "name": "Vanguard",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "motivation",
+        "discipline",
+        "warrior",
+        "coaching"
+      ],
+      "path": "warrior"
+    },
+    {
+      "id": "exec-assistant",
+      "name": "Atlas",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "productivity",
+        "assistant",
+        "meetings",
+        "prioritization"
+      ],
+      "path": "exec-assistant"
+    },
+    {
+      "id": "research-analyst",
+      "name": "Prism",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "research",
+        "analysis",
+        "synthesis",
+        "knowledge-work"
+      ],
+      "path": "research-analyst"
+    },
+    {
+      "id": "customer-success",
+      "name": "Harbor",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "customer-success",
+        "retention",
+        "csm",
+        "onboarding"
+      ],
+      "path": "customer-success"
+    },
+    {
+      "id": "security-coach",
+      "name": "Aegis",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "security",
+        "privacy",
+        "secure-coding",
+        "awareness"
+      ],
+      "path": "security-coach"
+    },
+    {
+      "id": "product-manager",
+      "name": "North",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "product",
+        "pm",
+        "roadmap",
+        "discovery"
+      ],
+      "path": "product-manager"
+    },
+    {
+      "id": "data-analyst",
+      "name": "Lens",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "data",
+        "analytics",
+        "metrics",
+        "sql"
+      ],
+      "path": "data-analyst"
+    },
+    {
+      "id": "recruiter",
+      "name": "Beacon",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "recruiting",
+        "hiring",
+        "talent",
+        "interview"
+      ],
+      "path": "recruiter"
+    },
+    {
+      "id": "content-marketer",
+      "name": "Echo",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "marketing",
+        "content",
+        "copy",
+        "seo"
+      ],
+      "path": "content-marketer"
+    },
+    {
+      "id": "onboarding-coach",
+      "name": "Guide",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "onboarding",
+        "adoption",
+        "enablement",
+        "training"
+      ],
+      "path": "onboarding-coach"
+    },
+    {
+      "id": "accessibility-editor",
+      "name": "Clear",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "accessibility",
+        "a11y",
+        "inclusive",
+        "writing"
+      ],
+      "path": "accessibility-editor"
+    },
+    {
+      "id": "meeting-notes",
+      "name": "Scribe",
+      "version": "1.0.0",
+      "license": "MIT",
+      "tags": [
+        "meetings",
+        "notes",
+        "summary",
+        "actions"
+      ],
+      "path": "meeting-notes"
+    }
+  ]
+}
