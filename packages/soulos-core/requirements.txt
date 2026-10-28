@@ -59,7 +59,7 @@ mcp==2.2.0
     # via soulos-core (pyproject.toml)
 mcp-types==2.2.0
     # via mcp
-opentelemetry-api==1.45.0
+opentelemetry-api==1.45.1
     # via mcp
 pgvector==0.5.0
     # via soulos-core (pyproject.toml)
