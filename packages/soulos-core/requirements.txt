@@ -11,7 +11,7 @@ anyio==4.15.1
     #   mcp
     #   sse-starlette
     #   starlette
-asyncpg==0.31.0
+asyncpg==0.32.0
     # via soulos-core (pyproject.toml)
 attrs==26.1.0
     # via
