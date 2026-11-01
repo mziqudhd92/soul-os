@@ -28,7 +28,7 @@ idna==3.20
     # via
     #   anyio
     #   httpx
-pydantic==2.13.5
+pydantic==2.14.1
     # via fastapi
 pydantic-core==2.50.1
     # via pydantic
