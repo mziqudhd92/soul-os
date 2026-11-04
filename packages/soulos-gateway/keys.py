@@ -18,6 +18,8 @@ class ApiKeyRecord:
     account_id: str
     tier: str = "cloud"
     rate_limit_per_minute: int = 120
+    # Forwarded to kernel as X-SoulOS-Scopes (e.g. mcp:admin:msv_write).
+    scopes: tuple[str, ...] = ()
 
 
 def hash_api_key(token: str) -> str:
@@ -26,11 +28,22 @@ def hash_api_key(token: str) -> str:
     return f"sha256:{digest}"
 
 
+def _parse_scopes(raw) -> tuple[str, ...]:
+    if raw is None:
+        return ()
+    if isinstance(raw, str):
+        return tuple(s.strip() for s in raw.split(",") if s.strip())
+    if isinstance(raw, (list, tuple)):
+        return tuple(str(s).strip() for s in raw if str(s).strip())
+    return ()
+
+
 def _record_from_meta(meta: dict) -> ApiKeyRecord:
     return ApiKeyRecord(
         account_id=meta["account_id"],
         tier=meta.get("tier", "cloud"),
         rate_limit_per_minute=int(meta.get("rate_limit_per_minute", 120)),
+        scopes=_parse_scopes(meta.get("scopes")),
     )
 
 

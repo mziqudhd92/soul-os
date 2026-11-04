@@ -33,10 +33,10 @@ def contract_app():
     app.dependency_overrides[get_embedder] = MockEmbedder
     app.dependency_overrides[get_llm_service] = lambda: ContractLLMService()
     patches = [
-        patch("routes.hybrid.ensure_turn_session", mem_ensure),
+        patch("runtime.hybrid_service.ensure_turn_session", mem_ensure),
         patch("runtime.hybrid_complete.get_turn_session", mem_get),
         patch("runtime.hybrid_complete.advance_turn_session", mem_advance),
-        patch("routes.hybrid.store_turn_success_response", mem_store_success),
+        patch("runtime.hybrid_service.store_turn_success_response", mem_store_success),
     ]
     for p in patches:
         p.start()

@@ -1,6 +1,6 @@
 # MCP workflow (~10 minutes)
 
-> **Shows:** Cursor MCP over HTTP SSE (ingest → retrieve)
+> **Shows:** Cursor MCP over HTTP SSE (ingest → retrieve); Streamable HTTP `/mcp` also supported
 > **Time:** ~10 min
 > **Prerequisites:** full-stack kernel on `:8000` (`docker compose up --build`)
 
@@ -104,8 +104,9 @@ Chat streaming (`POST /chat/generate`) is **not** on MCP — use REST or `@soulo
 | MCP connection failed | Kernel on :8000? `curl http://localhost:8000/health` |
 | Ingest/retrieve errors | Ollama up? embeddings need `nomic-embed-text` |
 | 403 on tools | Cloud mode — gateway URL + Bearer API key |
+| Admin tool missing (`update_cognitive_state`) | Local: `SOULOS_MCP_ADMIN_TOOLS=1`; Cloud: API-key `"scopes": ["mcp:admin:msv_write"]` |
 | Wrong bot data | Confirm `bot_id` matches deployed avatar |
 
 ---
 
-**Docs:** [MCP guide](../../docs/guides/mcp.md) · [MCP tools](../../docs/reference/mcp-tools.md) · [Tutorials hub](../../docs/tutorials/README.md)
+**Docs:** [MCP guide](../../docs/guides/mcp.md) · [MCP tools](../../docs/reference/mcp-tools.md) · [Gateway headers](../../docs/guides/gateway-headers.md) · [Tutorials hub](../../docs/tutorials/README.md)

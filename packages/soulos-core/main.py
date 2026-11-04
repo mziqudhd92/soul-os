@@ -27,7 +27,8 @@ class McpAuthMiddleware(BaseHTTPMiddleware):
     """Apply the same account context rules as HTTP routes to MCP endpoints."""
 
     async def dispatch(self, request: Request, call_next):
-        if request.url.path.startswith("/mcp/"):
+        path = request.url.path
+        if path == "/mcp" or path.startswith("/mcp/"):
             account_id = request.headers.get(ACCOUNT_ID_HEADER)
             gateway_secret = request.headers.get(GATEWAY_SECRET_HEADER)
             try:
@@ -73,7 +74,26 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error("Boot memory sync failed: %s", e)
 
+    try:
+        from runtime.log_redact import install_secret_redact_filter
+        from runtime.mcp_client import (
+            OutboundMcpClient,
+            load_outbound_config_from_env,
+            set_outbound_client,
+        )
+
+        install_secret_redact_filter()
+        set_outbound_client(OutboundMcpClient(config=load_outbound_config_from_env()))
+    except Exception as e:
+        logger.error("Outbound MCP client init failed: %s", e)
+
     yield
+    try:
+        from runtime.mcp_client import set_outbound_client
+
+        set_outbound_client(None)
+    except Exception:
+        pass
     logger.info("Shutting down SoulOS Kernel...")
 
 

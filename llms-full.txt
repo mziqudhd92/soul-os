@@ -76,6 +76,13 @@ SignalPR (https://signalpr.pro/) — hybrid sidecar. Aeterna (https://helloaeter
 
 Playbooks: [docs/playbooks/signalpr-hybrid.md](docs/playbooks/signalpr-hybrid.md) · [docs/playbooks/aeterna-memory.md](docs/playbooks/aeterna-memory.md)
 
+## MCP (summary)
+
+- SSE `/mcp/sse` · Streamable HTTP `/mcp` · Cloud via gateway Bearer key
+- Admin force MSV: API-key `scopes: ["mcp:admin:msv_write"]` → `X-SoulOS-Scopes` (not client-forgeable through gateway)
+- Optional outbound client: `SOULOS_MCP_CLIENT` + `SOULOS_MCP_SERVERS_JSON` with SSRF + `schema_sha256` pins
+- Guides: [docs/guides/mcp.md](docs/guides/mcp.md) · [docs/reference/mcp-tools.md](docs/reference/mcp-tools.md) · [docs/guides/gateway-headers.md](docs/guides/gateway-headers.md)
+
 ## Doc map
 
 See llms.txt for linked sources. Human index: docs/README.md.

@@ -70,10 +70,13 @@ Key file format:
   "sk_live_…": {
     "account_id": "uuid-of-tenant",
     "tier": "cloud",
-    "rate_limit_per_minute": 120
+    "rate_limit_per_minute": 120,
+    "scopes": ["mcp:admin:msv_write"]
   }
 }
 ```
+
+Optional `scopes` is forwarded to the kernel as `X-SoulOS-Scopes`. Clients cannot set this header themselves — the gateway strips any inbound value and injects only scopes from the key record.
 
 ### Kernel (Cloud mode)
 
@@ -86,6 +89,7 @@ Headers injected by gateway (do not set from clients):
 
 - `X-SoulOS-Account-Id` — tenant UUID
 - `X-SoulOS-Gateway-Secret` — internal auth
+- `X-SoulOS-Scopes` — comma-separated scopes from the API key (e.g. `mcp:admin:msv_write`)
 
 ## Tenant isolation
 
@@ -120,7 +124,9 @@ Production (no local gateway):
 https://api.soulos.dev/mcp/sse
 ```
 
-Same Bearer key as the TypeScript SDK. MCP tools (`ingest_memory`, `retrieve_memory`, `register_avatar`, etc.) are tenant-scoped via the gateway account header. See [MCP guide](../guides/mcp.md) and [examples/mcp](../../examples/mcp/README.md).
+Same Bearer key as the TypeScript SDK. MCP tools (`ingest_memory`, `retrieve_memory`, `register_avatar`, etc.) are tenant-scoped via the gateway account header. Streamable HTTP (`/mcp`) is also proxied. See [MCP guide](../guides/mcp.md) and [examples/mcp](../../examples/mcp/README.md).
+
+To allow admin force MSV via MCP (`update_cognitive_state`), add `"scopes": ["mcp:admin:msv_write"]` on that key — never grant this to untrusted customers.
 
 ## Security
 
@@ -128,3 +134,4 @@ Same Bearer key as the TypeScript SDK. MCP tools (`ingest_memory`, `retrieve_mem
 - Do not expose kernel port 8000 on public networks when `REQUIRE_AUTH=1`
 - Issue per-customer API keys; map to unique `account_id` UUIDs
 - MCP endpoints have the same privileges as REST — protect gateway keys accordingly
+- Privileged headers (`X-SoulOS-Account-Id`, `X-SoulOS-Gateway-Secret`, `X-SoulOS-Scopes`) are gateway-injected only; see [gateway headers](../guides/gateway-headers.md)

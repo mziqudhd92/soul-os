@@ -79,7 +79,9 @@ Errors use `Content-Type: application/problem+json` with `type`, `title`, `statu
 ## Secondary paths
 
 - [docs/guides/python-bot.md](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/docs/guides/python-bot.md): Full-chat Python bot.
-- [docs/guides/mcp.md](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/docs/guides/mcp.md): MCP at `/mcp/sse`.
+- [docs/guides/mcp.md](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/docs/guides/mcp.md): MCP SSE `/mcp/sse` + Streamable HTTP `/mcp`; admin scopes; outbound client.
+- [docs/reference/mcp-tools.md](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/docs/reference/mcp-tools.md): MCP tools, resources, prompts, schema pins.
+- [docs/guides/gateway-headers.md](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/docs/guides/gateway-headers.md): Trusted headers + API-key `scopes` → `X-SoulOS-Scopes`.
 - [docs/reference/api.md](https://raw.githubusercontent.com/mziqudhd92/soul-os/main/docs/reference/api.md): REST + SSE reference.
 
 ## Reference

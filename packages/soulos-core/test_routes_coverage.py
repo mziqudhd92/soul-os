@@ -67,7 +67,7 @@ async def test_reflect_state_sync_and_async():
         msv=default_msv_dict(), latency_ms=5, reasoning_tokens=1
     )
     with patch(
-        "routes.chat.run_system_2_reflector",
+        "runtime.cognitive_msv.run_system_2_reflector",
         new_callable=AsyncMock,
         return_value=result,
     ):

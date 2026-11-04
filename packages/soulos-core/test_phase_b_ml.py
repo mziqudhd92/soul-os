@@ -225,22 +225,24 @@ async def test_conversation_memory_and_handoff_routes():
         assert "hits" in r3.json()
 
         with (
-            patch("routes.handoffs.verify_bot_access", new_callable=AsyncMock),
+            patch("runtime.handoffs.verify_bot_access", new_callable=AsyncMock),
             patch(
-                "routes.handoffs.ingest_memory_record", new_callable=AsyncMock
+                "runtime.handoffs.ingest_memory_record", new_callable=AsyncMock
             ),
             patch(
-                "routes.handoffs.ingest_conversation_memory",
+                "runtime.handoffs.ingest_conversation_memory",
                 new_callable=AsyncMock,
                 return_value="shared-1",
             ),
             patch(
-                "routes.handoffs._load_idempotent",
+                "runtime.handoffs._load_idempotent",
                 new_callable=AsyncMock,
                 return_value=None,
             ),
             patch(
-                "routes.handoffs._store_idempotent", new_callable=AsyncMock
+                "runtime.handoffs._store_idempotent",
+                new_callable=AsyncMock,
+                return_value=True,
             ),
         ):
             h = await ac.post(
@@ -271,9 +273,9 @@ async def test_handoff_idempotent_replay():
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
         with (
-            patch("routes.handoffs.verify_bot_access", new_callable=AsyncMock),
+            patch("runtime.handoffs.verify_bot_access", new_callable=AsyncMock),
             patch(
-                "routes.handoffs._load_idempotent",
+                "runtime.handoffs._load_idempotent",
                 new_callable=AsyncMock,
                 return_value=cached,
             ),

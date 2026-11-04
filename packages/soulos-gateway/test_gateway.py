@@ -117,6 +117,63 @@ async def test_gateway_proxies_mcp_sse_as_stream():
     mock_client.send.assert_awaited_once()
 
 
+@pytest.mark.asyncio
+async def test_gateway_passes_mcp_session_id_and_unbuffers():
+    demo_key = "sk_test_demo_key_for_local_dev"
+
+    async def aiter_bytes():
+        yield b'{"jsonrpc":"2.0","result":{}}'
+
+    mock_upstream = MagicMock()
+    mock_upstream.status_code = 200
+    mock_upstream.headers = httpx.Headers(
+        {
+            "content-type": "application/json",
+            "mcp-session-id": "sess-abc",
+        }
+    )
+    mock_upstream.aiter_bytes = aiter_bytes
+    mock_upstream.aclose = AsyncMock()
+
+    mock_client = MagicMock()
+    mock_client.build_request = MagicMock(return_value=MagicMock())
+    mock_client.send = AsyncMock(return_value=mock_upstream)
+    mock_client.aclose = AsyncMock()
+
+    with patch("main.httpx.AsyncClient", return_value=mock_client):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+            response = await ac.post(
+                "/mcp",
+                headers={
+                    "Authorization": f"Bearer {demo_key}",
+                    "Mcp-Session-Id": "sess-abc",
+                },
+                json={"jsonrpc": "2.0", "id": 1, "method": "initialize"},
+            )
+
+    assert response.status_code == 200
+    assert response.headers.get("mcp-session-id") == "sess-abc"
+    assert response.headers.get("x-accel-buffering") == "no"
+    # Forwarded request should include session header from client
+    built_headers = mock_client.build_request.call_args.kwargs.get("headers") or {}
+    assert built_headers.get("Mcp-Session-Id") == "sess-abc" or any(
+        str(k).lower() == "mcp-session-id" for k in built_headers
+    )
+
+
+def test_gateway_mcp_stream_cap():
+    from main import _MCP_MAX_STREAMS, _mcp_stream_acquire, _mcp_stream_counts, _mcp_stream_release
+
+    _mcp_stream_counts.clear()
+    key = "cap-test"
+    for _ in range(_MCP_MAX_STREAMS):
+        assert _mcp_stream_acquire(key) is True
+    assert _mcp_stream_acquire(key) is False
+    _mcp_stream_release(key)
+    assert _mcp_stream_acquire(key) is True
+    _mcp_stream_counts.clear()
+
+
 def test_hash_api_key_format():
     from keys import hash_api_key
 
@@ -135,6 +192,119 @@ def test_lookup_api_key_hashes_bearer_token():
     assert hash_api_key("sk_test_demo_key_for_local_dev") in keys_module.KEY_STORE
     assert "sk_test_demo_key_for_local_dev" not in keys_module.KEY_STORE
     assert lookup_api_key("sk_invalid") is None
+
+
+def test_api_key_record_parses_scopes():
+    from keys import _record_from_meta
+
+    rec = _record_from_meta(
+        {
+            "account_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+            "scopes": ["mcp:admin:msv_write", "other"],
+        }
+    )
+    assert rec.scopes == ("mcp:admin:msv_write", "other")
+    rec2 = _record_from_meta(
+        {
+            "account_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+            "scopes": "mcp:admin:msv_write, other",
+        }
+    )
+    assert rec2.scopes == ("mcp:admin:msv_write", "other")
+
+
+@pytest.mark.asyncio
+async def test_gateway_injects_scopes_and_strips_client_scopes():
+    from config import ACCOUNT_ID_HEADER, GATEWAY_SECRET_HEADER, SCOPES_HEADER
+    from keys import hash_api_key
+
+    admin_key = "sk_admin_scopes_test"
+    old_store = keys_module.KEY_STORE
+    keys_module.KEY_STORE = {
+        hash_api_key(admin_key): keys_module._record_from_meta(
+            {
+                "account_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+                "tier": "cloud",
+                "rate_limit_per_minute": 120,
+                "scopes": ["mcp:admin:msv_write"],
+            }
+        ),
+        hash_api_key("sk_test_demo_key_for_local_dev"): keys_module._record_from_meta(
+            {
+                "account_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+                "tier": "cloud",
+                "rate_limit_per_minute": 120,
+            }
+        ),
+    }
+    try:
+        mock_upstream = MagicMock()
+        mock_upstream.status_code = 200
+        mock_upstream.content = b'{"ok":true}'
+        mock_upstream.headers = httpx.Headers({"content-type": "application/json"})
+
+        mock_client = MagicMock()
+        mock_client.request = AsyncMock(return_value=mock_upstream)
+        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_client.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("main.httpx.AsyncClient", return_value=mock_client):
+            async with AsyncClient(
+                transport=ASGITransport(app=app), base_url="http://test"
+            ) as ac:
+                response = await ac.get(
+                    "/v1/avatars",
+                    headers={
+                        "Authorization": f"Bearer {admin_key}",
+                        SCOPES_HEADER: "mcp:admin:msv_write,evil",
+                        ACCOUNT_ID_HEADER: "00000000-0000-0000-0000-000000000000",
+                        GATEWAY_SECRET_HEADER: "forged-secret",
+                    },
+                )
+
+        assert response.status_code == 200
+        forwarded = mock_client.request.await_args.kwargs.get("headers") or {}
+        lower = {str(k).lower(): v for k, v in forwarded.items()}
+        assert lower.get(SCOPES_HEADER.lower()) == "mcp:admin:msv_write"
+        assert lower.get(ACCOUNT_ID_HEADER.lower()) == (
+            "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+        )
+        assert lower.get(GATEWAY_SECRET_HEADER.lower()) != "forged-secret"
+    finally:
+        keys_module.KEY_STORE = old_store
+
+
+@pytest.mark.asyncio
+async def test_gateway_does_not_forward_client_forged_scopes_without_key_scopes():
+    from config import SCOPES_HEADER
+
+    demo_key = "sk_test_demo_key_for_local_dev"
+    mock_upstream = MagicMock()
+    mock_upstream.status_code = 200
+    mock_upstream.content = b'{"ok":true}'
+    mock_upstream.headers = httpx.Headers({"content-type": "application/json"})
+
+    mock_client = MagicMock()
+    mock_client.request = AsyncMock(return_value=mock_upstream)
+    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+    mock_client.__aexit__ = AsyncMock(return_value=False)
+
+    with patch("main.httpx.AsyncClient", return_value=mock_client):
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as ac:
+            response = await ac.get(
+                "/v1/avatars",
+                headers={
+                    "Authorization": f"Bearer {demo_key}",
+                    SCOPES_HEADER: "mcp:admin:msv_write",
+                },
+            )
+
+    assert response.status_code == 200
+    forwarded = mock_client.request.await_args.kwargs.get("headers") or {}
+    lower = {str(k).lower(): v for k, v in forwarded.items()}
+    assert SCOPES_HEADER.lower() not in lower
 
 
 def test_load_key_store_accepts_prehashed_keys(monkeypatch):

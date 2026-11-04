@@ -15,6 +15,14 @@ from config import (
 )
 
 HEXACO_KEYS = ("H", "E", "X", "A", "C", "O")
+HEXACO_TRAIT_NAMES = {
+    "H": "honesty_humility",
+    "E": "emotionality",
+    "X": "extraversion",
+    "A": "agreeableness",
+    "C": "conscientiousness",
+    "O": "openness",
+}
 MORAL_KEYS = (
     "care_harm",
     "fairness_cheating",
@@ -23,6 +31,14 @@ MORAL_KEYS = (
     "sanctity_degradation",
 )
 DRIVE_KEYS = ("curiosity", "autonomy", "social_approval")
+
+# Discrete psychometric shifts for LLM-facing tools (deterministic mapping).
+SEMANTIC_SHIFT_DELTAS: dict[str, float] = {
+    "slight_increase": 0.05,
+    "moderate_increase": 0.10,
+    "slight_decrease": -0.05,
+    "moderate_decrease": -0.10,
+}
 
 
 def _clamp(value: float, lo: float, hi: float) -> float:
@@ -144,3 +160,90 @@ def merge_reflected_msv(
         retrieval_weak=retrieval_weak,
     )
     return clamp_msv(out)
+
+
+def apply_semantic_hexaco_shift(
+    current_msv: dict[str, Any],
+    *,
+    trait: str,
+    shift: str,
+    max_step: float = MSV_MAX_STEP,
+) -> dict[str, Any]:
+    """Apply a categorical HEXACO shift (H/E/X/A/C/O) with step clamping."""
+    key = trait.strip().upper() if len(trait.strip()) == 1 else trait.strip()
+    # Accept letter keys or full names mapped back to letters.
+    if key not in HEXACO_KEYS:
+        for letter, name in HEXACO_TRAIT_NAMES.items():
+            if key.lower() == name or key.lower() == letter.lower():
+                key = letter
+                break
+    if key not in HEXACO_KEYS:
+        raise ValueError(
+            f"Invalid MSV key {trait!r}. Valid HEXACO keys are: "
+            + ", ".join(f"{k} ({HEXACO_TRAIT_NAMES[k]})" for k in HEXACO_KEYS)
+        )
+    if shift not in SEMANTIC_SHIFT_DELTAS:
+        raise ValueError(
+            f"Invalid shift {shift!r}. Valid shifts: "
+            + ", ".join(sorted(SEMANTIC_SHIFT_DELTAS))
+        )
+    delta = _clamp(SEMANTIC_SHIFT_DELTAS[shift], -max_step, max_step)
+    out = clamp_msv(current_msv)
+    prev = float(out["hexaco"][key])
+    out["hexaco"][key] = _clamp(prev + delta, -1.0, 1.0)
+    return out
+
+
+def hexaco_delta(
+    baseline: dict[str, Any], current: dict[str, Any]
+) -> dict[str, float]:
+    b = clamp_msv(baseline)["hexaco"]
+    c = clamp_msv(current)["hexaco"]
+    return {k: round(float(c[k]) - float(b[k]), 4) for k in HEXACO_KEYS}
+
+
+def behavioral_summary_from_drift(
+    baseline: dict[str, Any], current: dict[str, Any], *, threshold: float = 0.08
+) -> str:
+    """Natural-language stance directives from significant HEXACO drift."""
+    deltas = hexaco_delta(baseline, current)
+    lines: list[str] = []
+    hints = {
+        "H": (
+            "elevated honesty/humility: prefer candid, principle-led phrasing",
+            "reduced honesty/humility: watch for cynicism; stay factual",
+        ),
+        "E": (
+            "elevated emotionality/stress: use shorter sentences and higher care",
+            "reduced emotionality: stay calm and steady; avoid over-soothing",
+        ),
+        "X": (
+            "elevated extraversion: more warm, outgoing energy",
+            "reduced extraversion: keep replies concise and less chatty",
+        ),
+        "A": (
+            "elevated agreeableness: collaborative and accommodating tone",
+            "reduced agreeableness: firmer boundaries; avoid reflexive yes",
+        ),
+        "C": (
+            "elevated conscientiousness: emphasize structure, checklists, follow-through",
+            "reduced conscientiousness: avoid over-promising precision",
+        ),
+        "O": (
+            "elevated openness: explore options and creative framings",
+            "reduced openness: prefer proven, concrete answers",
+        ),
+    }
+    for key in HEXACO_KEYS:
+        d = deltas[key]
+        if abs(d) < threshold:
+            continue
+        up, down = hints[key]
+        name = HEXACO_TRAIT_NAMES[key]
+        if d > 0:
+            lines.append(f"{name} ({key} {d:+.2f}): {up}")
+        else:
+            lines.append(f"{name} ({key} {d:+.2f}): {down}")
+    if not lines:
+        return "No significant HEXACO drift vs baseline; keep baseline persona."
+    return " | ".join(lines)

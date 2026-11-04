@@ -62,6 +62,18 @@ Full blast-radius table and Anthropic MCP alignment notes: see Phase 4 section b
 | `memory://episodic/{bot_id}` | Memories | Read resource | Resource URI pattern |
 | Chat streaming | — | **Not on MCP** | Use REST/SDK — intentional gap |
 
-**Gaps vs Anthropic MCP expectations:** no per-tool rate limits in kernel; no resource subscription lifecycle; SSE transport requires sticky sessions behind some load balancers. Document these in deployment runbooks.
+**Gaps vs Anthropic MCP expectations:** no resource subscription lifecycle; Streamable HTTP sessions are in-memory (use sticky routing or single worker for `/mcp`).
+
+### Bidirectional MCP threat model (hardened)
+
+| Threat | Control |
+|--------|---------|
+| Cross-tenant IDOR via `bot_id` in tools/resources | Task-local `SecurityContext` (ContextVar) + `verify_bot_access`; strict ID/URI validation (`runtime/mcp_ids.py`) |
+| Gateway Host mismatch | `SOULOS_MCP_HOST_ALLOWLIST` empty by default (docker/gateway Hostnames work); set explicitly for browser-facing kernels |
+| MCP episodic/conversation writes | Stored wrapped as `<untrusted_memory trust_level="external_mcp">` |
+| `confirm_force`-style LLM bypass | Admin MSV write via `mcp:admin:msv_write` (gateway API-key `scopes` → `X-SoulOS-Scopes`) / `SOULOS_MCP_ADMIN_TOOLS`; tool omitted from `list_tools` otherwise; clients cannot forge scopes through the gateway |
+| Memory poisoning / handoff escalation | MCP writes tagged `trust_level=external_mcp`; `allowed_handoff_targets` graph; consolidate `too_early` + rate limits |
+| Streamable HTTP session hijack | `Mcp-Session-Id` bound to auth principal hash; Origin/Host allowlists; 256KB body cap; gateway stream caps |
+| Outbound SSRF / rug-pull | DNS-then-block private/link-local; `follow_redirects=False`; `schema_sha256` pin re-checked via `tools/list` before each `tools/call`; `description_override`; untrusted output wrap; `auth_env_key` |
 
 **Never expose `:8000` with `REQUIRE_AUTH=0` publicly.**

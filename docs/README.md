@@ -39,7 +39,7 @@ Primary integration for apps that already call an LLM (Bedrock, OpenAI, LiteLLM,
 | Use case | Best choice | Doc |
 |----------|-------------|-----|
 | Your app already has an LLM + SSE | **Sidecar** (`SoulHybridClient`, `/hybrid/*`) | [Sidecar guide](guides/sidecar-integration.md) · [hybrid-api.md](reference/hybrid-api.md) |
-| IDE agent (Cursor) managing memory / FAQ | **MCP** (`/mcp/sse`) | [MCP guide](guides/mcp.md) · [tool reference](reference/mcp-tools.md) |
+| IDE agent (Cursor) managing memory / FAQ | **MCP** (`/mcp/sse` or `/mcp`) | [MCP guide](guides/mcp.md) · [tool reference](reference/mcp-tools.md) · [gateway headers](guides/gateway-headers.md) |
 | SoulOS streams chat end-to-end | **@soulos/sdk** or REST `/chat/generate` | [Quickstart](getting-started/quickstart.md) · [Python bot](guides/python-bot.md) |
 | Hand-tuning personality JSON | **Soul Studio** (:8765) | [Soul Builder](getting-started/soul-builder.md) |
 

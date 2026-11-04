@@ -81,6 +81,29 @@ MEMORY_BUDGET_SEMANTIC = float(os.getenv("MEMORY_BUDGET_SEMANTIC", "0.2"))
 # Capability query cache TTL (seconds)
 CAPABILITY_CACHE_TTL_SECONDS = float(os.getenv("CAPABILITY_CACHE_TTL_SECONDS", "30"))
 
+# MCP hardening
+SOULOS_MCP_ADMIN_TOOLS = os.getenv("SOULOS_MCP_ADMIN_TOOLS", "0").lower() in (
+    "1",
+    "true",
+    "yes",
+)
+MCP_ORIGIN_ALLOWLIST = [
+    o.strip()
+    for o in os.getenv("SOULOS_MCP_ORIGIN_ALLOWLIST", "").split(",")
+    if o.strip()
+]
+# Empty default: do not enforce Host (gateway/docker use service Hostnames).
+# Set SOULOS_MCP_HOST_ALLOWLIST explicitly for browser-facing kernels.
+MCP_HOST_ALLOWLIST = [
+    h.strip()
+    for h in os.getenv("SOULOS_MCP_HOST_ALLOWLIST", "").split(",")
+    if h.strip()
+]
+MCP_MAX_BODY_BYTES = int(os.getenv("SOULOS_MCP_MAX_BODY_BYTES", str(256 * 1024)))
+MCP_EPISODIC_DEFAULT_LIMIT = int(os.getenv("SOULOS_MCP_EPISODIC_DEFAULT_LIMIT", "50"))
+MCP_EPISODIC_MAX_LIMIT = int(os.getenv("SOULOS_MCP_EPISODIC_MAX_LIMIT", "100"))
+CONSOLIDATE_MIN_CANDIDATES = int(os.getenv("CONSOLIDATE_MIN_CANDIDATES", "4"))
+
 WEAK_GATEWAY_SECRETS = frozenset(
     {DEFAULT_GATEWAY_SECRET, "changeme", "secret", "password", ""}
 )

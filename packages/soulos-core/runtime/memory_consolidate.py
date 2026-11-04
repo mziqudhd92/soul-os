@@ -29,9 +29,14 @@ async def consolidate_memories(
     *,
     session_id: str | None = None,
     limit: int = 8,
+    min_candidates: int = 2,
 ) -> dict[str, Any]:
-    """Select old/low-importance episodics, lock, summarize into one semantic row."""
-    params: dict[str, Any] = {"bot_id": bot_id, "limit": max(2, limit)}
+    """Select old/low-importance episodics, lock, summarize into one semantic row.
+
+    Pass min_candidates>2 (MCP uses CONSOLIDATE_MIN_CANDIDATES) to avoid premature compression.
+    """
+    min_needed = max(2, min_candidates)
+    params: dict[str, Any] = {"bot_id": bot_id, "limit": max(min_needed, limit)}
     session_clause = ""
     if session_id:
         session_clause = "AND session_id = :session_id"
@@ -53,6 +58,14 @@ async def consolidate_memories(
     rows = result.fetchall()
     if len(rows) < 2:
         return {"status": "noop", "reason": "not_enough_candidates", "consolidated": 0}
+    if len(rows) < min_needed:
+        return {
+            "status": "noop",
+            "reason": "too_early",
+            "consolidated": 0,
+            "candidates": len(rows),
+            "min_candidates": min_needed,
+        }
 
     ids = [r.id for r in rows]
     contents = [r.content for r in rows]

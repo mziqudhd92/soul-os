@@ -11,9 +11,30 @@ When the SoulOS kernel runs with **`REQUIRE_AUTH=1`**, direct public access is r
 
 Both headers are required when `REQUIRE_AUTH=1`. Missing or wrong secret → **401**.
 
+## Optional scopes (gateway-injected)
+
+| Header | Source | Purpose |
+|--------|--------|---------|
+| `X-SoulOS-Scopes` | API key `scopes` in `keys.json` / `SOULOS_API_KEYS` | Comma-separated privileges (e.g. `mcp:admin:msv_write`) |
+
+**SoulOS Cloud gateway** strips any client-supplied `X-SoulOS-Account-Id`, `X-SoulOS-Gateway-Secret`, and `X-SoulOS-Scopes`, then injects trusted values from the validated API key. Clients cannot forge admin scopes by sending the header themselves.
+
+Self-hosted BFFs that call the kernel directly must inject the same headers and treat them as trusted — do not forward end-user values for these three.
+
+Example key entry:
+
+```json
+{
+  "sk_live_…": {
+    "account_id": "uuid-of-tenant",
+    "scopes": ["mcp:admin:msv_write"]
+  }
+}
+```
+
 ## Open mode (local dev)
 
-`REQUIRE_AUTH=0` (default in Docker Compose): headers optional. Any client with kernel access can use any `bot_id` — **do not expose port 8000 publicly**.
+`REQUIRE_AUTH=0` (default in Docker Compose): headers optional. Any client with kernel access can use any `bot_id` — **do not expose port 8000 publicly**. For local admin MCP tools without gateway scopes, set `SOULOS_MCP_ADMIN_TOOLS=1` on the kernel.
 
 ## BFF pattern
 
@@ -22,7 +43,7 @@ Browser → Your API (auth) → SoulOS kernel (private)
                 ↑ inject gateway headers on every kernel request
 ```
 
-Your API already authenticates the user; map them to `X-SoulOS-Account-Id` (workspace owner, org id, etc.).
+Your API already authenticates the user; map them to `X-SoulOS-Account-Id` (workspace owner, org id, etc.). Optional: map privileged roles to `X-SoulOS-Scopes`.
 
 ## Python (`SoulHybridClient`)
 

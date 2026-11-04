@@ -57,8 +57,9 @@ Environment variables for the kernel:
 ### Security notes
 
 - **Open mode** (`REQUIRE_AUTH=0`, default): any client with kernel access can use any `bot_id` — fine for solo local dev only.
-- **Cloud mode** (`REQUIRE_AUTH=1`): kernel requires `X-SoulOS-Gateway-Secret` + `X-SoulOS-Account-Id` from the gateway; do not expose port 8000 publicly.
+- **Cloud mode** (`REQUIRE_AUTH=1`): kernel requires `X-SoulOS-Gateway-Secret` + `X-SoulOS-Account-Id` from the gateway; do not expose port 8000 publicly. Optional `X-SoulOS-Scopes` (e.g. `mcp:admin:msv_write`) comes from API-key `scopes` via the gateway — see [gateway headers](../guides/gateway-headers.md).
 - **Studio**: local dev tool; do not expose port 8765 publicly without auth in production.
+- **MCP admin tools**: local open mode can set `SOULOS_MCP_ADMIN_TOOLS=1`; prefer scopes in cloud.
 - **Content limits**: `MAX_MEMORY_CONTENT_CHARS` (default 32768) caps ingest / chat / hybrid text fields (REST and MCP).
 
 ### Upgrading from `senticore` database name

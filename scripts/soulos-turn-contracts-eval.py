@@ -118,10 +118,10 @@ async def run_script(path: Path) -> list[str]:
     app.dependency_overrides[get_llm_service] = lambda: ContractLLM(contract)
 
     patches = [
-        patch("routes.hybrid.ensure_turn_session", _mem_ensure),
+        patch("runtime.hybrid_service.ensure_turn_session", _mem_ensure),
         patch("runtime.hybrid_complete.get_turn_session", _mem_get),
         patch("runtime.hybrid_complete.advance_turn_session", _mem_advance),
-        patch("routes.hybrid.store_turn_success_response", _mem_store_success),
+        patch("runtime.hybrid_service.store_turn_success_response", _mem_store_success),
     ]
     for p in patches:
         p.start()

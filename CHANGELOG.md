@@ -4,9 +4,17 @@ All notable changes to SoulOS are documented here.
 
 ## [Unreleased]
 
+### Added
+
+- Streamable HTTP MCP at `/mcp` alongside SSE `/mcp/sse`; gateway preserves `Mcp-Session-Id` and caps concurrent MCP streams
+- Gateway API-key `scopes` → `X-SoulOS-Scopes` (e.g. `mcp:admin:msv_write`); clients cannot forge privileged headers
+- Outbound MCP client (`SOULOS_MCP_CLIENT` / `SOULOS_MCP_SERVERS_JSON`) with SSRF controls and `schema_sha256` pin checks on `call_tool`
+- MCP parity tools: conversation memory, handoffs, consolidate, `apply_msv_delta`, `reflect_cognitive_state`; resources/prompts (`session://`, `msv://drift`, `hybrid_turn`, …)
+
 ### Changed
 
 - Kernel MCP server migrated to **MCP Python SDK 2.x** low-level `Server` (`on_*` handlers); dependency pin `mcp>=2,<3`
+- Docs: MCP/admin scopes, gateway headers, outbound pins — `docs/guides/mcp.md`, `mcp-tools.md`, `gateway-headers.md`, `SOULOS_AGENT_CONTEXT.md`, `llms.txt`
 
 ### Fixed
 
@@ -15,6 +23,8 @@ All notable changes to SoulOS are documented here.
 - Python SDK `handoff_to` only falls back to Phase A on 404/405 (not 5xx/403/422)
 - Handoff `payload` JSON size capped; idempotent store detects lost races
 - OpenAPI mount smoke test covers Phase B routes; Helm documents ML retrieval env knobs
+- Gateway strips client-supplied `X-SoulOS-Scopes` / account / gateway-secret before injecting trusted values
+- Outbound `schema_sha256` enforced on the live `call_tool` path (tools/list pin re-check)
 
 ## [0.6.0] — 2026-09-27
 

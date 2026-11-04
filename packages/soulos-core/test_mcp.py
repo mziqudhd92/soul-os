@@ -10,6 +10,16 @@ from soul_validation import default_msv_dict
 
 VALID_MSV = default_msv_dict()
 
+
+@pytest.fixture(autouse=True)
+def _reset_mcp_security():
+    from mcp_server import set_mcp_security_context
+
+    set_mcp_security_context(None)
+    set_mcp_account_context(AccountContext(account_id=None))
+    yield
+    set_mcp_security_context(None)
+
 VALID_SOUL = {
     "name": "MCP Bot",
     "role": "Assistant",
@@ -40,10 +50,28 @@ async def test_mcp_messages_rejects_unauthenticated_cloud_mode(monkeypatch):
     assert response.status_code == 401
 
 
+def _enable_mcp_admin():
+    from auth import AccountContext
+    from mcp_server import set_mcp_security_context
+    from runtime.security_context import (
+        SCOPE_MCP_ADMIN_MSV_WRITE,
+        security_context_from_account,
+    )
+
+    set_mcp_account_context(AccountContext(account_id=None))
+    set_mcp_security_context(
+        security_context_from_account(
+            AccountContext(account_id=None),
+            scopes=frozenset({SCOPE_MCP_ADMIN_MSV_WRITE}),
+        )
+    )
+
+
 @pytest.mark.asyncio
 async def test_mcp_update_cognitive_state_validates_msv():
     from mcp_server import handle_call_tool
 
+    _enable_mcp_admin()
     result = await handle_call_tool(
         "update_cognitive_state",
         {
@@ -59,17 +87,27 @@ async def test_mcp_update_cognitive_state_validates_msv():
 
 @pytest.mark.asyncio
 async def test_mcp_update_cognitive_state_checks_tenant_access():
-    from mcp_server import handle_call_tool
+    from mcp_server import handle_call_tool, set_mcp_security_context
     from runtime.errors import ACCESS_DENIED, SoulOSProblem
+    from runtime.security_context import (
+        SCOPE_MCP_ADMIN_MSV_WRITE,
+        security_context_from_account,
+    )
 
-    set_mcp_account_context(
-        AccountContext(account_id="bbbbbbbb-cccc-dddd-eeee-ffffffffffff")
+    acct = AccountContext(account_id="bbbbbbbb-cccc-dddd-eeee-ffffffffffff")
+    set_mcp_account_context(acct)
+    set_mcp_security_context(
+        security_context_from_account(
+            acct, scopes=frozenset({SCOPE_MCP_ADMIN_MSV_WRITE})
+        )
     )
 
     mock_conn = AsyncMock()
     with (
         patch("mcp_server.engine") as mock_engine,
-        patch("mcp_server.verify_bot_access", new_callable=AsyncMock) as mock_verify,
+        patch(
+            "runtime.cognitive_msv.verify_bot_access", new_callable=AsyncMock
+        ) as mock_verify,
     ):
         mock_engine.connect.return_value.__aenter__.return_value = mock_conn
         mock_verify.side_effect = SoulOSProblem(ACCESS_DENIED, 403, "Access denied")
@@ -87,15 +125,24 @@ async def test_mcp_update_cognitive_state_checks_tenant_access():
 
 @pytest.mark.asyncio
 async def test_mcp_ingest_memory_uses_embedder():
-    from mcp_server import handle_call_tool
+    from mcp_server import handle_call_tool, set_mcp_security_context
+    from runtime.security_context import security_context_from_account
 
     set_mcp_account_context(AccountContext(account_id=None))
+    set_mcp_security_context(
+        security_context_from_account(AccountContext(account_id=None))
+    )
     mock_conn = AsyncMock()
 
     with (
         patch("mcp_server.engine") as mock_engine,
         patch("mcp_server.verify_bot_access", new_callable=AsyncMock),
         patch("mcp_server.ingest_memory_record", new_callable=AsyncMock) as mock_ingest,
+        patch(
+            "mcp_server.retrieve_memory_hits",
+            new_callable=AsyncMock,
+            return_value=[],
+        ),
         patch("mcp_server._embedder") as mock_embedder,
     ):
         mock_engine.connect.return_value.__aenter__.return_value = mock_conn
@@ -105,11 +152,18 @@ async def test_mcp_ingest_memory_uses_embedder():
             {"bot_id": "bot-1", "content": "A remembered moment."},
         )
 
-        mock_ingest.assert_awaited_once_with(
-            mock_conn, mock_embedder, "bot-1", "A remembered moment.", None
-        )
+        assert mock_ingest.await_count == 1
+        args, kwargs = mock_ingest.await_args
+        assert args[0] is mock_conn
+        assert args[1] is mock_embedder
+        assert args[2] == "bot-1"
+        assert "<untrusted_memory" in args[3]
+        assert "A remembered moment." in args[3]
+        assert args[4] is None
+        assert kwargs.get("importance") == 0.6
         payload = json.loads(result[0].text)
         assert payload["status"] == "success"
+        assert payload["trust_level"] == "external_mcp"
 
 
 @pytest.mark.asyncio
@@ -123,10 +177,17 @@ async def test_mcp_retrieve_memory():
         patch("mcp_server.engine") as mock_engine,
         patch("mcp_server.verify_bot_access", new_callable=AsyncMock),
         patch(
-            "mcp_server.retrieve_memories",
+            "mcp_server.retrieve_memory_hits",
             new_callable=AsyncMock,
-            return_value=["Refund within 30 days."],
+            return_value=[],
         ) as mock_retrieve,
+        patch(
+            "mcp_server.rerank_hits_for_persona",
+            return_value=[
+                type("H", (), {"content": "Refund within 30 days."})(),
+            ],
+        ),
+        patch("mcp_server.hit_contents", return_value=["Refund within 30 days."]),
         patch("mcp_server._embedder"),
     ):
         mock_engine.connect.return_value.__aenter__.return_value = mock_conn
@@ -139,6 +200,74 @@ async def test_mcp_retrieve_memory():
         mock_retrieve.assert_awaited_once()
         payload = json.loads(result[0].text)
         assert payload["memories"] == ["Refund within 30 days."]
+
+
+@pytest.mark.asyncio
+async def test_mcp_retrieve_conversation_memory_mood_rerank():
+    from mcp_server import handle_call_tool
+
+    set_mcp_account_context(AccountContext(account_id=None))
+    mock_conn = AsyncMock()
+
+    with (
+        patch("mcp_server.engine") as mock_engine,
+        patch("mcp_server.verify_bot_access", new_callable=AsyncMock) as mock_verify,
+        patch(
+            "mcp_server.retrieve_conversation_memory_hits",
+            new_callable=AsyncMock,
+            return_value=[],
+        ) as mock_hits,
+        patch(
+            "mcp_server.get_bot_identity",
+            new_callable=AsyncMock,
+            return_value={"current_msv": VALID_MSV},
+        ),
+        patch(
+            "mcp_server.rerank_hits_for_persona",
+            return_value=[type("H", (), {"content": "shared fact"})()],
+        ) as mock_rerank,
+        patch("mcp_server.hit_contents", return_value=["shared fact"]),
+        patch("mcp_server._embedder"),
+    ):
+        mock_engine.connect.return_value.__aenter__.return_value = mock_conn
+
+        result = await handle_call_tool(
+            "retrieve_conversation_memory",
+            {
+                "conversation_id": "conv-1",
+                "query": "refund",
+                "top_k": 2,
+                "bot_id": "bot-1",
+                "mood_congruent": True,
+                "recency_weight": 0.2,
+            },
+        )
+
+        mock_verify.assert_awaited_once()
+        mock_hits.assert_awaited_once()
+        assert mock_rerank.call_args.kwargs["mood_congruent"] is True
+        assert mock_rerank.call_args.kwargs["recency_weight"] == 0.2
+        payload = json.loads(result[0].text)
+        assert payload["memories"] == ["shared fact"]
+        assert payload["mood_congruent"] is True
+
+
+@pytest.mark.asyncio
+async def test_mcp_retrieve_conversation_memory_mood_requires_bot_id():
+    from mcp_server import handle_call_tool
+
+    set_mcp_account_context(AccountContext(account_id=None))
+    result = await handle_call_tool(
+        "retrieve_conversation_memory",
+        {
+            "conversation_id": "conv-1",
+            "query": "refund",
+            "mood_congruent": True,
+        },
+    )
+    body = json.loads(result[0].text)
+    assert body["error"] is True
+    assert "bot_id is required" in body["detail"]
 
 
 @pytest.mark.asyncio
@@ -355,15 +484,19 @@ async def test_mcp_retrieve_memory_passes_session_id():
         patch("mcp_server.engine") as mock_engine,
         patch("mcp_server.verify_bot_access", new_callable=AsyncMock),
         patch(
-            "mcp_server.retrieve_memories", new_callable=AsyncMock, return_value=[]
+            "mcp_server.retrieve_memory_hits", new_callable=AsyncMock, return_value=[]
         ) as mock_retrieve,
+        patch("mcp_server.rerank_hits_for_persona", return_value=[]),
+        patch("mcp_server.hit_contents", return_value=[]),
         patch("mcp_server._embedder") as mock_embedder,
     ):
         mock_engine.connect.return_value.__aenter__.return_value = mock_conn
         await handle_call_tool(
             "retrieve_memory", {"bot_id": "b", "query": "q", "session_id": "s1"}
         )
-    mock_retrieve.assert_awaited_once_with(mock_conn, mock_embedder, "b", "q", 5, "s1")
+    mock_retrieve.assert_awaited_once_with(
+        mock_conn, mock_embedder, "b", "q", 10, "s1"
+    )
 
 
 @pytest.mark.asyncio
@@ -451,7 +584,7 @@ async def test_mcp_ensure_avatar_accepts_json_string_soul():
 
 
 @pytest.mark.asyncio
-async def test_mcp_hybrid_prepare_delegates_to_rest_route():
+async def test_mcp_hybrid_prepare_delegates_to_runtime():
     from mcp_server import handle_call_tool
     from schemas import HybridPrepareRequest
 
@@ -460,20 +593,18 @@ async def test_mcp_hybrid_prepare_delegates_to_rest_route():
     with (
         patch("mcp_server.engine") as mock_engine,
         patch(
-            "mcp_server.hybrid_prepare",
+            "mcp_server.prepare_hybrid_turn",
             new_callable=AsyncMock,
             return_value={"bot_id": "b", "system_prompt": "You are..."},
-        ) as mock_route,
+        ) as mock_prep,
     ):
         mock_engine.connect.return_value.__aenter__.return_value = mock_conn
         result = await handle_call_tool(
             "hybrid_prepare", {"bot_id": "b", "query": "hi", "session_id": "s1"}
         )
-    kwargs = mock_route.await_args.kwargs
-    assert kwargs["db"] is mock_conn
-    assert kwargs["payload"] == HybridPrepareRequest(
-        bot_id="b", query="hi", session_id="s1"
-    )
+    args = mock_prep.await_args.args
+    assert args[0] is mock_conn
+    assert args[4] == HybridPrepareRequest(bot_id="b", query="hi", session_id="s1")
     assert json.loads(result[0].text)["system_prompt"] == "You are..."
     mock_conn.commit.assert_awaited_once()
 
@@ -492,14 +623,17 @@ async def test_mcp_hybrid_complete_async_reflect_runs_background_task():
     async def fake_reflect():
         ran.set()
 
-    async def fake_route(*, payload, background_tasks, **_):
+    async def fake_complete(
+        db, embedder, pipeline, account, payload, *, add_background_task=None, **_
+    ):
         assert payload.reflect_async is True
-        background_tasks.add_task(fake_reflect)
+        assert add_background_task is not None
+        add_background_task(fake_reflect)
         return JSONResponse(status_code=202, content={"status": "accepted"})
 
     with (
         patch("mcp_server.engine") as mock_engine,
-        patch("mcp_server.hybrid_complete", side_effect=fake_route),
+        patch("mcp_server.complete_hybrid_turn", side_effect=fake_complete),
     ):
         mock_engine.connect.return_value.__aenter__.return_value = AsyncMock()
         result = await handle_call_tool(
@@ -524,7 +658,7 @@ async def test_mcp_hybrid_complete_maps_problem_to_error_code():
     with (
         patch("mcp_server.engine") as mock_engine,
         patch(
-            "mcp_server.hybrid_complete",
+            "mcp_server.complete_hybrid_turn",
             new_callable=AsyncMock,
             side_effect=SoulOSProblem("TURN_STATE_STALE", 409, "version mismatch"),
         ),

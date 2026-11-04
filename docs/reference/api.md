@@ -105,24 +105,25 @@ data: {
 
 ## 3. MCP
 
-Transport: HTTP SSE at `GET /mcp/sse` (see [MCP guide](../guides/mcp.md)).
+Transports: HTTP SSE `GET /mcp/sse` · Streamable HTTP `/mcp` (see [MCP guide](../guides/mcp.md)). Cloud: gateway Bearer key; optional API-key `scopes` → `X-SoulOS-Scopes`.
 
 | Tool | Purpose |
 |------|---------|
-| `ingest_memory` | Store episodic memory |
-| `retrieve_memory` | Semantic recall (`query`, optional `top_k`) |
-| `get_identity` | Persona + baseline/current MSV JSON |
-| `register_avatar` | Create avatar from `.soul.json` object |
-| `list_avatars` | List avatars (tenant-scoped when auth enabled) |
-| `update_cognitive_state` | Force-update MSV |
+| `ingest_memory` / `retrieve_memory` | Episodic store + semantic recall |
+| `ingest_conversation_memory` / `retrieve_conversation_memory` | Shared conversation memory |
+| `create_handoff` / `consolidate_memory` | Multi-bot handoff · memory compression |
+| `hybrid_prepare` / `hybrid_complete` | Sidecar prepare/complete |
+| `apply_msv_delta` / `reflect_cognitive_state` | Preferred MSV mutation paths |
+| `forget_memory` / `delete_session` | Content-match delete · session wipe |
+| `ensure_avatar` / `get_identity` / `register_avatar` / `list_avatars` | Identity lifecycle |
+| `update_cognitive_state` | **Admin** force MSV (`mcp:admin:msv_write` or `SOULOS_MCP_ADMIN_TOOLS=1`) |
 
 Full argument schemas: [mcp-tools.md](mcp-tools.md).
 
-Resources: `memory://episodic/{bot_id}`, `soul://identity/{bot_id}`. Prompt: `identity`.
+Resources: `memory://episodic/{bot_id}`, `soul://identity/{bot_id}`, `session://turn/{bot_id}/{session_id}`, `soul://schema`, `msv://drift/{bot_id}`.  
+Prompts: `identity`, `hybrid_turn`, `soul_author`, `debug_msv`.
 
 **Not exposed via MCP:** `chat/generate` streaming — use REST or `@soulos/sdk`.
-
-**REST-only in v0.2 (no MCP tool):** `POST /memory/forget` and `DELETE /memory/session/{bot_id}/{session_id}` — use REST or the SDK HTTP client.
 
 ---
 
@@ -187,14 +188,14 @@ List avatars whose `capabilities` JSON includes the tag (TTL-cached; tenant-scop
 
 ### `POST /memory/forget`
 
-Content-match delete (ILIKE). **REST-only** — not exposed via MCP in v0.2.
+Content-match delete (ILIKE). Also available as MCP tool `forget_memory`.
 
 - **Payload:** `{"bot_id": "uuid", "content_match": "string"}`
 - **Response:** `{"status": "success", "deleted": N}`
 
 ### `DELETE /memory/session/{bot_id}/{session_id}`
 
-Delete all memories for a session (GDPR / conversation teardown). Also deletes the matching `turn_sessions` row when turn contracts are in use. **REST-only** — not exposed via MCP in v0.2.
+Delete all memories for a session (GDPR / conversation teardown). Also deletes the matching `turn_sessions` row when turn contracts are in use. Also available as MCP tool `delete_session`.
 
 - **Response:** `{"status": "success", "deleted": N, "turn_sessions_deleted": N, "bot_id": "...", "session_id": "..."}`
 

@@ -1,5 +1,5 @@
 {
-  "_comment": "Prefer sha256:<hex> of the bearer token as the object key. Plaintext keys are hashed in-memory on load.",
+  "_comment": "Prefer sha256:<hex> of the bearer token as the object key. Plaintext keys are hashed in-memory on load. Optional scopes (e.g. [\"mcp:admin:msv_write\"]) are injected as X-SoulOS-Scopes — clients cannot forge that header.",
   "sk_test_demo_key_for_local_dev": {
     "account_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
     "tier": "cloud",

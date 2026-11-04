@@ -94,9 +94,10 @@ Full recipe: [Multi-agent teams](multi-agent-teams.md) · [examples/multi-agent-
 
 ## Multi-tenant cloud
 
-When using SoulOS Cloud gateway, pass:
+When using SoulOS Cloud gateway, the gateway injects (clients must not set these):
 
 - `X-SoulOS-Gateway-Secret` — shared secret
 - `X-SoulOS-Account-Id` — tenant id
+- `X-SoulOS-Scopes` — optional privileges from the API key `scopes` field (e.g. `mcp:admin:msv_write`)
 
-`verify_bot_access` ensures `bot_id` belongs to the account. Errors return RFC 7807 Problem Details with `code: ACCESS_DENIED` or `BOT_NOT_FOUND`.
+`verify_bot_access` ensures `bot_id` belongs to the account. Errors return RFC 7807 Problem Details with `code: ACCESS_DENIED` or `BOT_NOT_FOUND`. See [Gateway headers](gateway-headers.md).

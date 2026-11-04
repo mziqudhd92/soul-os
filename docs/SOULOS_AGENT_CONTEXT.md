@@ -14,6 +14,7 @@ Full docs live in repo `docs/` · regenerate full dump: `python3 scripts/doc-gen
 |---------|-----------|-------|
 | Kernel REST | `http://localhost:8000` | via gateway only |
 | MCP (HTTP SSE) | `http://localhost:8000/mcp/sse` | `https://api.soulos.dev/mcp/sse` + `Authorization: Bearer <key>` |
+| MCP (Streamable HTTP) | `http://localhost:8000/mcp` | same path on gateway + Bearer key |
 | Soul Studio UI | `http://localhost:8765` | local dev tool |
 | Gateway | — | `http://localhost:8080` (local cloud stack) |
 
@@ -27,7 +28,7 @@ Boot: `docker compose up --build` (kernel :8000, studio :8765, Postgres, Ollama)
 |----------|-----|
 | **Existing LLM app (recommended)** | Hybrid sidecar: `ensure_avatar → prepare → your LLM → complete` |
 | Ready vertical persona | **SoulPacks** — `GET /v1/soulpacks`, `POST /v1/avatars/import-soulpack` · browse https://mziqudhd92.github.io/soul-os/soulpacks/ |
-| Cursor / Claude IDE agent | **MCP** at `/mcp/sse` |
+| Cursor / Claude IDE agent | **MCP** at `/mcp/sse` (or Streamable HTTP `/mcp`) |
 | App with SoulOS-owned chat stream | **REST** `POST /chat/generate` or SDK |
 | Hand-tune `.soul.json` | **Soul Studio** (`pip install soulos-studio`) |
 
@@ -181,12 +182,18 @@ Errors: RFC 7807 `application/problem+json` with `code` (e.g. `BOT_NOT_FOUND`, `
 
 ---
 
-## MCP (server: `soulos-kernel`, transport: HTTP SSE)
+## MCP (server: `soulos-kernel`)
+
+Transports: HTTP SSE `/mcp/sse` · Streamable HTTP `/mcp`. Cloud: gateway Bearer key; gateway injects account + optional `X-SoulOS-Scopes` from key `scopes`.
 
 | Tool | Args | Purpose |
 |------|------|---------|
-| `ingest_memory` | `bot_id`, `content`, `session_id?` | Store episodic memory |
-| `retrieve_memory` | `bot_id`, `query`, `top_k?`, `session_id?` | Semantic recall |
+| `ingest_memory` | `bot_id`, `content`, `session_id?` | Store episodic memory (MCP → `external_mcp` quarantine) |
+| `retrieve_memory` | `bot_id`, `query`, `top_k?`, `session_id?`, `mood_congruent?` | Semantic recall |
+| `ingest_conversation_memory` / `retrieve_conversation_memory` | conversation-scoped (+ optional `bot_id`/`mood_congruent`) | Shared conversation memory |
+| `create_handoff` | structured handoff fields | Allowlisted multi-bot handoff |
+| `consolidate_memory` | `bot_id`, … | Semantic compression (rate-limited) |
+| `apply_msv_delta` / `reflect_cognitive_state` | appraisal + shifts / message | Preferred MSV mutation paths |
 | `forget_memory` | `bot_id`, `content_match` | Delete by content match |
 | `delete_session` | `bot_id`, `session_id` | Session memories + turn state |
 | `ensure_avatar` | `external_key`, `soul`, `runtime_config?` | Idempotent bootstrap |
@@ -195,13 +202,15 @@ Errors: RFC 7807 `application/problem+json` with `code` (e.g. `BOT_NOT_FOUND`, `
 | `get_identity` | `bot_id` | Persona + baseline/current MSV |
 | `register_avatar` | `soul` (object) | Create avatar |
 | `list_avatars` | `limit?` | List avatars (tenant-scoped if auth on) |
-| `update_cognitive_state` | `bot_id`, `new_msv` | Force MSV update |
+| `update_cognitive_state` | `bot_id`, `new_msv` | **Admin** force MSV (`mcp:admin:msv_write` or `SOULOS_MCP_ADMIN_TOOLS=1`) |
 
-**Resources:** `memory://episodic/{bot_id}` · `soul://identity/{bot_id}`  
-**Prompt:** `identity` (`bot_id`)  
+**Resources:** `memory://episodic/{bot_id}` · `soul://identity/{bot_id}` · `session://turn/{bot_id}/{session_id}` · `soul://schema` · `msv://drift/{bot_id}`  
+**Prompts:** `identity` · `hybrid_turn` · `soul_author` · `debug_msv`  
 **Responses:** JSON in `TextContent`.
 
-Implementation: `packages/soulos-core/mcp_server.py` (MCP Python SDK **2.x** low-level `Server` with `on_*` handlers)
+Outbound client (optional): `SOULOS_MCP_CLIENT` + `SOULOS_MCP_SERVERS_JSON` — SSRF-safe allowlisted tools with optional `schema_sha256` pins.
+
+Implementation: `packages/soulos-core/mcp_server.py` + `runtime/` (MCP Python SDK **2.x** low-level `Server` with `on_*` handlers)
 
 ---
 
@@ -253,11 +262,11 @@ async for event in soul.send_message(avatar["id"], "hello"):
 | Mode | Notes |
 |------|--------|
 | Self-host | `REQUIRE_AUTH=0` default — **local dev only**; do not expose :8000 publicly |
-| Cloud | Gateway only; `REQUIRE_AUTH=1` on kernel; `sk_…` API keys → `account_id` tenant scope |
+| Cloud | Gateway only; `REQUIRE_AUTH=1` on kernel; `sk_…` API keys → `account_id` (+ optional `scopes`) |
 
-MCP and REST share privileges (memory ingest, avatar registration, MSV updates). Protect gateway keys. Studio (:8765) is not for public exposure without auth.
+MCP and REST share privileges (memory ingest, avatar registration, MSV updates). Protect gateway keys. Admin MCP tools need key `scopes` or `SOULOS_MCP_ADMIN_TOOLS`. Studio (:8765) is not for public exposure without auth.
 
-Local cloud stack: `docker compose -f docker-compose.cloud.yml up --build` · demo key in `packages/soulos-gateway/keys.example.json`.
+Local cloud stack: `docker compose -f docker-compose.cloud.yml up --build` · demo key in `packages/soulos-gateway/keys.example.json`. Headers: [guides/gateway-headers.md](guides/gateway-headers.md).
 
 ---
 
