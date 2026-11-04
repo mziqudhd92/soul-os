@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import secrets
-from dataclasses import dataclass
 
 from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse

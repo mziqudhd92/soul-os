@@ -3,19 +3,19 @@
 from __future__ import annotations
 
 import logging
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from runtime.errors import ACCESS_DENIED, SoulOSProblem
 from runtime.handoffs import assert_handoff_allowed
 from runtime.log_redact import SecretRedactFilter
+from runtime.mcp_client import MAX_TOOL_ITERATIONS, OutboundMcpClient, OutboundMcpConfig
+from runtime.mcp_outbound import run_budgeted_outbound_calls
 from runtime.memory_cognitive import rerank_hits_for_persona
 from runtime.memory_consolidate import consolidate_memories
 from runtime.memory_rank import MemoryHit
 from runtime.memory_trust import TRUST_EXTERNAL_MCP, format_memories_for_reflect
-from runtime.mcp_client import MAX_TOOL_ITERATIONS, OutboundMcpClient, OutboundMcpConfig
-from runtime.mcp_outbound import run_budgeted_outbound_calls
-from runtime.errors import ACCESS_DENIED, SoulOSProblem
 from soul_validation import default_msv_dict
 
 
@@ -99,10 +99,10 @@ async def test_consolidate_too_early():
 
 @pytest.mark.asyncio
 async def test_rate_limit_reflect_tool():
+    from auth import AccountContext, set_mcp_account_context
     from mcp_server import handle_call_tool, set_mcp_security_context
     from runtime.mcp_rate_limit import reflect_limiter
     from runtime.security_context import security_context_from_account
-    from auth import AccountContext, set_mcp_account_context
 
     set_mcp_account_context(AccountContext(account_id="tenant-rate"))
     set_mcp_security_context(
@@ -128,7 +128,11 @@ async def test_rate_limit_reflect_tool():
 
 @pytest.mark.asyncio
 async def test_outbound_budget_caps_iterations(monkeypatch):
-    from runtime.mcp_client import AllowToolSpec, OutboundServerConfig, set_outbound_client
+    from runtime.mcp_client import (
+        AllowToolSpec,
+        OutboundServerConfig,
+        set_outbound_client,
+    )
 
     calls = []
 
@@ -180,7 +184,11 @@ def test_secret_redact_filter():
 @pytest.mark.asyncio
 async def test_allowed_mcp_servers_empty_disables(monkeypatch):
     monkeypatch.setattr("runtime.mcp_client.SOULOS_MCP_CLIENT", True)
-    from runtime.mcp_client import OutboundServerConfig, AllowToolSpec, set_outbound_client
+    from runtime.mcp_client import (
+        AllowToolSpec,
+        OutboundServerConfig,
+        set_outbound_client,
+    )
     from runtime.mcp_outbound import resolve_active_mcp_tools
 
     set_outbound_client(

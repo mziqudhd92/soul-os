@@ -13,14 +13,9 @@ from auth import AccountContext, get_account_context
 from config import MAX_MEMORY_CONTENT_CHARS
 from dependencies import get_db, get_embedder
 from runtime.handoffs import (
-    _load_idempotent,
-    _store_idempotent,
     create_handoff_record,
     format_handoff_note,
 )
-from runtime.conversation_memory import ingest_conversation_memory
-from runtime.memory import ingest_memory as ingest_memory_record
-from tenant import verify_bot_access
 
 router = APIRouter(tags=["handoffs"])
 

@@ -2,7 +2,12 @@
 
 import pytest
 
-from runtime.mcp_ids import McpIdError, parse_resource_uri, validate_bot_id, validate_session_id
+from runtime.mcp_ids import (
+    McpIdError,
+    parse_resource_uri,
+    validate_bot_id,
+    validate_session_id,
+)
 
 
 def test_validate_bot_id_ok():

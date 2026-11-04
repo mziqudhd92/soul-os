@@ -162,7 +162,12 @@ async def test_gateway_passes_mcp_session_id_and_unbuffers():
 
 
 def test_gateway_mcp_stream_cap():
-    from main import _MCP_MAX_STREAMS, _mcp_stream_acquire, _mcp_stream_counts, _mcp_stream_release
+    from main import (
+        _MCP_MAX_STREAMS,
+        _mcp_stream_acquire,
+        _mcp_stream_counts,
+        _mcp_stream_release,
+    )
 
     _mcp_stream_counts.clear()
     key = "cap-test"

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import FrozenSet
 
 from auth import AccountContext
 
@@ -15,7 +14,7 @@ class SecurityContext:
     """Transport-bound principal for tenant-scoped MCP/runtime operations."""
 
     account: AccountContext
-    scopes: FrozenSet[str] = field(default_factory=frozenset)
+    scopes: frozenset[str] = field(default_factory=frozenset)
     principal_hash: str | None = None
 
     @property
@@ -36,7 +35,7 @@ class SecurityContext:
 def security_context_from_account(
     account: AccountContext,
     *,
-    scopes: FrozenSet[str] | None = None,
+    scopes: frozenset[str] | None = None,
     principal_hash: str | None = None,
     admin_tools_enabled: bool = False,
 ) -> SecurityContext:

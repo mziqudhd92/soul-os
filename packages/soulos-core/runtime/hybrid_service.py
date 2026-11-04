@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import time
-from typing import Any, Callable, Awaitable
+from collections.abc import Callable
+from typing import Any
 
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncConnection
@@ -29,11 +30,11 @@ from runtime.hybrid import (
 )
 from runtime.hybrid_complete import resolve_turn_on_complete
 from runtime.hybrid_tasks import run_reflect_background
+from runtime.mcp_outbound import resolve_active_mcp_tools
 from runtime.memory import ingest_memory as ingest_memory_record
 from runtime.memory import retrieve_memory_hits
 from runtime.memory_rank import hit_contents
 from runtime.memory_trust import format_memories_for_reflect
-from runtime.mcp_outbound import resolve_active_mcp_tools
 from runtime.msv_update import behavioral_summary_from_drift
 from runtime.reflector import run_system_2_reflector
 from runtime.telemetry import (

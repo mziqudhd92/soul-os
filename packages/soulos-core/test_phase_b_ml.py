@@ -481,7 +481,11 @@ async def test_conversation_memory_ingest_and_retrieve():
 async def test_handoff_idempotency_helpers():
     import json
 
-    from routes.handoffs import _load_idempotent, _store_idempotent, format_handoff_note
+    from runtime.handoffs import (
+        _load_idempotent,
+        _store_idempotent,
+        format_handoff_note,
+    )
 
     note = format_handoff_note(
         from_role="a",

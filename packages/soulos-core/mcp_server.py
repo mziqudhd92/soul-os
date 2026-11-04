@@ -36,7 +36,7 @@ from mcp.types import (
 )
 from pydantic import ValidationError
 
-from auth import AccountContext, get_mcp_account_context
+from auth import get_mcp_account_context
 from config import (
     CONSOLIDATE_MIN_CANDIDATES,
     MCP_EPISODIC_DEFAULT_LIMIT,
@@ -68,7 +68,12 @@ from runtime.embedder import Embedder
 from runtime.errors import ACCESS_DENIED, BOT_NOT_FOUND, SOUL_INVALID, SoulOSProblem
 from runtime.handoffs import create_handoff_record
 from runtime.hybrid_service import complete_hybrid_turn, prepare_hybrid_turn
-from runtime.mcp_ids import McpIdError, parse_resource_uri, validate_bot_id, validate_session_id
+from runtime.mcp_ids import (
+    McpIdError,
+    parse_resource_uri,
+    validate_bot_id,
+    validate_session_id,
+)
 from runtime.mcp_rate_limit import (
     consolidate_limiter,
     rate_limit_key,
@@ -89,9 +94,8 @@ from runtime.memory_trust import (
     quarantine_untrusted,
     should_skip_as_duplicate,
 )
-from runtime.msv_update import HEXACO_KEYS, HEXACO_TRAIT_NAMES, SEMANTIC_SHIFT_DELTAS
+from runtime.msv_update import HEXACO_KEYS, SEMANTIC_SHIFT_DELTAS
 from runtime.security_context import (
-    SCOPE_MCP_ADMIN_MSV_WRITE,
     SecurityContext,
     security_context_from_account,
 )
