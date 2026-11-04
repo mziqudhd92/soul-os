@@ -1,0 +1,12 @@
+/* SoulOS Studio — entry; styles live under static/css/ */
+@import url("./css/base.css");
+@import url("./css/header.css");
+@import url("./css/buttons.css");
+@import url("./css/layout.css");
+@import url("./css/preview.css");
+@import url("./css/wizard.css");
+@import url("./css/docs.css");
+@import url("./css/tutorials.css");
+@import url("./css/interactive.css");
+@import url("./css/terminal.css");
+@import url("./css/soul-builder.css");
