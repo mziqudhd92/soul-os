@@ -65,7 +65,7 @@ pgvector==0.5.0
     # via soulos-core (pyproject.toml)
 pycparser==3.0
     # via cffi
-pydantic==2.13.5
+pydantic==2.14.2
     # via
     #   soulos-core (pyproject.toml)
     #   fastapi
