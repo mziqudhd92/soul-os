@@ -1703,6 +1703,59 @@
           }
         }
       }
+    },
+    "/mcp": {
+      "get": {
+        "tags": [
+          "mcp"
+        ],
+        "summary": "Handle Streamable Get",
+        "operationId": "mcp_streamable_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "mcp"
+        ],
+        "summary": "Handle Streamable Post",
+        "operationId": "mcp_streamable_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "mcp"
+        ],
+        "summary": "Handle Streamable Delete",
+        "operationId": "mcp_streamable_delete",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1891,6 +1944,59 @@
               }
             ],
             "title": "Idempotency Key"
+          },
+          "task_summary": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32768
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Task Summary"
+          },
+          "unresolved_constraints": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unresolved Constraints"
+          },
+          "user_emotional_state": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32768
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Emotional State"
+          },
+          "source_bot_stance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32768
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Bot Stance"
           }
         },
         "type": "object",
