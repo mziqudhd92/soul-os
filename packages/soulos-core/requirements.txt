@@ -78,7 +78,7 @@ pydantic-settings==2.16.2
     # via soulos-core (pyproject.toml)
 pyjwt==2.15.0
     # via mcp
-python-dotenv==1.2.3
+python-dotenv==1.2.4
     # via pydantic-settings
 python-multipart==0.0.32
     # via mcp
