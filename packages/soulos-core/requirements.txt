@@ -94,7 +94,7 @@ rpds-py==2026.6.3
     #   referencing
 sqlalchemy==2.1.6
     # via soulos-core (pyproject.toml)
-sse-starlette==3.4.11
+sse-starlette==3.7.0
     # via mcp
 starlette==1.10.0
     # via
